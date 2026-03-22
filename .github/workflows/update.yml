@@ -29,8 +29,8 @@ jobs:
 
       - name: Run update script
         env:
-          OPENSKY_USER: ${{ secrets.OPENSKY_USER }}
-          OPENSKY_PASS: ${{ secrets.OPENSKY_PASS }}
+          OPENSKY_CLIENT_ID:     ${{ secrets.OPENSKY_CLIENT_ID }}
+          OPENSKY_CLIENT_SECRET: ${{ secrets.OPENSKY_CLIENT_SECRET }}
         run: python update_routes.py
 
       - name: Commit routes.json if changed
@@ -38,7 +38,6 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add routes.json
-          # Коммитим только если файл изменился
           git diff --staged --quiet \
             && echo "Маршруты не изменились, коммит не нужен" \
             || git commit -m "Обновление маршрутов $(date -u +%Y-%m-%d)"
