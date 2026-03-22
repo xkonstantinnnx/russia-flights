@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Прямые рейсы из России · 2026</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;background:#0d1117;font-family:-apple-system,'Segoe UI',Arial,sans-serif;color:#b8ccec;}
+body{display:flex;flex-direction:column;}
+#hdr{background:#0a1520ee;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #1e3252;backdrop-filter:blur(8px);z-index:1000;position:relative;}
+.h-title{font-size:13px;font-weight:600;color:#4a9eff;}
+.h-meta{font-size:10px;color:#2a3e56;margin-top:1px;}
+.h-badges{display:flex;gap:5px;flex-wrap:wrap;}
+.badge{font-size:10px;color:#4a9eff;background:#0a1828cc;padding:2px 8px;border-radius:10px;border:1px solid #1e3252;}
+#badge-updated{font-size:10px;color:#34d39988;background:#0a1828cc;padding:2px 8px;border-radius:10px;border:1px solid #34d39944;}
+
+#map-wrap{position:relative;flex-shrink:0;height:260px;}
+#map{width:100%;height:100%;}
+#arc-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;}
+.leaflet-container{background:#0d1117;}
+.leaflet-control-zoom a{background:#0a1828!important;color:#4a9eff!important;border-color:#1e3252!important;}
+.leaflet-control-zoom a:hover{background:#102030!important;}
+.leaflet-control-attribution{display:none!important;}
+.leaflet-tooltip{background:#0a1828ee!important;border:1px solid #1e3252!important;color:#b8ccec!important;font-size:11px!important;border-radius:6px!important;padding:4px 9px!important;box-shadow:0 4px 16px #0008!important;}
+.leaflet-tooltip::before{display:none!important;}
+
+#tile-switch{position:absolute;top:8px;right:8px;z-index:1000;display:flex;gap:4px;}
+.ts-btn{font-size:10px;padding:3px 9px;border-radius:8px;border:1px solid #1e3252;background:#0a1828dd;color:#7090b0;cursor:pointer;backdrop-filter:blur(4px);}
+.ts-btn.on{background:#4a9eff22;color:#4a9eff;border-color:#4a9eff88;}
+
+#info-bar{background:#0a1520ee;border-bottom:1px solid #1e3252;padding:0 14px;display:none;flex-direction:column;flex-shrink:0;backdrop-filter:blur(8px);}
+#info-top{display:flex;align-items:center;justify-content:space-between;padding:7px 0 3px;}
+#info-title{font-size:13px;font-weight:600;}
+#reset-btn{background:#0f1d2e;border:1px solid #1e3252;color:#4a9eff;font-size:11px;padding:4px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
+#chip-scroll{display:flex;gap:4px;overflow-x:auto;padding-bottom:7px;scrollbar-width:none;}
+#chip-scroll::-webkit-scrollbar{display:none;}
+.chip{font-size:11px;padding:3px 9px;border-radius:10px;background:#0f1d2e;border-left:2px solid;white-space:nowrap;flex-shrink:0;cursor:default;user-select:none;}
+
+#legend{display:flex;flex-wrap:wrap;gap:3px;padding:4px 12px;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:#7090b0;}
+.leg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block;}
+
+#tab-bar{display:flex;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
+.tab-btn{flex:1;padding:7px 4px;font-size:12px;border:none;cursor:pointer;border-bottom:2px solid transparent;background:transparent;color:#4a6a90;}
+
+#lists-wrap{flex:1;overflow:hidden;position:relative;}
+.list-pane{height:100%;overflow-y:auto;background:#060c16;scrollbar-width:thin;scrollbar-color:#162338 transparent;}
+.list-pane::-webkit-scrollbar{width:3px;}
+.list-pane::-webkit-scrollbar-thumb{background:#162338;border-radius:2px;}
+.list-row{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;border-bottom:1px solid #0a1520;transition:background .1s;}
+.list-row:active{background:#0f1d2e;}
+.row-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.row-name{font-size:12px;color:#b8ccec;flex:1;}
+.row-tag{font-size:10px;flex:0 0 auto;margin-right:4px;}
+.row-cnt{font-size:11px;font-weight:600;color:#4a9eff;background:rgba(74,158,255,.1);padding:2px 8px;border-radius:10px;}
+
+#loading{position:fixed;inset:0;background:#060c16;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:12px;}
+#loading-text{font-size:13px;color:#4a9eff;}
+#loading-sub{font-size:11px;color:#2a3e56;}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div id="loading-text">Загрузка маршрутов...</div>
+  <div id="loading-sub">Получение актуальных данных</div>
+</div>
+
+<div id="hdr">
+  <div>
+    <div class="h-title">✈ Прямые рейсы из России</div>
+    <div class="h-meta" id="h-meta">Загрузка...</div>
+  </div>
+  <div class="h-badges">
+    <span class="badge" id="b-cities">—</span>
+    <span class="badge" id="b-routes">—</span>
+    <span id="badge-updated" style="display:none"></span>
+  </div>
+</div>
+
+<div id="map-wrap">
+  <div id="map"></div>
+  <svg id="arc-svg"></svg>
+  <div id="tile-switch">
+    <button class="ts-btn on" id="ts-gmap" onclick="setTiles('gmap')">Google</button>
+    <button class="ts-btn" id="ts-yndx" onclick="setTiles('yndx')">Яндекс</button>
+    <button class="ts-btn" id="ts-sat"  onclick="setTiles('sat')">Спутник</button>
+  </div>
+</div>
+
+<div id="info-bar">
+  <div id="info-top">
+    <div id="info-title"></div>
+    <button id="reset-btn" onclick="reset()">✕ Сбросить</button>
+  </div>
+  <div id="chip-scroll"></div>
+</div>
+
+<div id="legend"></div>
+
+<div id="tab-bar">
+  <button class="tab-btn" id="tab-ru"  onclick="stab('ru')">🟡 Откуда (города России)</button>
+  <button class="tab-btn" id="tab-dst" onclick="stab('dst')">🔵 Куда (направления)</button>
+</div>
+
+<div id="lists-wrap">
+  <div class="list-pane" id="ru-list"></div>
+  <div class="list-pane" id="dst-list" style="display:none;"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════
+   SEED DATA — резервные данные на случай недоступности routes.json
+   (обновляются вручную при необходимости)
+══════════════════════════════════════════════════════ */
+const SEED = {"updated":"2026-03-21T00:00:00Z","routes":{"Москва":["Минск","Ереван","Тбилиси","Баку","Сухум","Ташкент","Самарканд","Бишкек","Душанбе","Алматы","Астана","Ашхабад","Белград","Стамбул","Анталья","Даламан","Дубай","Абу-Даби","Доха","Эр-Рияд","Маскат","Манама","Эль-Кувейт","Тель-Авив","Амман","Тегеран","Бангкок","Пхукет","Хошимин","Нячанг","Ханой","Дананг","Фукуок","Денпасар","Пекин","Шанхай","Чэнду","Санья","Гонконг","Дели","Гоа","Мале","Коломбо","Кабул","Каир","Хургада","Шарм-эш-Шейх","Аддис-Абеба","Алжир","Касабланка","Маэ","Каракас"],"Санкт-Петербург":["Минск","Ереван","Тбилиси","Баку","Ташкент","Бишкек","Душанбе","Алматы","Астана","Белград","Стамбул","Анталья","Дубай","Абу-Даби","Доха","Каир","Хургада","Шарм-эш-Шейх","Бангкок","Пхукет","Нячанг","Дананг","Фукуок","Дели","Гоа","Мале"],"Сочи":["Минск","Ереван","Тбилиси","Батуми","Баку","Ташкент","Алматы","Стамбул","Анталья","Дубай"],"Краснодар":["Ереван","Тбилиси","Баку","Ташкент","Стамбул","Дубай"],"Мин. Воды":["Тбилиси","Батуми","Душанбе","Стамбул","Анталья","Дубай","Пхукет"],"Екатеринбург":["Ереван","Тбилиси","Баку","Ташкент","Бишкек","Душанбе","Алматы","Астана","Стамбул","Анталья","Дубай","Абу-Даби","Доха","Каир","Хургада","Бангкок","Пхукет","Санья","Нячанг","Фукуок","Дели","Гоа","Коломбо","Пекин"],"Челябинск":["Ереван","Баку","Ташкент","Алматы","Астана","Стамбул","Дубай","Нячанг","Пхукет"],"Оренбург":["Баку","Ташкент","Алматы"],"Уфа":["Ереван","Ташкент","Алматы","Стамбул","Дубай","Нячанг","Пхукет"],"Казань":["Ереван","Тбилиси","Баку","Ташкент","Бишкек","Алматы","Стамбул","Дубай","Бангкок","Нячанг","Фукуок"],"Нижний Новгород":["Ереван","Баку","Сухум","Ташкент","Алматы","Стамбул","Дубай"],"Пермь":["Ереван","Баку","Ташкент","Алматы","Стамбул","Дубай","Нячанг","Пхукет"],"Самара":["Ереван","Ташкент","Алматы","Душанбе","Стамбул","Фукуок"],"Волгоград":["Ереван","Ташкент","Алматы"],"Саратов":["Ереван","Баку","Ташкент","Стамбул"],"Тюмень":["Ереван","Баку","Ташкент","Алматы","Астана","Стамбул","Дубай","Нячанг","Фукуок"],"Омск":["Баку","Ташкент","Алматы","Астана","Стамбул","Нячанг","Пхукет"],"Сургут":["Ереван","Баку","Ташкент","Алматы","Пхукет"],"Нижневартовск":["Баку","Ташкент"],"Новосибирск":["Ереван","Баку","Ташкент","Бишкек","Ош","Душанбе","Алматы","Астана","Стамбул","Дубай","Бангкок","Пхукет","Нячанг","Фукуок","Шанхай","Пекин"],"Красноярск":["Ереван","Баку","Ташкент","Бишкек","Алматы","Стамбул","Дубай","Бангкок","Пекин","Нячанг","Фукуок","Пхукет"],"Иркутск":["Ташкент","Алматы","Бангкок","Улан-Батор","Пхукет","Фукуок","Нячанг","Пекин","Шанхай"],"Улан-Удэ":["Пекин"],"Хабаровск":["Пекин","Харбин","Алматы","Шанхай","Нячанг","Фукуок","Пхукет"],"Владивосток":["Пекин","Харбин","Шанхай","Санья","Далянь","Макао","Пхеньян","Нячанг","Пхукет","Бангкок","Фукуок","Ташкент","Самарканд"],"Благовещенск":["Харбин","Нячанг","Фукуок","Пхукет"],"Мурманск":["Минск"],"Чита":["Пекин"],"Южно-Сахалинск":["Пекин","Пхукет"]},"destinations":{"Минск":{"la":53.9,"lo":27.6,"r":"СНГ","c":"Беларусь"},"Ереван":{"la":40.2,"lo":44.5,"r":"СНГ","c":"Армения"},"Тбилиси":{"la":41.7,"lo":44.8,"r":"СНГ","c":"Грузия"},"Батуми":{"la":41.6,"lo":41.6,"r":"СНГ","c":"Грузия"},"Баку":{"la":40.4,"lo":49.9,"r":"СНГ","c":"Азербайджан"},"Сухум":{"la":43.0,"lo":41.0,"r":"СНГ","c":"Абхазия"},"Ташкент":{"la":41.3,"lo":69.3,"r":"СНГ","c":"Узбекистан"},"Самарканд":{"la":39.7,"lo":67.0,"r":"СНГ","c":"Узбекистан"},"Бишкек":{"la":42.9,"lo":74.6,"r":"СНГ","c":"Кыргызстан"},"Ош":{"la":40.5,"lo":72.8,"r":"СНГ","c":"Кыргызстан"},"Душанбе":{"la":38.6,"lo":68.8,"r":"СНГ","c":"Таджикистан"},"Алматы":{"la":43.3,"lo":77.0,"r":"СНГ","c":"Казахстан"},"Астана":{"la":51.2,"lo":71.5,"r":"СНГ","c":"Казахстан"},"Ашхабад":{"la":38.0,"lo":58.4,"r":"СНГ","c":"Туркменистан"},"Белград":{"la":44.8,"lo":20.5,"r":"Европа","c":"Сербия"},"Стамбул":{"la":41.0,"lo":29.0,"r":"БВ","c":"Турция"},"Анталья":{"la":36.9,"lo":30.7,"r":"БВ","c":"Турция"},"Даламан":{"la":36.8,"lo":28.8,"r":"БВ","c":"Турция"},"Дубай":{"la":25.2,"lo":55.3,"r":"БВ","c":"ОАЭ"},"Абу-Даби":{"la":24.5,"lo":54.4,"r":"БВ","c":"ОАЭ"},"Доха":{"la":25.3,"lo":51.5,"r":"БВ","c":"Катар"},"Эр-Рияд":{"la":24.7,"lo":46.7,"r":"БВ","c":"Саудовская Аравия"},"Маскат":{"la":23.6,"lo":58.4,"r":"БВ","c":"Оман"},"Манама":{"la":26.2,"lo":50.6,"r":"БВ","c":"Бахрейн"},"Эль-Кувейт":{"la":29.4,"lo":48.0,"r":"БВ","c":"Кувейт"},"Тель-Авив":{"la":32.1,"lo":34.8,"r":"БВ","c":"Израиль"},"Амман":{"la":31.9,"lo":35.9,"r":"БВ","c":"Иордания"},"Тегеран":{"la":35.7,"lo":51.4,"r":"БВ","c":"Иран"},"Бангкок":{"la":13.8,"lo":100.5,"r":"Азия","c":"Таиланд"},"Пхукет":{"la":7.9,"lo":98.4,"r":"Азия","c":"Таиланд"},"Хошимин":{"la":10.8,"lo":106.6,"r":"Азия","c":"Вьетнам"},"Нячанг":{"la":12.2,"lo":109.2,"r":"Азия","c":"Вьетнам"},"Ханой":{"la":21.0,"lo":105.8,"r":"Азия","c":"Вьетнам"},"Дананг":{"la":16.1,"lo":108.2,"r":"Азия","c":"Вьетнам"},"Фукуок":{"la":10.2,"lo":104.0,"r":"Азия","c":"Вьетнам"},"Денпасар":{"la":-8.7,"lo":115.2,"r":"Азия","c":"Индонезия (Бали)"},"Пекин":{"la":39.9,"lo":116.4,"r":"Азия","c":"Китай"},"Шанхай":{"la":31.2,"lo":121.5,"r":"Азия","c":"Китай"},"Чэнду":{"la":30.6,"lo":104.1,"r":"Азия","c":"Китай"},"Санья":{"la":18.3,"lo":109.5,"r":"Азия","c":"Китай"},"Харбин":{"la":45.8,"lo":126.6,"r":"Азия","c":"Китай"},"Далянь":{"la":38.9,"lo":121.6,"r":"Азия","c":"Китай"},"Гонконг":{"la":22.3,"lo":114.2,"r":"Азия","c":"Гонконг (КНР)"},"Макао":{"la":22.2,"lo":113.6,"r":"Азия","c":"Макао (КНР)"},"Дели":{"la":28.6,"lo":77.2,"r":"Азия","c":"Индия"},"Гоа":{"la":15.3,"lo":74.0,"r":"Азия","c":"Индия"},"Мале":{"la":4.2,"lo":73.5,"r":"Азия","c":"Мальдивы"},"Коломбо":{"la":6.9,"lo":79.9,"r":"Азия","c":"Шри-Ланка"},"Улан-Батор":{"la":47.9,"lo":106.9,"r":"Азия","c":"Монголия"},"Пхеньян":{"la":39.0,"lo":125.8,"r":"Азия","c":"КНДР"},"Кабул":{"la":34.5,"lo":69.2,"r":"Азия","c":"Афганистан"},"Каир":{"la":30.1,"lo":31.2,"r":"Африка","c":"Египет"},"Хургада":{"la":27.3,"lo":33.8,"r":"Африка","c":"Египет"},"Шарм-эш-Шейх":{"la":27.9,"lo":34.3,"r":"Африка","c":"Египет"},"Аддис-Абеба":{"la":9.0,"lo":38.7,"r":"Африка","c":"Эфиопия"},"Алжир":{"la":36.7,"lo":3.1,"r":"Африка","c":"Алжир"},"Касабланка":{"la":33.6,"lo":-7.6,"r":"Африка","c":"Марокко"},"Маэ":{"la":-4.6,"lo":55.5,"r":"Африка","c":"Сейшелы"},"Каракас":{"la":10.5,"lo":-66.9,"r":"ЛА","c":"Венесуэла"}}};
+
+/* ══════════════════════════════════════════════════════
+   REGION COLORS
+══════════════════════════════════════════════════════ */
+const REG = {
+  "СНГ":    {c:"#3b82f6", l:"СНГ"},
+  "БВ":     {c:"#fb923c", l:"Бл. Восток / Турция"},
+  "Азия":   {c:"#34d399", l:"Азия / ЮВА"},
+  "Африка": {c:"#c084fc", l:"Африка"},
+  "Европа": {c:"#f87171", l:"Европа"},
+  "ЛА":     {c:"#facc15", l:"Лат. Америка"}
+};
+
+/* ══════════════════════════════════════════════════════
+   LOAD ROUTES
+══════════════════════════════════════════════════════ */
+async function loadRoutes() {
+  try {
+    const r = await fetch('routes.json?t=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    console.log('✓ routes.json загружен:', data.updated);
+    return data;
+  } catch(e) {
+    console.warn('routes.json недоступен, используем seed-данные:', e.message);
+    return SEED;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+loadRoutes().then(data => {
+  document.getElementById('loading').style.display = 'none';
+  initApp(data);
+});
+
+function initApp(data) {
+  const ROUTES      = data.routes;
+  const DEST_META   = data.destinations;
+  const updatedStr  = data.updated || null;
+  const fromSeed    = data === SEED;
+
+  // Строим обратный индекс
+  const REVERSE = {};
+  for (const [city, dests] of Object.entries(ROUTES))
+    for (const d of dests) {
+      if (!REVERSE[d]) REVERSE[d] = [];
+      REVERSE[d].push(city);
+    }
+
+  const allArcs = Object.entries(ROUTES).flatMap(([f,ds]) => ds.map(t => ({f,t})));
+  const totalRoutes = allArcs.length;
+
+  // Обновляем шапку
+  document.getElementById('b-cities').textContent = Object.keys(ROUTES).length + ' городов РФ';
+  document.getElementById('b-routes').textContent = totalRoutes + ' маршрутов';
+  if (updatedStr) {
+    const d = new Date(updatedStr);
+    const label = d.toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'});
+    const badge = document.getElementById('badge-updated');
+    badge.textContent = (fromSeed ? '⚠ seed ' : '↻ ') + label;
+    badge.style.display = 'inline';
+  }
+  document.getElementById('h-meta').textContent =
+    fromSeed ? 'Резервные данные · март 2026' : 'Обновлено автоматически · OpenSky Network';
+
+  /* ── LEGEND ── */
+  const lgBox = document.getElementById('legend');
+  for (const [k,v] of Object.entries(REG)) {
+    const d = document.createElement('div'); d.className = 'leg';
+    d.innerHTML = `<span class="leg-dot" style="background:${v.c}"></span>${v.l}`;
+    lgBox.appendChild(d);
+  }
+
+  /* ── LISTS ── */
+  const ruList  = document.getElementById('ru-list');
+  const dstList = document.getElementById('dst-list');
+  const cEls = {}, dEls = {};
+
+  [...Object.keys(ROUTES)]
+    .sort((a,b) => (ROUTES[b]||[]).length - (ROUTES[a]||[]).length)
+    .forEach(city => {
+      const cnt = (ROUTES[city]||[]).length;
+      const r = document.createElement('div'); r.className = 'list-row';
+      r.innerHTML = `<div class="row-dot" style="background:#f0b82a"></div><span class="row-name">${city}</span><span class="row-cnt">${cnt}</span>`;
+      r.addEventListener('click',   () => tapRU(city));
+      r.addEventListener('touchend', e => { e.preventDefault(); tapRU(city); });
+      ruList.appendChild(r); cEls[city] = r;
+    });
+
+  [...Object.keys(DEST_META)]
+    .sort((a,b) => (REVERSE[b]||[]).length - (REVERSE[a]||[]).length)
+    .forEach(name => {
+      const meta  = DEST_META[name];
+      const cnt   = (REVERSE[name]||[]).length;
+      const color = REG[meta.r]?.c || '#888';
+      const r = document.createElement('div'); r.className = 'list-row';
+      r.innerHTML = `<div class="row-dot" style="background:${color}"></div><span class="row-name">${name}</span><span class="row-tag" style="color:${color}">${meta.r}</span><span class="row-cnt">${cnt}</span>`;
+      r.addEventListener('click',    () => tapDST(name));
+      r.addEventListener('touchend', e => { e.preventDefault(); tapDST(name); });
+      dstList.appendChild(r); dEls[name] = r;
+    });
+
+  /* ── TABS ── */
+  let tab = 'ru';
+  function stab(id) {
+    tab = id;
+    document.getElementById('tab-ru').style.color             = id==='ru'  ? '#f0b82a' : '#4a6a90';
+    document.getElementById('tab-ru').style.borderBottomColor = id==='ru'  ? '#f0b82a' : 'transparent';
+    document.getElementById('tab-dst').style.color             = id==='dst' ? '#4a9eff' : '#4a6a90';
+    document.getElementById('tab-dst').style.borderBottomColor = id==='dst' ? '#4a9eff' : 'transparent';
+    ruList.style.display  = id==='ru'  ? 'block' : 'none';
+    dstList.style.display = id==='dst' ? 'block' : 'none';
+  }
+  window.stab = stab;
+  stab('ru');
+
+  /* ── MAP ── */
+  const TILES = {
+    gmap: { url:'https://mt{s}.google.com/vt/lyrs=m&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19} },
+    yndx: { url:'https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=ru_RU', opts:{maxZoom:19} },
+    sat:  { url:'https://mt{s}.google.com/vt/lyrs=y&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19} },
+  };
+  const map = L.map('map', {center:[55,70], zoom:3, zoomControl:true, attributionControl:false, minZoom:2, maxZoom:12});
+  let tileLayer = L.tileLayer(TILES.gmap.url, TILES.gmap.opts).addTo(map);
+
+  window.setTiles = function(key) {
+    map.removeLayer(tileLayer);
+    tileLayer = L.tileLayer(TILES[key].url, TILES[key].opts).addTo(map);
+    document.querySelectorAll('.ts-btn').forEach(b => b.classList.remove('on'));
+    document.getElementById('ts-' + key).classList.add('on');
+  };
+
+  /* ── MARKERS ── */
+  const ruMarkers = {}, dstMarkers = {};
+
+  for (const [name, meta] of Object.entries(DEST_META)) {
+    const color = REG[meta.r]?.c || '#888';
+    const m = L.circleMarker([meta.la, meta.lo], {
+      radius:5, fillColor:color, fillOpacity:0.9, color:'#fff', weight:1, opacity:0.5
+    }).addTo(map);
+    m.bindTooltip(`<b>${name}</b> · ${meta.r}`, {direction:'top', offset:[0,-4]});
+    m.on('click', () => { stab('dst'); tapDST(name); });
+    dstMarkers[name] = m;
+  }
+
+  for (const city of Object.keys(ROUTES)) {
+    const cnt = (ROUTES[city]||[]).length;
+    if (!cnt) continue;
+    const ru  = getRUCoords(city, ROUTES[city], DEST_META);
+    if (!ru) continue;
+    const r = 5 + Math.sqrt(cnt) * 1.1;
+    const m = L.circleMarker([ru.la, ru.lo], {
+      radius:r, fillColor:'#f0b82a', fillOpacity:0.95, color:'#fff', weight:1.5, opacity:0.8
+    }).addTo(map);
+    m.bindTooltip(`<b>${city}</b> · ${cnt} направлений`, {direction:'top', offset:[0,-4]});
+    m.on('click', () => { stab('ru'); tapRU(city); });
+    ruMarkers[city] = {m, cnt, la: ru.la, lo: ru.lo};
+  }
+
+  /* ── ARCS ── */
+  const arcSvg  = document.getElementById('arc-svg');
+  let curFrom   = null, curTo = null;
+
+  // Координаты городов РФ (фиксированные)
+  const RU_COORDS = {
+    "Москва":{la:55.75,lo:37.62},"Санкт-Петербург":{la:59.95,lo:30.32},
+    "Сочи":{la:43.60,lo:39.73},"Краснодар":{la:45.04,lo:38.98},
+    "Мин. Воды":{la:44.22,lo:43.08},"Екатеринбург":{la:56.85,lo:60.61},
+    "Челябинск":{la:55.16,lo:61.40},"Оренбург":{la:51.77,lo:55.10},
+    "Уфа":{la:54.74,lo:55.97},"Казань":{la:55.79,lo:49.12},
+    "Нижний Новгород":{la:56.33,lo:44.00},"Пермь":{la:58.00,lo:56.25},
+    "Самара":{la:53.20,lo:50.15},"Волгоград":{la:48.72,lo:44.51},
+    "Саратов":{la:51.53,lo:46.02},"Тюмень":{la:57.15,lo:68.00},
+    "Омск":{la:54.99,lo:73.37},"Сургут":{la:61.25,lo:73.40},
+    "Нижневартовск":{la:60.93,lo:76.57},"Новосибирск":{la:54.99,lo:82.90},
+    "Красноярск":{la:56.01,lo:92.87},"Иркутск":{la:52.29,lo:104.30},
+    "Улан-Удэ":{la:51.83,lo:107.61},"Хабаровск":{la:48.48,lo:135.08},
+    "Владивосток":{la:43.13,lo:131.91},"Благовещенск":{la:50.28,lo:127.54},
+    "Мурманск":{la:68.97,lo:33.08},"Чита":{la:52.03,lo:113.50},
+    "Южно-Сахалинск":{la:46.96,lo:142.74}
+  };
+
+  function getRUCoords(city) {
+    return RU_COORDS[city] || null;
+  }
+
+  function hexA(a) {
+    return Math.round(Math.min(255,Math.max(0,a*255))).toString(16).padStart(2,'0');
+  }
+
+  function drawArcs() {
+    const wrap = document.getElementById('map-wrap');
+    const W = wrap.clientWidth, H = wrap.clientHeight;
+    arcSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    arcSvg.innerHTML = `<defs>
+      <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>`;
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    arcSvg.appendChild(g);
+
+    for (const arc of allArcs) {
+      const fr   = RU_COORDS[arc.f];
+      const dt   = DEST_META[arc.t];
+      if (!fr || !dt) continue;
+      const hl    = !curFrom && !curTo || (curFrom && arc.f===curFrom) || (curTo && arc.t===curTo);
+      const alpha = hl ? (curFrom||curTo ? 0.72 : 0.35) : 0.025;
+      const sw    = hl ? (curFrom||curTo ? 2.0  : 1.0)  : 0.5;
+      const color = REG[dt.r]?.c || '#888';
+      const p1    = map.latLngToContainerPoint([fr.la, fr.lo]);
+      const p2    = map.latLngToContainerPoint([dt.la, dt.lo]);
+      const len   = Math.sqrt((p2.x-p1.x)**2+(p2.y-p1.y)**2);
+      if (len < 4) continue;
+      const off   = Math.min(len*0.28, H*0.22);
+      const cx    = (p1.x+p2.x)/2, cy = (p1.y+p2.y)/2-off;
+      const path  = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', `M${p1.x.toFixed(1)},${p1.y.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`);
+      path.setAttribute('stroke', color + hexA(alpha));
+      path.setAttribute('stroke-width', sw);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'round');
+      if (hl && (curFrom||curTo)) path.setAttribute('filter','url(#glow)');
+      g.appendChild(path);
+    }
+  }
+
+  map.on('move zoom viewreset resize', drawArcs);
+  window.addEventListener('resize', drawArcs);
+  setTimeout(drawArcs, 200);
+
+  /* ── STATE ── */
+  let aC = null, aD = null;
+
+  function updateMarkers(fC, tD) {
+    for (const [n, m] of Object.entries(dstMarkers)) {
+      const hl = !fC&&!tD || (fC&&(ROUTES[fC]||[]).includes(n)) || (tD&&n===tD);
+      m.setStyle({fillOpacity: hl?0.9:0.06, opacity: hl?0.5:0.05, weight: n===tD?2:1});
+      m.setRadius(n===tD ? 7 : 5);
+    }
+    for (const [n, obj] of Object.entries(ruMarkers)) {
+      const dim = tD && !(REVERSE[tD]||[]).includes(n);
+      const isA = n===fC;
+      obj.m.setStyle({fillOpacity: dim?0.22:0.95, opacity: dim?0.15:0.8, weight: isA?2.5:1.5});
+      const r = (5+Math.sqrt(obj.cnt)*1.1)*(isA?1.25:1);
+      obj.m.setRadius(r);
+    }
+  }
+
+  function reset() {
+    aC=null; aD=null; curFrom=null; curTo=null;
+    for (const e of Object.values(cEls))  { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
+    for (const e of Object.values(dEls))  { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
+    document.getElementById('info-bar').style.display = 'none';
+    updateMarkers(null,null); drawArcs();
+  }
+  window.reset = reset;
+
+  function tapRU(name) {
+    if (aC===name && !aD) { reset(); return; }
+    aC=name; aD=null; curFrom=name; curTo=null;
+    for (const [cn,e] of Object.entries(cEls)) {
+      const a=cn===name; e.style.borderLeftColor=a?'#f0b82a':'transparent'; e.style.background=a?'rgba(240,184,42,.05)':'transparent';
+    }
+    for (const e of Object.values(dEls)) { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
+    const dests = ROUTES[name]||[];
+    const title = document.getElementById('info-title');
+    title.style.color='#f0b82a'; title.textContent=`✈ Из ${name} · ${dests.length} направлений`;
+    const cs=document.getElementById('chip-scroll'); cs.innerHTML='';
+    for (const dn of dests) {
+      const meta=DEST_META[dn]; if(!meta) continue;
+      const color=REG[meta.r]?.c||'#888';
+      const chip=document.createElement('span'); chip.className='chip';
+      chip.style.borderLeftColor=color; chip.style.color=color; chip.textContent=dn;
+      cs.appendChild(chip);
+    }
+    document.getElementById('info-bar').style.display='flex';
+    if (cEls[name]) cEls[name].scrollIntoView({block:'nearest',behavior:'smooth'});
+    updateMarkers(name,null); drawArcs();
+  }
+
+  function tapDST(name) {
+    if (aD===name && !aC) { reset(); return; }
+    aD=name; aC=null; curFrom=null; curTo=name;
+    const meta=DEST_META[name], color=REG[meta?.r]?.c||'#4a9eff', srcs=REVERSE[name]||[];
+    for (const [dn,e] of Object.entries(dEls)) {
+      const a=dn===name; e.style.borderLeftColor=a?color:'transparent'; e.style.background=a?color+'18':'transparent';
+    }
+    for (const [cn,e] of Object.entries(cEls)) {
+      const a=srcs.includes(cn); e.style.borderLeftColor=a?'#f0b82a':'transparent'; e.style.background=a?'rgba(240,184,42,.05)':'transparent';
+    }
+    const title=document.getElementById('info-title');
+    title.style.color=color; title.textContent=`📍 В ${name} · из ${srcs.length} городов РФ`;
+    const cs=document.getElementById('chip-scroll'); cs.innerHTML='';
+    for (const cn of srcs) {
+      const chip=document.createElement('span'); chip.className='chip';
+      chip.style.borderLeftColor='#f0b82a'; chip.style.color='#f0b82a'; chip.textContent=cn;
+      cs.appendChild(chip);
+    }
+    document.getElementById('info-bar').style.display='flex';
+    if (dEls[name]) dEls[name].scrollIntoView({block:'nearest',behavior:'smooth'});
+    updateMarkers(null,name); drawArcs();
+  }
+
+  map.on('click', e => { if (!e.originalEvent._fromMarker) reset(); });
+  for (const obj of Object.values(ruMarkers))  obj.m.on('click', e => { e.originalEvent._fromMarker=true; });
+  for (const m   of Object.values(dstMarkers)) m.on('click',     e => { e.originalEvent._fromMarker=true; });
+}
+</script>
+</body>
+</html>
