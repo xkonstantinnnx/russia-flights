@@ -151,7 +151,13 @@ async function loadRoutes() {
 ══════════════════════════════════════════════════════ */
 loadRoutes().then(data => {
   document.getElementById('loading').style.display = 'none';
-  initApp(data);
+  const routeCount = Object.keys(data.routes || {}).length;
+  if (routeCount === 0) {
+    console.warn('routes.json пуст, используем seed-данные');
+    initApp(SEED);
+  } else {
+    initApp(data);
+  }
 });
 
 function initApp(data) {
