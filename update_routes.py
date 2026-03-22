@@ -242,17 +242,20 @@ def main():
 
     now = datetime.now(timezone.utc)
 
-    # Данные обновляются ночью — берём с задержкой 1 день (вчера и раньше).
-    # Окна по 6 дней (лимит API: строго < 7 дней).
-    # 4 окна × 6 дней = 24 дня истории.
+    # Лимит API: begin и end должны лежать в одном UTC-календарном дне
+    # (или захватывать не более одной полночной границы).
+    # Решение: один запрос на каждый полный UTC-день.
+    # 14 дней × 31 аэропорт = 434 запроса, ~15 минут.
+    DAYS_HISTORY = 14
     windows = []
-    for i in range(4):
-        end   = now - timedelta(days=1 + i * 6)
-        begin = end  - timedelta(days=6)
-        windows.append((int(begin.timestamp()), int(end.timestamp())))
+    for i in range(1, DAYS_HISTORY + 1):
+        day   = (now - timedelta(days=i)).date()
+        begin = int(datetime(day.year, day.month, day.day,  0,  0,  0, tzinfo=timezone.utc).timestamp())
+        end   = int(datetime(day.year, day.month, day.day, 23, 59, 59, tzinfo=timezone.utc).timestamp())
+        windows.append((begin, end))
 
     print(f"Период: {windows[-1][0]} → {windows[0][1]}")
-    print(f"Аэропортов: {len(RU_AIRPORTS)}, окон: {len(windows)}")
+    print(f"Аэропортов: {len(RU_AIRPORTS)}, дней истории: {len(windows)}")
     print()
 
     # route_counts[город_рф][icao_назначения] = кол-во рейсов
@@ -296,7 +299,7 @@ def main():
         sys.exit(0)  # не падаем с ошибкой, чтобы не ломать CI
 
     # ── Строим маршруты ──────────────────────────────────────────────────────
-    MIN_FLIGHTS = 2  # минимум рейсов за 24 дня для включения маршрута
+    MIN_FLIGHTS = 2  # минимум рейсов за 14 дней для включения маршрута
 
     routes:    dict[str, list[str]] = {}
     used_icao: set[str]             = set()
