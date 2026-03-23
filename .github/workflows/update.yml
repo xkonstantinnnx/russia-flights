@@ -42,3 +42,14 @@ jobs:
             && echo "Маршруты не изменились, коммит не нужен" \
             || git commit -m "Обновление маршрутов $(date -u +%Y-%m-%d)"
           git push
+      - name: Deploy to Timeweb via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:   ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          local-dir: ./
+          server-dir: /home/c/cl66138/russia-flights/public_html/   # папка на хостинге, уточните у Timeweb
+          include: |
+            index.html
+            routes.json
