@@ -181,7 +181,7 @@ class TokenManager:
         self._token      = data["access_token"]
         expires_in       = data.get("expires_in", 1800)  # обычно 1800 сек (30 мин)
         self._expires_at = time.time() + expires_in
-        print(f"  [auth] Токен получен, действует {expires_in // 60} мин")
+        print(f"  [auth] Токен получен, действует {expires_in // 60} мин", flush=True)
 
 
 def get_departures(icao: str, begin_ts: int, end_ts: int,
@@ -229,14 +229,16 @@ def get_departures(icao: str, begin_ts: int, end_ts: int,
 
 
 def main():
+    print("=== Script started ===", flush=True)
     if not CLIENT_ID or not CLIENT_SECRET:
         print("✗ OPENSKY_CLIENT_ID и OPENSKY_CLIENT_SECRET не заданы")
         sys.exit(1)
 
+    print(f"=== CLIENT_ID length: {len(CLIENT_ID)}, CLIENT_SECRET length: {len(CLIENT_SECRET)} ===", flush=True)
     token_mgr = TokenManager(CLIENT_ID, CLIENT_SECRET)
 
-    # Проверяем авторизацию до начала основной работы
     try:
+        print("=== Requesting token... ===", flush=True)
         token_mgr.get_token()
     except Exception as e:
         print(f"✗ Не удалось получить токен: {e}")
