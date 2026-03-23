@@ -165,7 +165,7 @@ class TokenManager:
         return self._token
 
     def _refresh(self):
-        print("  [auth] Получаем OAuth2 токен...")
+        print("  [auth] Получаем OAuth2 токен...", flush=True)
         r = requests.post(
             TOKEN_URL,
             data={
@@ -174,8 +174,9 @@ class TokenManager:
                 "client_secret": self.client_secret,
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
-            timeout=15,
+            timeout=(10, 15),  # (connect_timeout, read_timeout)
         )
+        print(f"  [auth] HTTP {r.status_code}", flush=True)
         r.raise_for_status()
         data             = r.json()
         self._token      = data["access_token"]
