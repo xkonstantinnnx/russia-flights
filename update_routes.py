@@ -16,6 +16,8 @@
 """
 
 import os, json, time, sys, requests
+import socket
+socket.setdefaulttimeout(20)
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 
