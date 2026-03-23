@@ -53,14 +53,15 @@ jobs:
       - name: Deploy to Timeweb via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server:   ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          local-dir: ./
+          server:     ${{ secrets.FTP_HOST }}
+          username:   ${{ secrets.FTP_USER }}
+          password:   ${{ secrets.FTP_PASS }}
+          local-dir:  ./
           server-dir: /home/c/cl66138/russia-flights/public_html/
           exclude: |
-            .git*
-            .github*
-            update_routes.py
-            README.md
+            **/.git/**
+            **/.github/**
+            **/update_routes.py
+            **/README.md
+            **/.ftp-deploy-sync-state.json
             .ftp-deploy-sync-state.json
