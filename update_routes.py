@@ -219,8 +219,8 @@ def get_departures(icao: str, begin_ts: int, end_ts: int,
                 token_mgr._expires_at = 0  # форсируем обновление
                 time.sleep(5)
             elif r.status_code == 429:
-                print(f"    Rate limit (429) — пропускаем этот день", flush=True)
-                return []
+                print(f"    Rate limit (429) — кредиты исчерпаны, останавливаемся", flush=True)
+                return None  # None останавливает весь скрипт
             else:
                 print(f"    HTTP {r.status_code} для {icao}")
                 return []
@@ -250,6 +250,23 @@ def main():
     except Exception as e:
         print(f"✗ Не удалось получить токен: {e}")
         sys.exit(1)
+    # Проверяем остаток кредитов одним лёгким запросом
+    try:
+        print("=== Проверка кредитов... ===", flush=True)
+        r = requests.get(
+            "https://opensky-network.org/api/flights/departure",
+            params={"airport": "EDDF", "begin": 1717200000, "end": 1717286399},
+            headers={"Authorization": f"Bearer {token_mgr.get_token()}"},
+            timeout=(10, 15),
+        )
+        remaining = r.headers.get("X-Rate-Limit-Remaining", "неизвестно")
+        limit     = r.headers.get("X-Rate-Limit-Limit", "неизвестно")
+        print(f"=== Кредитов осталось: {remaining} из {limit} ===", flush=True)
+        if r.status_code == 429:
+            print("=== Кредиты исчерпаны, запуск нецелесообразен ===", flush=True)
+            sys.exit(0)
+    except Exception as e:
+        print(f"=== Не удалось проверить кредиты: {e} ===", flush=True)
 
     now = datetime.now(timezone.utc)
 
