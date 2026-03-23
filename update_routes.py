@@ -211,11 +211,10 @@ def get_departures(icao: str, begin_ts: int, end_ts: int,
             elif r.status_code == 401:
                 print(f"    токен истёк, принудительно обновляем...")
                 token_mgr._expires_at = 0  # форсируем обновление
-                time.sleep(2)
+                time.sleep(5)
             elif r.status_code == 429:
-                wait = int(r.headers.get("Retry-After", 60))
-                print(f"    Rate limit, ждём {wait} сек...")
-                time.sleep(wait)
+                print(f"    Rate limit (429) — пропускаем этот день", flush=True)
+                return []
             else:
                 print(f"    HTTP {r.status_code} для {icao}")
                 return []
@@ -292,7 +291,7 @@ def main():
                     continue
                 route_counts[city][arr] += 1
 
-            time.sleep(2)  # пауза между запросами
+            time.sleep(5)  # пауза между запросами
 
         total_for_city = sum(route_counts[city].values())
         print(f"    → {total_for_city} засечённых вылетов")
