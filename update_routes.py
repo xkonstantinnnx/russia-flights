@@ -281,6 +281,7 @@ def build_from_airlabs(airlabs_results: dict) -> tuple[dict, dict]:
             if arr_icao[:2] in RU_ICAO_PREFIXES:
                 continue
             if arr_icao not in DEST_INFO:
+                print(f"    пропущен неизвестный ICAO: {arr_icao}", flush=True)
                 continue
             dest_name = DEST_INFO[arr_icao]["n"]
             if dest_name not in seen_names:
