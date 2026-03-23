@@ -1,18 +1,10 @@
 #!/usr/bin/env python3
 """
-Обновление маршрутов из России через OpenSky Network API.
+Обновление маршрутов из России.
+Основной источник: OpenSky Network API (OAuth2).
+Резервный источник: AirLabs Routes API (если кредиты OpenSky исчерпаны).
+
 Запускается еженедельно через GitHub Actions.
-
-Аутентификация: OAuth2 client credentials (актуально с марта 2026).
-Логика:
-  - Запрашиваем вылеты из каждого российского аэропорта за последние 28 дней
-    (4 окна по 6 дней — лимит API: строго меньше 7 дней)
-  - Только международные рейсы (не в Россию)
-  - Маршрут считается активным, если выполнен >= 2 раза за 28 дней
-  - Результат сохраняется в routes.json
-
-Важно: OpenSky иногда блокирует запросы с AWS (GitHub Actions работает на AWS).
-При ошибке 403 скрипт сохраняет имеющиеся данные и завершается без ошибки.
 """
 
 import os, json, time, sys, requests
@@ -23,6 +15,7 @@ from collections import defaultdict
 
 CLIENT_ID     = os.environ.get("OPENSKY_CLIENT_ID", "")
 CLIENT_SECRET = os.environ.get("OPENSKY_CLIENT_SECRET", "")
+AIRLABS_KEY   = os.environ.get("AIRLABS_KEY", "")
 
 TOKEN_URL = (
     "https://auth.opensky-network.org"
@@ -185,11 +178,16 @@ class TokenManager:
         print(f"  [auth] Токен получен, действует {expires_in // 60} мин", flush=True)
 
 
+# ══════════════════════════════════════════════════════════════
+#  OpenSky — получение вылетов из аэропорта за один день
+# ══════════════════════════════════════════════════════════════
+
 def get_departures(icao: str, begin_ts: int, end_ts: int,
                    token_mgr: TokenManager) -> list | None:
     """
     Запрашивает вылеты из аэропорта за период [begin_ts, end_ts].
-    Возвращает список рейсов или None при критической ошибке (403 = блокировка AWS).
+    Возвращает список рейсов, [] если рейсов нет,
+    None при критической ошибке (403, 429, кредиты = 0) — сигнал переключиться на AirLabs.
     """
     url = "https://opensky-network.org/api/flights/departure"
     params = {"airport": icao, "begin": begin_ts, "end": end_ts}
@@ -211,46 +209,124 @@ def get_departures(icao: str, begin_ts: int, end_ts: int,
             elif r.status_code == 404:
                 return []  # нет рейсов за этот период — норма
             elif r.status_code == 403:
-                # OpenSky блокирует AWS IP — не паникуем, просто пишем в лог
-                print(f"    ⚠ 403 Forbidden для {icao} — OpenSky заблокировал AWS IP")
+                print(f"    ⚠ 403 Forbidden для {icao} — OpenSky заблокировал AWS IP", flush=True)
                 return None  # сигнал для основного цикла: прекратить запросы
             elif r.status_code == 401:
-                print(f"    токен истёк, принудительно обновляем...")
+                print(f"    токен истёк, принудительно обновляем...", flush=True)
                 token_mgr._expires_at = 0  # форсируем обновление
                 time.sleep(5)
             elif r.status_code == 429:
                 print(f"    Rate limit (429) — кредиты исчерпаны, останавливаемся", flush=True)
                 return None  # None останавливает весь скрипт
             else:
-                print(f"    HTTP {r.status_code} для {icao}")
+                print(f"    HTTP {r.status_code} для {icao}", flush=True)
                 return []
 
         except requests.exceptions.Timeout:
-            print(f"    Timeout для {icao}, попытка {attempt + 1}/3")
+            print(f"    Timeout для {icao}, попытка {attempt + 1}/3", flush=True)
             time.sleep(5)
         except Exception as e:
-            print(f"    Ошибка: {e}, попытка {attempt + 1}/3")
+            print(f"    Ошибка: {e}, попытка {attempt + 1}/3", flush=True)
             time.sleep(10)
 
     return []
 
 
+# ══════════════════════════════════════════════════════════════
+#  AirLabs — получение маршрутов аэропорта (резервный источник)
+# ══════════════════════════════════════════════════════════════
+
+def get_routes_airlabs(icao: str, api_key: str) -> list | None:
+    """
+    Возвращает список ICAO-кодов аэропортов назначения для данного аэропорта.
+    Один запрос на аэропорт — не зависит от дат и кредитов OpenSky.
+    Возвращает None при ошибке.
+    """
+    url    = "https://airlabs.co/api/v9/routes"
+    params = {"dep_icao": icao, "api_key": api_key}
+    print(f"    → AirLabs routes dep_icao={icao}", flush=True)
+    try:
+        r = requests.get(url, params=params, timeout=(10, 20))
+        print(f"    ← HTTP {r.status_code}", flush=True)
+        if r.status_code == 200:
+            data = r.json()
+            if data.get("error"):
+                print(f"    AirLabs error: {data['error']}", flush=True)
+                return None
+            routes = data.get("response", [])
+            return [f.get("arr_icao", "").upper() for f in routes if f.get("arr_icao")]
+        elif r.status_code == 429:
+            print(f"    AirLabs: лимит запросов исчерпан", flush=True)
+            return None
+        else:
+            print(f"    AirLabs HTTP {r.status_code}", flush=True)
+            return None
+    except Exception as e:
+        print(f"    AirLabs ошибка: {e}", flush=True)
+        return None
+
+
+def build_from_airlabs(airlabs_results: dict) -> tuple[dict, dict]:
+    """
+    airlabs_results: {город_рф: [icao_назначения, ...]}
+    Возвращает (routes, destinations).
+    """
+    routes:    dict[str, list[str]] = {}
+    used_icao: set[str]             = set()
+
+    for city, arr_icaos in airlabs_results.items():
+        city_dests: list[str] = []
+        seen_names: set[str]  = set()
+        for arr_icao in arr_icaos:
+            if arr_icao[:2] in RU_ICAO_PREFIXES:
+                continue
+            if arr_icao not in DEST_INFO:
+                continue
+            dest_name = DEST_INFO[arr_icao]["n"]
+            if dest_name not in seen_names:
+                city_dests.append(dest_name)
+                seen_names.add(dest_name)
+                used_icao.add(arr_icao)
+        if city_dests:
+            routes[city] = city_dests
+
+    destinations: dict[str, dict] = {}
+    for icao in used_icao:
+        info = DEST_INFO[icao]
+        name = info["n"]
+        if name not in destinations:
+            destinations[name] = {
+                "la": info["la"], "lo": info["lo"],
+                "r":  info["r"],  "c":  info["c"],
+            }
+
+    return routes, destinations
+
+
+# ══════════════════════════════════════════════════════════════
+#  MAIN
+# ══════════════════════════════════════════════════════════════
+
 def main():
     print("=== Script started ===", flush=True)
     if not CLIENT_ID or not CLIENT_SECRET:
-        print("✗ OPENSKY_CLIENT_ID и OPENSKY_CLIENT_SECRET не заданы")
+        print("✗ OPENSKY_CLIENT_ID и OPENSKY_CLIENT_SECRET не заданы", flush=True)
         sys.exit(1)
 
     print(f"=== CLIENT_ID length: {len(CLIENT_ID)}, CLIENT_SECRET length: {len(CLIENT_SECRET)} ===", flush=True)
+    print(f"=== AirLabs fallback: {'доступен' if AIRLABS_KEY else 'не настроен'} ===", flush=True)
+
     token_mgr = TokenManager(CLIENT_ID, CLIENT_SECRET)
 
     try:
         print("=== Requesting token... ===", flush=True)
         token_mgr.get_token()
     except Exception as e:
-        print(f"✗ Не удалось получить токен: {e}")
+        print(f"✗ Не удалось получить токен: {e}", flush=True)
         sys.exit(1)
-    # Проверяем остаток кредитов одним лёгким запросом
+
+    # ── Проверяем остаток кредитов одним лёгким запросом ────────────────────
+    opensky_ok = True
     try:
         print("=== Проверка кредитов... ===", flush=True)
         r = requests.get(
@@ -263,100 +339,139 @@ def main():
         limit     = r.headers.get("X-Rate-Limit-Limit", "неизвестно")
         print(f"=== Кредитов осталось: {remaining} из {limit} ===", flush=True)
         if r.status_code == 429:
-            print("=== Кредиты исчерпаны, запуск нецелесообразен ===", flush=True)
-            sys.exit(0)
+            print("=== Кредиты исчерпаны, переходим на AirLabs ===", flush=True)
+            opensky_ok = False
+        elif remaining != "неизвестно" and int(remaining) == 0:
+            print("=== Кредиты на нуле, переходим на AirLabs ===", flush=True)
+            opensky_ok = False
     except Exception as e:
         print(f"=== Не удалось проверить кредиты: {e} ===", flush=True)
 
     now = datetime.now(timezone.utc)
+    routes:       dict[str, list[str]] = {}
+    destinations: dict[str, dict]      = {}
+    source = ""
 
-    # Лимит API: begin и end должны лежать в одном UTC-календарном дне
-    # (или захватывать не более одной полночной границы).
-    # Решение: один запрос на каждый полный UTC-день.
-    # 14 дней × 31 аэропорт = 434 запроса, ~15 минут.
-    DAYS_HISTORY = 14
-    windows = []
-    for i in range(1, DAYS_HISTORY + 1):
-        day   = (now - timedelta(days=i)).date()
-        begin = int(datetime(day.year, day.month, day.day,  0,  0,  0, tzinfo=timezone.utc).timestamp())
-        end   = int(datetime(day.year, day.month, day.day, 23, 59, 59, tzinfo=timezone.utc).timestamp())
-        windows.append((begin, end))
+    # ══════════════════════════════════════════════════════════
+    #  Путь 1 — OpenSky
+    # ══════════════════════════════════════════════════════════
+    if opensky_ok:
+        print("\n=== Используем OpenSky Network ===", flush=True)
 
-    print(f"Период: {windows[-1][0]} → {windows[0][1]}", flush=True)
-    print(f"Аэропортов: {len(RU_AIRPORTS)}, дней истории: {len(windows)}", flush=True)
-    print(flush=True)
+        # Лимит API: begin и end должны лежать в одном UTC-календарном дне.
+        # Решение: один запрос на каждый полный UTC-день.
+        # 14 дней × 31 аэропорт = 434 запроса.
+        DAYS_HISTORY = 14
+        windows = []
+        for i in range(1, DAYS_HISTORY + 1):
+            day   = (now - timedelta(days=i)).date()
+            begin = int(datetime(day.year, day.month, day.day,  0,  0,  0, tzinfo=timezone.utc).timestamp())
+            end   = int(datetime(day.year, day.month, day.day, 23, 59, 59, tzinfo=timezone.utc).timestamp())
+            windows.append((begin, end))
 
-    # route_counts[город_рф][icao_назначения] = кол-во рейсов
-    route_counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    aws_blocked = False
+        print(f"Период: {windows[-1][0]} → {windows[0][1]}", flush=True)
+        print(f"Аэропортов: {len(RU_AIRPORTS)}, дней истории: {len(windows)}", flush=True)
+        print(flush=True)
 
-    total = len(RU_AIRPORTS)
-    for idx, (icao, city) in enumerate(RU_AIRPORTS.items(), 1):
-        if aws_blocked:
-            break
-        print(f"[{idx}/{total}] {city} ({icao})")
+        route_counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        opensky_failed = False
 
-        for begin_ts, end_ts in windows:
-            result = get_departures(icao, begin_ts, end_ts, token_mgr)
-
-            if result is None:
-                # 403 — OpenSky блокирует этот IP
-                aws_blocked = True
+        total = len(RU_AIRPORTS)
+        for idx, (icao, city) in enumerate(RU_AIRPORTS.items(), 1):
+            if opensky_failed:
                 break
+            print(f"[{idx}/{total}] {city} ({icao})", flush=True)
 
-            for f in result:
-                arr = (f.get("estArrivalAirport") or "").strip().upper()
-                if not arr or len(arr) != 4:
-                    continue
-                if arr[:2] in RU_ICAO_PREFIXES:
-                    continue
-                if arr not in DEST_INFO:
-                    continue
-                route_counts[city][arr] += 1
+            for begin_ts, end_ts in windows:
+                result = get_departures(icao, begin_ts, end_ts, token_mgr)
 
-            time.sleep(5)  # пауза между запросами
+                if result is None:
+                    opensky_failed = True
+                    break
 
-        total_for_city = sum(route_counts[city].values())
-        print(f"    → {total_for_city} засечённых вылетов")
-        time.sleep(3)
+                for f in result:
+                    arr = (f.get("estArrivalAirport") or "").strip().upper()
+                    if not arr or len(arr) != 4:
+                        continue
+                    if arr[:2] in RU_ICAO_PREFIXES:
+                        continue
+                    if arr not in DEST_INFO:
+                        continue
+                    route_counts[city][arr] += 1
 
-    if aws_blocked:
-        print("\n⚠ OpenSky заблокировал запросы с AWS.")
-        print("  Это известная проблема GitHub Actions (Amazon IP).")
-        print("  routes.json НЕ обновляется — оставляем предыдущую версию.")
-        sys.exit(0)  # не падаем с ошибкой, чтобы не ломать CI
+                time.sleep(5)  # пауза между запросами
 
-    # ── Строим маршруты ──────────────────────────────────────────────────────
-    MIN_FLIGHTS = 2  # минимум рейсов за 14 дней для включения маршрута
+            total_for_city = sum(route_counts[city].values())
+            print(f"    → {total_for_city} засечённых вылетов", flush=True)
+            time.sleep(3)
 
-    routes:    dict[str, list[str]] = {}
-    used_icao: set[str]             = set()
+        if opensky_failed:
+            print("\n⚠ OpenSky недоступен (кредиты / AWS блокировка).", flush=True)
+            opensky_ok = False
+        else:
+            # Строим маршруты из данных OpenSky
+            MIN_FLIGHTS = 2  # минимум рейсов за 14 дней для включения маршрута
+            used_icao: set[str] = set()
+            for city, dest_counts in route_counts.items():
+                city_dests = []
+                for arr_icao, count in sorted(dest_counts.items(), key=lambda x: -x[1]):
+                    if count >= MIN_FLIGHTS:
+                        dest_name = DEST_INFO[arr_icao]["n"]
+                        if dest_name not in city_dests:  # дедупликация
+                            city_dests.append(dest_name)
+                            used_icao.add(arr_icao)
+                if city_dests:
+                    existing = routes.get(city, [])
+                    routes[city] = list(dict.fromkeys(existing + city_dests))
+            for icao in used_icao:
+                info = DEST_INFO[icao]
+                name = info["n"]
+                if name not in destinations:
+                    destinations[name] = {
+                        "la": info["la"], "lo": info["lo"],
+                        "r":  info["r"],  "c":  info["c"],
+                    }
+            source = "OpenSky Network"
 
-    for city, dest_counts in route_counts.items():
-        city_dests = []
-        for arr_icao, count in sorted(dest_counts.items(), key=lambda x: -x[1]):
-            if count >= MIN_FLIGHTS:
-                dest_name = DEST_INFO[arr_icao]["n"]
-                if dest_name not in city_dests:  # дедупликация (два аэропорта Стамбула и т.п.)
-                    city_dests.append(dest_name)
-                    used_icao.add(arr_icao)
-        if city_dests:
-            existing = routes.get(city, [])
-            routes[city] = list(dict.fromkeys(existing + city_dests))
+    # ══════════════════════════════════════════════════════════
+    #  Путь 2 — AirLabs (fallback)
+    # ══════════════════════════════════════════════════════════
+    if not opensky_ok:
+        if not AIRLABS_KEY:
+            print("\n✗ AirLabs не настроен (AIRLABS_KEY отсутствует).", flush=True)
+            print("  routes.json НЕ обновляется — оставляем предыдущую версию.", flush=True)
+            sys.exit(0)
 
-    # Метаданные только реально используемых направлений
-    destinations: dict[str, dict] = {}
-    for icao in used_icao:
-        info = DEST_INFO[icao]
-        name = info["n"]
-        if name not in destinations:
-            destinations[name] = {
-                "la": info["la"], "lo": info["lo"],
-                "r":  info["r"],  "c":  info["c"],
-            }
+        print("\n=== Переключаемся на AirLabs Routes API ===", flush=True)
+        airlabs_results: dict[str, list[str]] = {}
+        total = len(RU_AIRPORTS)
+
+        for idx, (icao, city) in enumerate(RU_AIRPORTS.items(), 1):
+            print(f"\n[{idx}/{total}] {city} ({icao})", flush=True)
+            arr_icaos = get_routes_airlabs(icao, AIRLABS_KEY)
+            if arr_icaos is None:
+                print("  AirLabs недоступен, останавливаемся.", flush=True)
+                print("  routes.json НЕ обновляется.", flush=True)
+                sys.exit(0)
+            # Объединяем несколько аэропортов одного города (Москва)
+            existing = airlabs_results.get(city, [])
+            airlabs_results[city] = existing + arr_icaos
+            print(f"    → {len(arr_icaos)} маршрутов от AirLabs", flush=True)
+            time.sleep(2)
+
+        routes, destinations = build_from_airlabs(airlabs_results)
+        source = "AirLabs Routes API"
+
+    # ══════════════════════════════════════════════════════════
+    #  Сохраняем результат
+    # ══════════════════════════════════════════════════════════
+    if not routes:
+        print("\n⚠ Маршруты не получены, routes.json НЕ обновляется.", flush=True)
+        sys.exit(0)
 
     output = {
         "updated":      now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "source":       source,
         "routes":       routes,
         "destinations": destinations,
     }
@@ -365,7 +480,7 @@ def main():
         json.dump(output, f, ensure_ascii=False, indent=2)
 
     total_routes = sum(len(v) for v in routes.values())
-    print(f"\n✓ Готово: {len(routes)} городов РФ, {total_routes} маршрутов")
+    print(f"\n✓ Готово [{source}]: {len(routes)} городов РФ, {total_routes} маршрутов")
     print(f"  Обновлено: {output['updated']}")
 
 
