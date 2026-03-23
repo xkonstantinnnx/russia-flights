@@ -57,7 +57,7 @@ jobs:
           username:   ${{ secrets.FTP_USER }}
           password:   ${{ secrets.FTP_PASS }}
           local-dir:  ./
-          server-dir: /home/c/[REDACTED-USER]/russia-flights/public_html/
+          server-dir: /russia-flights/public_html/
           exclude: |
             **/.git/**
             **/.github/**
