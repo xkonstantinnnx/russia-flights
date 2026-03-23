@@ -31,7 +31,13 @@ jobs:
         env:
           OPENSKY_CLIENT_ID:     ${{ secrets.OPENSKY_CLIENT_ID }}
           OPENSKY_CLIENT_SECRET: ${{ secrets.OPENSKY_CLIENT_SECRET }}
-        run: python update_routes.py
+        run: |
+          echo "=== DNS check ==="
+          nslookup auth.opensky-network.org || true
+          echo "=== Curl check ==="
+          curl -v --max-time 10 https://auth.opensky-network.org 2>&1 | head -30 || true
+          echo "=== Running script ==="
+          timeout 1200 python update_routes.py || echo "Script timed out or failed"
 
       - name: Commit routes.json if changed
         run: |
@@ -42,6 +48,7 @@ jobs:
             && echo "Маршруты не изменились, коммит не нужен" \
             || git commit -m "Обновление маршрутов $(date -u +%Y-%m-%d)"
           git push
+          
       - name: Deploy to Timeweb via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
