@@ -201,6 +201,12 @@ def get_departures(icao: str, begin_ts: int, end_ts: int,
             print(f"    ← HTTP {r.status_code}", flush=True)
 
             if r.status_code == 200:
+                remaining = r.headers.get("X-Rate-Limit-Remaining")
+                if remaining is not None:
+                    print(f"    кредитов осталось: {remaining}", flush=True)
+                    if int(remaining) == 0:
+                        print(f"    ⚠ Кредиты исчерпаны на сегодня, останавливаемся", flush=True)
+                        return None  # None = сигнал основному циклу остановить всё
                 return r.json() or []
             elif r.status_code == 404:
                 return []  # нет рейсов за этот период — норма
