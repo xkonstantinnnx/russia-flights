@@ -31,6 +31,7 @@ jobs:
         env:
           OPENSKY_CLIENT_ID:     ${{ secrets.OPENSKY_CLIENT_ID }}
           OPENSKY_CLIENT_SECRET: ${{ secrets.OPENSKY_CLIENT_SECRET }}
+          AIRLABS_KEY:           ${{ secrets.AIRLABS_KEY }}
         run: |
           echo "=== DNS check ==="
           nslookup auth.opensky-network.org || true
@@ -48,7 +49,7 @@ jobs:
             && echo "Маршруты не изменились, коммит не нужен" \
             || git commit -m "Обновление маршрутов $(date -u +%Y-%m-%d)"
           git push
-          
+
       - name: Deploy to Timeweb via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -56,7 +57,7 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./
-          server-dir: /home/c/cl66138/russia-flights/public_html/   # папка на хостинге, уточните у Timeweb
+          server-dir: /home/c/cl66138/russia-flights/public_html/
           include: |
             index.html
             routes.json
