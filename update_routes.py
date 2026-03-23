@@ -193,11 +193,12 @@ def get_departures(icao: str, begin_ts: int, end_ts: int,
     """
     url = "https://opensky-network.org/api/flights/departure"
     params = {"airport": icao, "begin": begin_ts, "end": end_ts}
-
+    print(f"    → GET departure airport={icao} begin={begin_ts} end={end_ts}", flush=True)
     for attempt in range(3):
         headers = {"Authorization": f"Bearer {token_mgr.get_token()}"}
         try:
-            r = requests.get(url, params=params, headers=headers, timeout=30)
+            r = requests.get(url, params=params, headers=headers, timeout=(10, 15))
+            print(f"    ← HTTP {r.status_code}", flush=True)
 
             if r.status_code == 200:
                 return r.json() or []
@@ -259,9 +260,9 @@ def main():
         end   = int(datetime(day.year, day.month, day.day, 23, 59, 59, tzinfo=timezone.utc).timestamp())
         windows.append((begin, end))
 
-    print(f"Период: {windows[-1][0]} → {windows[0][1]}")
-    print(f"Аэропортов: {len(RU_AIRPORTS)}, дней истории: {len(windows)}")
-    print()
+    print(f"Период: {windows[-1][0]} → {windows[0][1]}", flush=True)
+    print(f"Аэропортов: {len(RU_AIRPORTS)}, дней истории: {len(windows)}", flush=True)
+    print(flush=True)
 
     # route_counts[город_рф][icao_назначения] = кол-во рейсов
     route_counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
