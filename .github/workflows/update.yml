@@ -58,6 +58,9 @@ jobs:
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./
           server-dir: /home/c/cl66138/russia-flights/public_html/
-          include: |
-            index.html
-            routes.json
+          exclude: |
+            .git*
+            .github*
+            update_routes.py
+            README.md
+            .ftp-deploy-sync-state.json
