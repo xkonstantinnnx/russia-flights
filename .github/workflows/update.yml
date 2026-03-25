@@ -32,6 +32,7 @@ jobs:
           OPENSKY_CLIENT_ID:     ${{ secrets.OPENSKY_CLIENT_ID }}
           OPENSKY_CLIENT_SECRET: ${{ secrets.OPENSKY_CLIENT_SECRET }}
           AIRLABS_KEY:           ${{ secrets.AIRLABS_KEY }}
+          TRAVELPAYOUTS_TOKEN:   ${{ secrets.TRAVELPAYOUTS_TOKEN }}
         run: |
           echo "=== DNS check ==="
           nslookup auth.opensky-network.org || true
