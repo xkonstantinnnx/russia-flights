@@ -51,18 +51,13 @@ jobs:
             || git commit -m "Обновление маршрутов $(date -u +%Y-%m-%d)"
           git push
 
-      - name: Deploy to Timeweb via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy routes.json via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server:     ${{ secrets.FTP_HOST }}
-          username:   ${{ secrets.FTP_USER }}
-          password:   ${{ secrets.FTP_PASS }}
-          local-dir:  ./
-          server-dir: /russia-flights/public_html/
-          exclude: |
-            **/.git/**
-            **/.github/**
-            **/update_routes.py
-            **/README.md
-            **/.ftp-deploy-sync-state.json
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: "routes.json"
+          target: /russia-flights/public_html/
             .ftp-deploy-sync-state.json
