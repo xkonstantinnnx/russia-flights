@@ -60,4 +60,3 @@ jobs:
           port: 22
           source: "routes.json"
           target: /russia-flights/public_html/
-            .ftp-deploy-sync-state.json
