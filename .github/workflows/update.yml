@@ -51,12 +51,18 @@ jobs:
             || git commit -m "Обновление маршрутов $(date -u +%Y-%m-%d)"
           git push
 
-      - name: Deploy routes.json via SCP
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy routes.json via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          source: "routes.json"
-          target: /russia-flights/public_html/
+          server:   ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          local-dir: ./
+          server-dir: /russia-flights/public_html/
+          exclude: |
+            **/.git/**
+            **/.github/**
+            **/update_routes.py
+            **/README.md
+            **/scp_test.txt
+            **/ftp_test.txt
