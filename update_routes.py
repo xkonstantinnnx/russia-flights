@@ -3,22 +3,19 @@
 Обновление маршрутов из России.
 
 Источники (по приоритету):
-  1. AirLabs Routes API  — первичный: расписание маршрутов, надёжный, охватывает все аэропорты
-  2. Aviasales Data API  — дополнение: кэш поисков за 7 дней, бесплатно
-  3. OpenSky Network     — обогащение: реальные ADS-B данные за 14 дней,
-                           работает ТОЛЬКО в режиме добавления (не удаляет то, что нашли AirLabs/Aviasales)
+  1. AirLabs Routes API — первичный: расписание маршрутов, только прямые рейсы
+  2. OpenSky Network   — обогащение: реальные ADS-B данные за 14 дней,
+                         работает ТОЛЬКО в режиме добавления (никогда не удаляет)
 
 Логика:
-  - AirLabs обрабатывает все аэропорты, результат — базовый confirmed
-  - Aviasales дополняет confirmed по всем аэропортам
-  - OpenSky обрабатывает аэропорты в порядке Stage 1 → Stage 2 (экономия кредитов),
-    только добавляет маршруты, останавливается при 429
+  - AirLabs обрабатывает все аэропорты → базовый confirmed
+  - OpenSky Stage 1 → Stage 2, только добавляет, останавливается при 429
   - Направление, найденное хотя бы одним источником, включается в итог
-  - Направление, не найденное НИ ОДНИМ источником, удаляется
+  - Направление, не найденное ни одним источником, удаляется
 
 Экономия кредитов OpenSky:
   - Stage 1 (города с уже известными маршрутами) идут первыми
-  - Ранний выход из дней когда все маршруты города уже подтверждены OpenSky
+  - Ранний выход из дней когда все маршруты города уже верифицированы
   - RU-префиксы отсеиваются до проверки в DEST_INFO
 """
 
@@ -30,7 +27,6 @@ from pathlib import Path
 OPENSKY_CLIENT_ID     = os.environ.get("OPENSKY_CLIENT_ID", "")
 OPENSKY_CLIENT_SECRET = os.environ.get("OPENSKY_CLIENT_SECRET", "")
 AIRLABS_KEY           = os.environ.get("AIRLABS_KEY", "")
-TRAVELPAYOUTS_TOKEN   = os.environ.get("TRAVELPAYOUTS_TOKEN", "")
 
 TOKEN_URL = (
     "https://auth.opensky-network.org"
@@ -146,54 +142,6 @@ DEST_NAME_TO_ICAOS: dict[str, list[str]] = defaultdict(list)
 for _icao, _info in DEST_INFO.items():
     DEST_NAME_TO_ICAOS[_info["n"]].append(_icao)
 
-# ── Aviasales: ICAO → IATA для российских аэропортов ──────────────────────────
-RU_AIRPORT_IATA: dict[str, str] = {
-    "UUEE": "SVO", "UUDD": "DME", "UUWW": "VKO",
-    "ULLI": "LED", "URSS": "AER", "URKK": "KRR",
-    "URMM": "MRV", "USSS": "SVX", "USCC": "CEK",
-    "UWOO": "REN", "UWUU": "UFA", "UWKD": "KZN",
-    "UWGG": "GOJ", "USPP": "PEE", "UWWW": "KUF",
-    "URWW": "VOG", "UWSS": "RTW", "USTR": "TJM",
-    "UNOO": "OMS", "USRR": "SGC", "USNN": "NJC",
-    "UNNT": "OVB", "UNKL": "KJA", "UIII": "IKT",
-    "UIUU": "UUD", "UHHH": "KHV", "UHWW": "VVO",
-    "UHBB": "BQS", "ULMM": "MMK", "UIAA": "HTA",
-    "UHSS": "UUS",
-}
-
-# ── Aviasales: IATA направления → имя города (как в DEST_INFO) ────────────────
-DEST_IATA_TO_NAME: dict[str, str] = {
-    "MSQ": "Минск",    "EVN": "Ереван",   "TBS": "Тбилиси",
-    "BUS": "Батуми",   "KUT": "Кутаиси",  "GYD": "Баку",
-    "TAS": "Ташкент",  "SKD": "Самарканд","NVI": "Навои",
-    "NMA": "Наманган", "AZN": "Андижан",  "FEG": "Фергана",
-    "BHK": "Бухара",   "FRU": "Бишкек",   "OSS": "Ош",
-    "DYU": "Душанбе",  "ALA": "Алматы",   "NQZ": "Астана",
-    "CIT": "Шымкент",  "ASB": "Ашхабад",  "BEG": "Белград",
-    "IST": "Стамбул",  "SAW": "Стамбул",  "AYT": "Анталья",
-    "DLM": "Даламан",  "ADB": "Измир",
-    "DXB": "Дубай",    "DWC": "Дубай",    "AUH": "Абу-Даби",
-    "DOH": "Доха",     "RUH": "Эр-Рияд",  "DMM": "Даммам",
-    "MCT": "Маскат",   "SLL": "Салала",   "BAH": "Манама",
-    "KWI": "Эль-Кувейт","TLV": "Тель-Авив","AMM": "Амман",
-    "IKA": "Тегеран",  "BGW": "Багдад",
-    "BKK": "Бангкок",  "DMK": "Бангкок",  "HKT": "Пхукет",
-    "KBV": "Краби",    "SGN": "Хошимин",  "CXR": "Нячанг",
-    "HAN": "Ханой",    "DAD": "Дананг",   "PQC": "Фукуок",
-    "DPS": "Денпасар", "MNL": "Манила",
-    "PEK": "Пекин",    "PKX": "Пекин",    "PVG": "Шанхай",
-    "SHA": "Шанхай",   "CTU": "Чэнду",    "SYX": "Санья",
-    "HRB": "Харбин",   "DLC": "Далянь",   "CAN": "Гуанчжоу",
-    "HLD": "Хайлар",   "HKG": "Гонконг",  "MFM": "Макао",
-    "DEL": "Дели",     "GOI": "Гоа",      "MLE": "Мале",
-    "CMB": "Коломбо",  "ULN": "Улан-Батор","FNJ": "Пхеньян",
-    "KBL": "Кабул",
-    "CAI": "Каир",     "HRG": "Хургада",  "SSH": "Шарм-эш-Шейх",
-    "ADD": "Аддис-Абеба","ALG": "Алжир",  "CMN": "Касабланка",
-    "SEZ": "Маэ",      "HBE": "Александрия",
-    "CCS": "Каракас",  "HAV": "Гавана",
-}
-
 
 def icao_to_dest_name(arr_icao: str) -> str | None:
     if arr_icao[:2] in RU_ICAO_PREFIXES:
@@ -220,9 +168,9 @@ def load_current_routes() -> dict[str, list[str]]:
 
 def make_airport_stages(current_routes: dict) -> tuple[list, list]:
     """
-    Stage 1 — города с уже известными маршрутами (идут первыми в OpenSky для экономии кредитов).
+    Stage 1 — города с уже известными маршрутами (идут первыми в OpenSky).
     Stage 2 — новые города.
-    AirLabs и Aviasales обрабатывают stage1+stage2 вместе.
+    Сортировка Stage 1 по убыванию количества маршрутов.
     """
     cities_with_routes = set(current_routes.keys())
     stage1, stage2 = [], []
@@ -299,7 +247,6 @@ def run_airlabs_primary(api_key: str,
                         all_airports: list[tuple[str, str]]) -> dict[str, set[str]]:
     """
     Первичный источник. Обрабатывает ВСЕ аэропорты.
-    Возвращает confirmed — базовый набор маршрутов.
     При достижении лимита сохраняет всё найденное до этого момента.
     """
     confirmed: dict[str, set[str]] = defaultdict(set)
@@ -335,90 +282,7 @@ def run_airlabs_primary(api_key: str,
     return dict(confirmed)
 
 
-# ── 2. Aviasales Data API (SUPPLEMENT) ────────────────────────────────────────
-
-def fetch_aviasales_directions(origin_iata: str, token: str) -> set[str]:
-    """
-    Возвращает IATA-коды направлений из кэша Aviasales через v1 API.
-
-    Эндпоинт: GET /v1/prices/cheap?origin=XXX&currency=rub&token=...
-    Структура ответа: {"data": {"IATA": {"1": {...}}, "IATA2": {...}}, ...}
-    Ключи словаря data — это и есть IATA-коды направлений.
-
-    Пустой результат ≠ отсутствие рейса — просто отсутствие данных в кэше.
-    """
-    try:
-        r = requests.get(
-            "https://api.travelpayouts.com/v1/prices/cheap",
-            params={
-                "origin":   origin_iata,
-                "currency": "rub",
-                "token":    token,
-            },
-            timeout=(10, 15),
-        )
-        if r.status_code == 200:
-            data = r.json()
-            # Ключи data — IATA-коды направлений
-            return {k.upper() for k in data.get("data", {}).keys() if k}
-        else:
-            print(f"    Aviasales HTTP {r.status_code}", flush=True)
-    except Exception as e:
-        print(f"    Aviasales ошибка: {e}", flush=True)
-
-    return set()
-
-
-def run_aviasales_supplement(
-    token: str,
-    all_airports: list[tuple[str, str]],
-    confirmed: dict[str, set[str]],
-) -> dict[str, set[str]]:
-    """
-    Дополняет confirmed данными из Aviasales.
-    Никогда не удаляет — только добавляет.
-    """
-    result = {c: set(d) for c, d in confirmed.items()}
-    total = len(all_airports)
-    added_total = 0
-
-    for idx, (icao, city) in enumerate(all_airports, 1):
-        iata = RU_AIRPORT_IATA.get(icao)
-        if not iata:
-            print(f"\n[{idx}/{total}] {city} ({icao}) — нет IATA, пропускаем",
-                  flush=True)
-            continue
-
-        print(f"\n[{idx}/{total}] {city} ({icao}/{iata}) [Aviasales]", flush=True)
-        dest_iatas = fetch_aviasales_directions(iata, token)
-
-        new_dests = {
-            DEST_IATA_TO_NAME[d]
-            for d in dest_iatas
-            if d in DEST_IATA_TO_NAME
-        }
-
-        if not new_dests:
-            print("    → кэш пуст", flush=True)
-            time.sleep(1)
-            continue
-
-        existing = result.get(city, set())
-        added    = new_dests - existing
-        if added:
-            result[city] = existing | new_dests
-            added_total += len(added)
-            print(f"    + добавлено: {sorted(added)}", flush=True)
-        else:
-            print(f"    → {len(new_dests)} в кэше, всё уже известно", flush=True)
-        time.sleep(1)
-
-    print(f"\n  Aviasales завершён: добавлено {added_total} новых направлений",
-          flush=True)
-    return result
-
-
-# ── 3. OpenSky Network (ADDITIVE ENRICHMENT) ──────────────────────────────────
+# ── 2. OpenSky Network (ADDITIVE ENRICHMENT) ──────────────────────────────────
 
 class TokenManager:
     def __init__(self, client_id: str, client_secret: str):
@@ -515,10 +379,9 @@ def run_opensky_additive(token_mgr: TokenManager,
                          now: datetime) -> dict[str, set[str]]:
     """
     Обогащение через реальные ADS-B данные. ТОЛЬКО ДОБАВЛЯЕТ маршруты.
-    Никогда не удаляет то, что нашли AirLabs + Aviasales.
+    Никогда не удаляет то, что нашёл AirLabs.
 
-    Stage 1 первым — у этих городов уже есть подтверждённые маршруты,
-    ранний выход при их верификации экономит кредиты.
+    Stage 1 первым: ранний выход при верификации известных маршрутов экономит кредиты.
     """
     DAYS_HISTORY = 14
     MIN_FLIGHTS  = 2
@@ -547,13 +410,11 @@ def run_opensky_additive(token_mgr: TokenManager,
 
         print(f"\n[{seq_idx}/{total}] {city} ({icao}) [OpenSky]", flush=True)
 
-        # Маршруты, уже найденные AirLabs + Aviasales
         already_known = result.get(city, set())
 
         for begin_ts, end_ts in windows:
             result_day = fetch_opensky_day(icao, begin_ts, end_ts, token_mgr)
             if result_day is None:
-                # Лимит — применяем накопленное и выходим
                 _apply_opensky_counts(route_counts, result, MIN_FLIGHTS)
                 print(f"\n  OpenSky: лимит на [{seq_idx}/{total}], "
                       f"добавлено {added_total} направлений всего", flush=True)
@@ -579,7 +440,6 @@ def run_opensky_additive(token_mgr: TokenManager,
                     break
             time.sleep(5)
 
-        # Применяем найденное для текущего города (только добавляем)
         new_for_city = {
             DEST_INFO[a]["n"]
             for a, cnt in route_counts[city].items()
@@ -599,7 +459,7 @@ def run_opensky_additive(token_mgr: TokenManager,
 
 
 def _apply_opensky_counts(route_counts, result, min_flights):
-    """Применяет накопленные counts к result при досрочном выходе."""
+    """Применяет накопленные counts к result при досрочном выходе из OpenSky."""
     for city, counts in route_counts.items():
         new_dests = {DEST_INFO[a]["n"] for a, cnt in counts.items() if cnt >= min_flights}
         existing  = result.get(city, set())
@@ -612,11 +472,9 @@ def _apply_opensky_counts(route_counts, result, min_flights):
 
 def main():
     print("=== Script started ===", flush=True)
-    print(f"=== AirLabs:   {'доступен' if AIRLABS_KEY else 'НЕ НАСТРОЕН ⚠'} ===",
+    print(f"=== AirLabs: {'доступен' if AIRLABS_KEY else 'НЕ НАСТРОЕН ⚠'} ===",
           flush=True)
-    print(f"=== Aviasales: {'доступен' if TRAVELPAYOUTS_TOKEN else 'не настроен'} ===",
-          flush=True)
-    print(f"=== OpenSky:   {'доступен' if OPENSKY_CLIENT_ID else 'не настроен'} ===",
+    print(f"=== OpenSky: {'доступен' if OPENSKY_CLIENT_ID else 'не настроен'} ===",
           flush=True)
 
     if not AIRLABS_KEY:
@@ -636,29 +494,17 @@ def main():
 
     # ── 1. AirLabs — первичный источник ──────────────────────────────────────
     print(f"\n{'='*52}", flush=True)
-    print(f"  1/3  AirLabs — первичный источник ({len(all_airports)} аэропортов)", flush=True)
+    print(f"  1/2  AirLabs — первичный источник ({len(all_airports)} аэропортов)",
+          flush=True)
     print(f"{'='*52}", flush=True)
     confirmed = run_airlabs_primary(AIRLABS_KEY, all_airports)
     if confirmed:
         sources_used.append("AirLabs")
 
-    # ── 2. Aviasales — дополнение ─────────────────────────────────────────────
-    if TRAVELPAYOUTS_TOKEN:
-        print(f"\n{'='*52}", flush=True)
-        print(f"  2/3  Aviasales — дополнение ({len(all_airports)} аэропортов)", flush=True)
-        print(f"{'='*52}", flush=True)
-        before = sum(len(v) for v in confirmed.values())
-        confirmed = run_aviasales_supplement(TRAVELPAYOUTS_TOKEN, all_airports, confirmed)
-        after = sum(len(v) for v in confirmed.values())
-        if after > before:
-            sources_used.append("Aviasales Data API")
-    else:
-        print("\n  2/3  Aviasales: TRAVELPAYOUTS_TOKEN не задан, пропускаем", flush=True)
-
-    # ── 3. OpenSky — обогащение (только добавление) ───────────────────────────
+    # ── 2. OpenSky — обогащение (только добавление) ───────────────────────────
     if OPENSKY_CLIENT_ID and OPENSKY_CLIENT_SECRET:
         print(f"\n{'='*52}", flush=True)
-        print(f"  3/3  OpenSky — обогащение (additive, {len(all_airports)} аэропортов)",
+        print(f"  2/2  OpenSky — обогащение ({len(all_airports)} аэропортов)",
               flush=True)
         print(f"{'='*52}", flush=True)
         token_mgr = TokenManager(OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET)
@@ -678,8 +524,7 @@ def main():
         except Exception as e:
             print(f"  ⚠ OpenSky: ошибка авторизации ({e}), пропускаем", flush=True)
     else:
-        print("\n  3/3  OpenSky: OPENSKY_CLIENT_ID/SECRET не заданы, пропускаем",
-              flush=True)
+        print("\n  2/2  OpenSky: не настроен, пропускаем", flush=True)
 
     # ── Сохранение ───────────────────────────────────────────────────────────
     if not confirmed:
