@@ -19,7 +19,7 @@
   - RU-префиксы отсеиваются до проверки в DEST_INFO
 """
 
-import os, json, time, sys, requests
+import os, json, time, sys, requests, re
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 from pathlib import Path
@@ -468,12 +468,320 @@ def _apply_opensky_counts(route_counts, result, min_flights):
             result[city] = existing | new_dests
 
 
+# ══════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
+#  Источник 3 — gogov.ru (верификация через веб-скрейпинг)
+# ══════════════════════════════════════════════════════════════
+#
+# Логика:
+#   1. Сначала пробуем общую страницу gogov.ru/articles/direct-flights
+#      (один запрос, все направления)
+#   2. Для направлений не найденных на общей странице — индивидуальные страницы
+#   3. При изменении структуры HTML — предупреждение в лог, источник пропускается
+#
+# Детекция изменения структуры:
+#   - Ожидаемый паттерн общей страницы:  "- {Назначение} из {город1}, {город2}"
+#   - Ожидаемый паттерн отдельной страницы: "Все прямые рейсы в {Назначение}:"
+#   - Если ни один паттерн не найден на странице — логируем предупреждение
+
+import re as _re
+import time as _time
+import requests as _requests
+
+# Соответствие наших названий направлений → slug в URL gogov.ru
+GOGOV_DEST_SLUGS: dict[str, str] = {
+    "Минск":          "minsk",
+    "Ереван":         "erevan",
+    "Тбилиси":        "tbilisi",
+    "Батуми":         "batumi",
+    "Кутаиси":        "kutaisi",
+    "Баку":           "baku",
+    "Сухум":          "sukhum",
+    "Ташкент":        "tashkent",
+    "Самарканд":      "samarkand",
+    "Навои":          "navoi",
+    "Наманган":       "namangan",
+    "Андижан":        "andijan",
+    "Фергана":        "fergana",
+    "Бухара":         "bukhara",
+    "Бишкек":         "bishkek",
+    "Ош":             "osh",
+    "Душанбе":        "dushanbe",
+    "Алматы":         "almaty",
+    "Астана":         "astana",
+    "Шымкент":        "shymkent",
+    "Ашхабад":        "ashkhabad",
+    "Белград":        "belgrade",
+    "Стамбул":        "stambul",
+    "Анталья":        "antalya",
+    "Даламан":        "dalaman",
+    "Измир":          "izmir",
+    "Дубай":          "dubai",
+    "Абу-Даби":       "abu-dhabi",
+    "Доха":           "doha",
+    "Эр-Рияд":        "riyadh",
+    "Маскат":         "muscat",
+    "Салала":         "salalah",
+    "Манама":         "manama",
+    "Эль-Кувейт":     "kuwait",
+    "Тель-Авив":      "tel-aviv",
+    "Амман":          "amman",
+    "Тегеран":        "tehran",
+    "Багдад":         "baghdad",
+    "Бангкок":        "bangkok",
+    "Пхукет":         "phuket",
+    "Краби":          "krabi",
+    "Хошимин":        "ho-chi-minh",
+    "Нячанг":         "nha-trang",
+    "Ханой":          "hanoi",
+    "Дананг":         "danang",
+    "Фукуок":         "phu-quoc",
+    "Денпасар":       "bali",
+    "Манила":         "manila",
+    "Пекин":          "beijing",
+    "Шанхай":         "shanghai",
+    "Чэнду":          "chengdu",
+    "Санья":          "sanya",
+    "Харбин":         "harbin",
+    "Далянь":         "dalian",
+    "Гуанчжоу":       "guangzhou",
+    "Хайлар":         "hailar",
+    "Гонконг":        "hongkong",
+    "Макао":          "macau",
+    "Дели":           "delhi",
+    "Гоа":            "goa",
+    "Мале":           "male",
+    "Коломбо":        "colombo",
+    "Улан-Батор":     "ulaanbaatar",
+    "Пхеньян":        "pyongyang",
+    "Кабул":          "kabul",
+    "Каир":           "cairo",
+    "Хургада":        "hurghada",
+    "Шарм-эш-Шейх":  "sharm-esh-sheykh",
+    "Аддис-Абеба":    "addis-ababa",
+    "Алжир":          "algiers",
+    "Касабланка":     "casablanca",
+    "Маэ":            "mahe",
+    "Александрия":    "alexandria",
+    "Каракас":        "caracas",
+    "Гавана":         "havana",
+}
+
+# Маппинг названий городов gogov → наши названия городов РФ
+GOGOV_RU_CITY_MAP: dict[str, str] = {
+    "Москва":           "Москва",
+    "Санкт-Петербург":  "Санкт-Петербург",
+    "Сочи":             "Сочи",
+    "Краснодар":        "Краснодар",
+    "Минеральные Воды": "Мин. Воды",
+    "Екатеринбург":     "Екатеринбург",
+    "Челябинск":        "Челябинск",
+    "Оренбург":         "Оренбург",
+    "Уфа":              "Уфа",
+    "Казань":           "Казань",
+    "Нижний Новгород":  "Нижний Новгород",
+    "Пермь":            "Пермь",
+    "Самара":           "Самара",
+    "Волгоград":        "Волгоград",
+    "Саратов":          "Саратов",
+    "Тюмень":           "Тюмень",
+    "Омск":             "Омск",
+    "Сургут":           "Сургут",
+    "Нижневартовск":    "Нижневартовск",
+    "Новосибирск":      "Новосибирск",
+    "Красноярск":       "Красноярск",
+    "Иркутск":          "Иркутск",
+    "Улан-Удэ":         "Улан-Удэ",
+    "Хабаровск":        "Хабаровск",
+    "Владивосток":      "Владивосток",
+    "Благовещенск":     "Благовещенск",
+    "Мурманск":         "Мурманск",
+    "Чита":             "Чита",
+    "Южно-Сахалинск":   "Южно-Сахалинск",
+    # Города которых нет в наших аэропортах — игнорируются автоматически
+}
+
+_GOGOV_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    ),
+    "Accept-Language": "ru-RU,ru;q=0.9",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+}
+
+# Паттерн для общей страницы: "- Батуми из Казань, Краснодар, Москва ..."
+_MAIN_PAGE_RE = _re.compile(
+    r'-\s+([А-Яа-яёЁ][А-Яа-яёЁ\-\. ]+?)\s+из\s+([А-Яа-яёЁ][А-Яа-яёЁ\-\., ]+?)(?:\n|·|$)',
+    _re.MULTILINE,
+)
+
+# Паттерн для индивидуальной страницы: "Все прямые рейсы в Батуми: Казань, Москва ..."
+_DEST_PAGE_RE = _re.compile(
+    r'Все прямые рейсы в [^:]+:\s*([А-Яа-яёЁ][А-Яа-яёЁ\-\., ]+?)(?:\n|·|<|$)',
+    _re.MULTILINE,
+)
+
+
+def _parse_city_list(raw: str) -> list[str]:
+    """Превращает 'Казань, Краснодар, Москва' в список наших городов."""
+    cities = []
+    for name in raw.split(","):
+        name = name.strip().rstrip("·").strip()
+        mapped = GOGOV_RU_CITY_MAP.get(name)
+        if mapped:
+            cities.append(mapped)
+    return cities
+
+
+def fetch_gogov_main_page() -> dict[str, list[str]] | None:
+    """
+    Загружает общую страницу gogov и парсит все маршруты.
+    Возвращает {название_назначения: [город_рф, ...]} или None при ошибке.
+    Логирует предупреждение если структура HTML изменилась.
+    """
+    url = "https://gogov.ru/articles/direct-flights"
+    try:
+        r = _requests.get(url, headers=_GOGOV_HEADERS, timeout=(10, 20))
+        if r.status_code != 200:
+            print(f"  [gogov] Главная страница: HTTP {r.status_code}", flush=True)
+            return None
+
+        text = r.text
+        matches = _MAIN_PAGE_RE.findall(text)
+
+        if not matches:
+            print("  ⚠ [gogov] СТРУКТУРА ИЗМЕНИЛАСЬ: паттерн '- X из Y' не найден "
+                  f"на {url}", flush=True)
+            print("  ⚠ [gogov] Скрейпинг главной страницы пропущен.", flush=True)
+            return None
+
+        result: dict[str, list[str]] = {}
+        for dest_name_raw, cities_raw in matches:
+            dest_name = dest_name_raw.strip()
+            # Проверяем что это направление нам известно
+            if dest_name not in GOGOV_DEST_SLUGS:
+                continue
+            cities = _parse_city_list(cities_raw)
+            if cities:
+                existing = result.get(dest_name, [])
+                merged   = list(dict.fromkeys(existing + cities))
+                result[dest_name] = merged
+
+        print(f"  [gogov] Главная страница: найдено {len(result)} направлений", flush=True)
+        return result
+
+    except Exception as e:
+        print(f"  [gogov] Ошибка загрузки главной страницы: {e}", flush=True)
+        return None
+
+
+def fetch_gogov_dest_page(dest_name: str) -> list[str] | None:
+    """
+    Загружает индивидуальную страницу направления.
+    Возвращает список городов РФ или None при ошибке/изменении структуры.
+    """
+    slug = GOGOV_DEST_SLUGS.get(dest_name)
+    if not slug:
+        return None
+
+    url = f"https://gogov.ru/direct-flights/{slug}"
+    try:
+        r = _requests.get(url, headers=_GOGOV_HEADERS, timeout=(10, 20))
+        if r.status_code == 404:
+            print(f"  [gogov] 404 для {dest_name} ({url})", flush=True)
+            return None
+        if r.status_code != 200:
+            print(f"  [gogov] HTTP {r.status_code} для {dest_name}", flush=True)
+            return None
+
+        text = r.text
+        m = _DEST_PAGE_RE.search(text)
+        if not m:
+            # Проверяем есть ли хоть что-то похожее на данные
+            if "прямых рейс" not in text.lower() and "из " not in text:
+                print(f"  ⚠ [gogov] СТРУКТУРА ИЗМЕНИЛАСЬ: паттерн 'Все прямые рейсы в ...:' "
+                      f"не найден для {dest_name} ({url})", flush=True)
+            else:
+                print(f"  [gogov] Данные не найдены для {dest_name}", flush=True)
+            return None
+
+        cities = _parse_city_list(m.group(1))
+        return cities if cities else None
+
+    except Exception as e:
+        print(f"  [gogov] Ошибка для {dest_name}: {e}", flush=True)
+        return None
+
+
+def run_gogov(confirmed: dict[str, set[str]]) -> dict[str, set[str]]:
+    """
+    Верифицирует и дополняет маршруты через gogov.ru.
+    Работает в обратном направлении: назначение → список городов РФ.
+    Только ДОБАВЛЯЕТ маршруты — не удаляет.
+
+    confirmed: {город_рф: set(направлений)}
+    Возвращает обновлённый confirmed.
+    """
+    result = {c: set(d) for c, d in confirmed.items()}
+    added_total = 0
+
+    # Собираем все направления которые нужно проверить
+    all_dests = set(GOGOV_DEST_SLUGS.keys())
+
+    print(f"\n  [gogov] Загружаем главную страницу...", flush=True)
+    main_data = fetch_gogov_main_page()
+    _time.sleep(3)
+
+    # Строим обратный индекс: {назначение: set(городов_рф)} из confirmed
+    current_by_dest: dict[str, set[str]] = {}
+    for city, dests in result.items():
+        for dest in dests:
+            if dest not in current_by_dest:
+                current_by_dest[dest] = set()
+            current_by_dest[dest].add(city)
+
+    # Обрабатываем найденное на главной странице
+    found_on_main: set[str] = set()
+    if main_data:
+        for dest_name, ru_cities in main_data.items():
+            found_on_main.add(dest_name)
+            for city in ru_cities:
+                if city not in result:
+                    result[city] = set()
+                if dest_name not in result[city]:
+                    result[city].add(dest_name)
+                    added_total += 1
+
+    # Для направлений не найденных на главной — индивидуальные страницы
+    missing_dests = all_dests - found_on_main
+    if missing_dests:
+        print(f"  [gogov] Загружаем {len(missing_dests)} индивидуальных страниц...",
+              flush=True)
+        for dest_name in sorted(missing_dests):
+            cities = fetch_gogov_dest_page(dest_name)
+            if cities:
+                for city in cities:
+                    if city not in result:
+                        result[city] = set()
+                    if dest_name not in result[city]:
+                        result[city].add(dest_name)
+                        added_total += 1
+            _time.sleep(2)
+
+    print(f"  [gogov] Завершён: добавлено {added_total} направлений", flush=True)
+    return result
+
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def main():
     print("=== Script started ===", flush=True)
     print(f"=== AirLabs: {'доступен' if AIRLABS_KEY else 'НЕ НАСТРОЕН ⚠'} ===",
           flush=True)
+    print(f"=== gogov.ru: всегда активен ===", flush=True)
     print(f"=== OpenSky: {'доступен' if OPENSKY_CLIENT_ID else 'не настроен'} ===",
           flush=True)
 
@@ -494,7 +802,7 @@ def main():
 
     # ── 1. AirLabs — первичный источник ──────────────────────────────────────
     print(f"\n{'='*52}", flush=True)
-    print(f"  1/2  AirLabs — первичный источник ({len(all_airports)} аэропортов)",
+    print(f"  1/3  AirLabs — первичный источник ({len(all_airports)} аэропортов)",
           flush=True)
     print(f"{'='*52}", flush=True)
     confirmed = run_airlabs_primary(AIRLABS_KEY, all_airports)
@@ -504,7 +812,7 @@ def main():
     # ── 2. OpenSky — обогащение (только добавление) ───────────────────────────
     if OPENSKY_CLIENT_ID and OPENSKY_CLIENT_SECRET:
         print(f"\n{'='*52}", flush=True)
-        print(f"  2/2  OpenSky — обогащение ({len(all_airports)} аэропортов)",
+        print(f"  2/3  OpenSky — обогащение ({len(all_airports)} аэропортов)",
               flush=True)
         print(f"{'='*52}", flush=True)
         token_mgr = TokenManager(OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET)
@@ -524,7 +832,18 @@ def main():
         except Exception as e:
             print(f"  ⚠ OpenSky: ошибка авторизации ({e}), пропускаем", flush=True)
     else:
-        print("\n  2/2  OpenSky: не настроен, пропускаем", flush=True)
+        print("\n  2/3  OpenSky: не настроен, пропускаем", flush=True)
+
+    # ── 3. gogov.ru — верификация и дополнение ───────────────────────────────
+    print(f"\n{'='*52}", flush=True)
+    print(f"  3/3  gogov.ru — верификация маршрутов", flush=True)
+    print(f"{'='*52}", flush=True)
+    before_gogov = sum(len(v) for v in confirmed.values())
+    confirmed = run_gogov(confirmed)
+    after_gogov = sum(len(v) for v in confirmed.values())
+    if after_gogov > before_gogov:
+        sources_used.append("gogov.ru")
+
 
     # ── Сохранение ───────────────────────────────────────────────────────────
     if not confirmed:
