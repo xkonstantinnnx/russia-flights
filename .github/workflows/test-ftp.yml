@@ -1,0 +1,29 @@
+name: Тест деплоя FTP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ftp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Создать тестовый файл
+        run: echo "ftp-test-$(date -u +%Y-%m-%dT%H:%M:%SZ)" > ftp_test.txt
+
+      - name: Deploy тестового файла via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:   ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          local-dir: ./
+          server-dir: /russia-flights/public_html/
+          include: |
+            ftp_test.txt
+          dangerous-clean-slate: false
+          log-level: verbose
