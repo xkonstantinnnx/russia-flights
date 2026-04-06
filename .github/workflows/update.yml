@@ -51,6 +51,20 @@ jobs:
             || git commit -m "Обновление маршрутов $(date -u +%Y-%m-%d)"
           git push
 
+
+      - name: Проверка FTP-соединения
+        run: |
+          echo "=== FTP host check ==="
+          nslookup ${{ secrets.FTP_HOST }} || true
+          echo "=== TCP check port 21 ==="
+          timeout 10 bash -c "echo > /dev/tcp/${{ secrets.FTP_HOST }}/21" \
+            && echo "Порт 21 открыт" \
+            || echo "Порт 21 недоступен"
+          echo "=== TCP check port 990 ==="
+          timeout 10 bash -c "echo > /dev/tcp/${{ secrets.FTP_HOST }}/990" \
+            && echo "Порт 990 открыт" \
+            || echo "Порт 990 недоступен"
+
       - name: Deploy routes.json via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
