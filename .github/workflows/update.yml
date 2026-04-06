@@ -59,6 +59,7 @@ jobs:
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./
           server-dir: /russia-flights/public_html/
+          timeout: 60000
           exclude: |
             **/.git/**
             **/.github/**
