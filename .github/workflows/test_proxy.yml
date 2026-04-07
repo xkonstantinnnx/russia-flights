@@ -1,0 +1,69 @@
+name: Тест прокси + gogov
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-proxy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Проверка прокси и gogov.ru
+        env:
+          PROXY_URL: ${{ secrets.PROXY_URL }}
+        run: |
+          echo "=== 1. Свой внешний IP (без прокси) ==="
+          curl -s https://api.ipify.org && echo ""
+
+          echo ""
+          echo "=== 2. IP через прокси ==="
+          curl -s --proxy "$PROXY_URL" https://api.ipify.org && echo ""
+
+          echo ""
+          echo "=== 3. gogov.ru без прокси ==="
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+            --max-time 15 \
+            "https://gogov.ru/articles/direct-flights")
+          echo "HTTP статус: $STATUS"
+          if [ "$STATUS" = "429" ]; then
+            echo "→ Ожидаемо: 429 без прокси"
+          elif [ "$STATUS" = "200" ]; then
+            echo "→ 200 без прокси (неожиданно, но хорошо)"
+          else
+            echo "→ Неожиданный статус: $STATUS"
+          fi
+
+          echo ""
+          echo "=== 4. gogov.ru через прокси ==="
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --proxy "$PROXY_URL" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+            --max-time 15 \
+            "https://gogov.ru/articles/direct-flights")
+          echo "HTTP статус: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "✓ Прокси работает — gogov доступен!"
+          elif [ "$STATUS" = "429" ]; then
+            echo "✗ 429 даже через прокси — IP VPS тоже заблокирован"
+          elif [ "$STATUS" = "000" ]; then
+            echo "✗ Не удалось подключиться к прокси (таймаут/порт закрыт)"
+          else
+            echo "? Статус $STATUS — проверьте вручную"
+          fi
+
+          echo ""
+          echo "=== 5. Парсинг gogov через прокси ==="
+          BODY=$(curl -s \
+            --proxy "$PROXY_URL" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+            --max-time 15 \
+            "https://gogov.ru/articles/direct-flights")
+          if echo "$BODY" | grep -q "Батуми из"; then
+            echo "✓ Паттерн '- Батуми из ...' найден на странице"
+          elif echo "$BODY" | grep -q "прямых рейс"; then
+            echo "? Страница загружена но паттерн не найден — возможно структура изменилась"
+          else
+            echo "✗ Страница не содержит ожидаемых данных"
+          fi
