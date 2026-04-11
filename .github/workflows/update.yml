@@ -3,7 +3,7 @@ name: Обновление маршрутов
 on:
   schedule:
     # Каждый понедельник в 04:00 UTC
-    - cron: '0 4 * * 1'
+    - cron: '0 0 1,15 * *'  
   # Ручной запуск через интерфейс GitHub
   workflow_dispatch:
 
@@ -33,6 +33,7 @@ jobs:
           OPENSKY_CLIENT_SECRET: ${{ secrets.OPENSKY_CLIENT_SECRET }}
           AIRLABS_KEY:           ${{ secrets.AIRLABS_KEY }}
           TRAVELPAYOUTS_TOKEN:   ${{ secrets.TRAVELPAYOUTS_TOKEN }}
+          AERODATABOX_KEY:       ${{ secrets.AERODATABOX_KEY }}
         run: |
           echo "=== DNS check ==="
           nslookup auth.opensky-network.org || true
