@@ -375,7 +375,7 @@ def run_aerodatabox_supplement(
             print(f"    + добавлено: {sorted(added)}", flush=True)
         else:
             print(f"    → {len(new_dests)} найдено, новых нет", flush=True)
-        time.sleep(1)  # 1 req/sec — лимит BASIC плана
+        time.sleep(3)  # 1 req/sec — лимит BASIC плана
 
     print(f"\n  AeroDataBox завершён: добавлено {added_total} направлений, "
           f"потрачено ~{units_spent} units", flush=True)
