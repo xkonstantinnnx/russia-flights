@@ -68,6 +68,10 @@ jobs:
             **/.github/**
             **/update_routes.py
             **/README.md
+ 
+      - name: Wait before FTP attempt 2
+        if: steps.ftp1.outcome == 'failure'
+        run: sleep 180
 
       - name: Deploy routes.json via FTP (attempt 2)
         if: steps.ftp1.outcome == 'failure'
@@ -86,6 +90,10 @@ jobs:
             **/.github/**
             **/update_routes.py
             **/README.md
+ 
+      - name: Wait before FTP attempt 3
+        if: steps.ftp1.outcome == 'failure' && steps.ftp2.outcome == 'failure'
+        run: sleep 180
 
       - name: Deploy routes.json via FTP (attempt 3)
         if: steps.ftp1.outcome == 'failure' && steps.ftp2.outcome == 'failure'
