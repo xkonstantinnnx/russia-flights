@@ -215,16 +215,26 @@ def build_output(confirmed: dict[str, set[str]], now: datetime,
 
 # ── 1. AirLabs Routes API (PRIMARY) ───────────────────────────────────────────
 
-def fetch_airlabs_routes(icao: str, api_key: str) -> list | None:
-    """None = лимит исчерпан. [] = нет маршрутов. list = маршруты."""
-    print(f"    → AirLabs dep_icao={icao}", flush=True)
+AIRLABS_PAGE_SIZE = 50  # Лимит строк на запрос для бесплатного ключа
+
+
+def fetch_airlabs_routes_page(icao: str, api_key: str,
+                               offset: int = 0) -> list | None:
+    """
+    Один запрос к AirLabs с заданным offset.
+    None = лимит исчерпан или ошибка. [] = нет маршрутов. list = маршруты.
+    """
     try:
         r = requests.get(
             "https://airlabs.co/api/v9/routes",
-            params={"dep_icao": icao, "api_key": api_key},
+            params={
+                "dep_icao": icao,
+                "api_key":  api_key,
+                "limit":    AIRLABS_PAGE_SIZE,
+                "offset":   offset,
+            },
             timeout=(10, 20),
         )
-        print(f"    ← HTTP {r.status_code}", flush=True)
         if r.status_code == 200:
             data = r.json()
             if data.get("error"):
@@ -243,20 +253,69 @@ def fetch_airlabs_routes(icao: str, api_key: str) -> list | None:
         return []
 
 
+def fetch_airlabs_routes(icao: str, api_key: str) -> tuple[list | None, int]:
+    """
+    Получает все маршруты из аэропорта через пагинацию.
+
+    Возвращает (arr_icaos, requests_made):
+      - arr_icaos = None если лимит исчерпан, [] если нет маршрутов, list если есть
+      - requests_made = количество потраченных запросов к API
+
+    Логика пагинации: если страница вернула ровно PAGE_SIZE записей —
+    запрашиваем следующую. Если меньше — это последняя страница.
+    """
+    all_icaos:     list[str] = []
+    offset         = 0
+    requests_made  = 0
+    page           = 1
+
+    while True:
+        print(f"    → AirLabs dep_icao={icao} offset={offset}", flush=True)
+        batch = fetch_airlabs_routes_page(icao, api_key, offset)
+        requests_made += 1
+
+        if batch is None:
+            # Лимит исчерпан — возвращаем None, но сохраняем уже собранное
+            if all_icaos:
+                print(f"    ⚠ Лимит на странице {page} — возвращаем {len(all_icaos)} "
+                      f"маршрутов собранных до этого", flush=True)
+                return all_icaos, requests_made
+            return None, requests_made
+
+        print(f"    ← стр.{page}: {len(batch)} маршрутов", flush=True)
+        all_icaos.extend(batch)
+
+        if len(batch) < AIRLABS_PAGE_SIZE:
+            # Последняя страница — данных больше нет
+            break
+
+        # Возможно есть ещё страница
+        offset += AIRLABS_PAGE_SIZE
+        page   += 1
+        time.sleep(1)  # небольшая пауза между страницами
+
+    return all_icaos, requests_made
+
+
 def run_airlabs_primary(api_key: str,
                         all_airports: list[tuple[str, str]]) -> dict[str, set[str]]:
     """
-    Первичный источник. Обрабатывает ВСЕ аэропорты.
+    Первичный источник. Обрабатывает ВСЕ аэропорты с пагинацией.
     При достижении лимита сохраняет всё найденное до этого момента.
+    Логирует суммарный расход запросов для контроля месячного лимита.
     """
-    confirmed: dict[str, set[str]] = defaultdict(set)
-    total = len(all_airports)
+    confirmed:      dict[str, set[str]] = defaultdict(set)
+    total           = len(all_airports)
+    total_requests  = 0
 
     for idx, (icao, city) in enumerate(all_airports, 1):
         print(f"\n[{idx}/{total}] {city} ({icao}) [AirLabs]", flush=True)
-        arr_icaos = fetch_airlabs_routes(icao, api_key)
+        arr_icaos, req_count = fetch_airlabs_routes(icao, api_key)
+        total_requests += req_count
+
         if arr_icaos is None:
-            print("  ⚠ AirLabs лимит — останавливаемся", flush=True)
+            print(f"  ⚠ AirLabs лимит (потрачено запросов: {total_requests}) "
+                  f"— останавливаемся", flush=True)
             break
 
         new_dests: set[str] = set()
@@ -272,13 +331,13 @@ def run_airlabs_primary(api_key: str,
         added = new_dests - existing
         if added:
             print(f"    + добавлено: {sorted(added)}", flush=True)
-        print(f"    → итого для {city}: {len(confirmed.get(city, set()))} направлений",
-              flush=True)
+        print(f"    → итого для {city}: {len(confirmed.get(city, set()))} направлений "
+              f"(запросов к API: {req_count})", flush=True)
         time.sleep(2)
 
     total_routes = sum(len(v) for v in confirmed.values())
-    print(f"\n  AirLabs завершён: {len(confirmed)} городов, {total_routes} маршрутов",
-          flush=True)
+    print(f"\n  AirLabs завершён: {len(confirmed)} городов, {total_routes} маршрутов, "
+          f"потрачено запросов: {total_requests}", flush=True)
     return dict(confirmed)
 
 
