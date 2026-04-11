@@ -2,7 +2,7 @@ name: Обновление маршрутов
 
 on:
   schedule:
-    # Каждый понедельник в 04:00 UTC
+    # 1-го и 15-го числа
     - cron: '0 0 1,15 * *'  
   # Ручной запуск через интерфейс GitHub
   workflow_dispatch:
@@ -32,7 +32,6 @@ jobs:
           OPENSKY_CLIENT_ID:     ${{ secrets.OPENSKY_CLIENT_ID }}
           OPENSKY_CLIENT_SECRET: ${{ secrets.OPENSKY_CLIENT_SECRET }}
           AIRLABS_KEY:           ${{ secrets.AIRLABS_KEY }}
-          TRAVELPAYOUTS_TOKEN:   ${{ secrets.TRAVELPAYOUTS_TOKEN }}
           AERODATABOX_KEY:       ${{ secrets.AERODATABOX_KEY }}
         run: |
           echo "=== DNS check ==="
@@ -53,26 +52,15 @@ jobs:
           git push
 
 
-      - name: Проверка FTP-соединения
-        run: |
-          echo "=== FTP host check ==="
-          nslookup ${{ secrets.FTP_HOST }} || true
-          echo "=== TCP check port 21 ==="
-          timeout 10 bash -c "echo > /dev/tcp/${{ secrets.FTP_HOST }}/21" \
-            && echo "Порт 21 открыт" \
-            || echo "Порт 21 недоступен"
-          echo "=== TCP check port 990 ==="
-          timeout 10 bash -c "echo > /dev/tcp/${{ secrets.FTP_HOST }}/990" \
-            && echo "Порт 990 открыт" \
-            || echo "Порт 990 недоступен"
-
-      - name: Deploy routes.json via FTP
+      - name: Deploy routes.json via FTP (attempt 1)
+        id: ftp1
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server:   ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          local-dir: ./
+          server:     ${{ secrets.FTP_HOST }}
+          username:   ${{ secrets.FTP_USER }}
+          password:   ${{ secrets.FTP_PASS }}
+          local-dir:  ./
           server-dir: /russia-flights/public_html/
           timeout: 60000
           exclude: |
@@ -80,5 +68,37 @@ jobs:
             **/.github/**
             **/update_routes.py
             **/README.md
-            **/scp_test.txt
-            **/ftp_test.txt
+
+      - name: Deploy routes.json via FTP (attempt 2)
+        if: steps.ftp1.outcome == 'failure'
+        id: ftp2
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:     ${{ secrets.FTP_HOST }}
+          username:   ${{ secrets.FTP_USER }}
+          password:   ${{ secrets.FTP_PASS }}
+          local-dir:  ./
+          server-dir: /russia-flights/public_html/
+          timeout: 60000
+          exclude: |
+            **/.git/**
+            **/.github/**
+            **/update_routes.py
+            **/README.md
+
+      - name: Deploy routes.json via FTP (attempt 3)
+        if: steps.ftp1.outcome == 'failure' && steps.ftp2.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:     ${{ secrets.FTP_HOST }}
+          username:   ${{ secrets.FTP_USER }}
+          password:   ${{ secrets.FTP_PASS }}
+          local-dir:  ./
+          server-dir: /russia-flights/public_html/
+          timeout: 60000
+          exclude: |
+            **/.git/**
+            **/.github/**
+            **/update_routes.py
+            **/README.md
