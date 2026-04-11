@@ -45,19 +45,51 @@ TOKEN_URL = (
 
 ROUTES_FILE = Path("routes.json")
 
-RU_AIRPORTS = {
-    "UUEE": "Москва", "UUDD": "Москва", "UUWW": "Москва",
-    "ULLI": "Санкт-Петербург", "URSS": "Сочи", "URKK": "Краснодар",
-    "URMM": "Мин. Воды", "USSS": "Екатеринбург", "USCC": "Челябинск",
-    "UWOO": "Оренбург", "UWUU": "Уфа", "UWKD": "Казань",
-    "UWGG": "Нижний Новгород", "USPP": "Пермь", "UWWW": "Самара",
-    "URWW": "Волгоград", "UWSS": "Саратов", "USTR": "Тюмень",
-    "UNOO": "Омск", "USRR": "Сургут", "USNN": "Нижневартовск",
-    "UNNT": "Новосибирск", "UNKL": "Красноярск", "UIII": "Иркутск",
-    "UIUU": "Улан-Удэ", "UHHH": "Хабаровск", "UHWW": "Владивосток",
-    "UHBB": "Благовещенск", "ULMM": "Мурманск", "UIAA": "Чита",
-    "UHSS": "Южно-Сахалинск",
-}
+# Явный приоритетный порядок аэропортов.
+# Используется ВСЕМИ источниками (AirLabs, AeroDataBox, OpenSky).
+# Москва первой, затем крупные хабы по убыванию трафика,
+# малые аэропорты в конце — чтобы при исчерпании лимита
+# важные маршруты были обработаны в первую очередь.
+RU_AIRPORTS_ORDERED: list[tuple[str, str]] = [
+    # ── Москва ───────────────────────────────────────────────
+    ("UUEE", "Москва"),           # Шереметьево  (крупнейший)
+    ("UUDD", "Москва"),           # Домодедово
+    ("UUWW", "Москва"),           # Внуково
+    # ── Крупные региональные хабы ────────────────────────────
+    ("ULLI", "Санкт-Петербург"),  # Пулково
+    ("USSS", "Екатеринбург"),     # Кольцово
+    ("UNNT", "Новосибирск"),      # Толмачёво
+    ("URSS", "Сочи"),             # Адлер
+    ("UWKD", "Казань"),           # Казань
+    ("UNKL", "Красноярск"),       # Емельяново
+    ("UHHH", "Хабаровск"),        # Новый
+    ("UHWW", "Владивосток"),      # Кневичи
+    ("UIII", "Иркутск"),          # Иркутск
+    # ── Средние города ───────────────────────────────────────
+    ("URKK", "Краснодар"),        # Пашковский
+    ("UWUU", "Уфа"),              # Уфа
+    ("UWWW", "Самара"),           # Курумоч
+    ("USCC", "Челябинск"),        # Баландино
+    ("URMM", "Мин. Воды"),        # Мин. Воды
+    ("USTR", "Тюмень"),           # Рощино
+    ("UWGG", "Нижний Новгород"),  # Стригино
+    ("USPP", "Пермь"),            # Большое Савино
+    ("UNOO", "Омск"),             # Центральный
+    ("URWW", "Волгоград"),        # Гумрак
+    ("USRR", "Сургут"),           # Сургут
+    # ── Малые аэропорты ──────────────────────────────────────
+    ("UWOO", "Оренбург"),         # Центральный
+    ("USNN", "Нижневартовск"),    # Нижневартовск
+    ("UIUU", "Улан-Удэ"),         # Мухино
+    ("UHBB", "Благовещенск"),     # Игнатьево
+    ("UIAA", "Чита"),             # Кадала
+    ("UHSS", "Южно-Сахалинск"),   # Хомутово
+    ("UWSS", "Саратов"),          # Гагарин
+    ("ULMM", "Мурманск"),         # Мурманск
+]
+
+# Словарь для обратного поиска city по ICAO (используется в других местах)
+RU_AIRPORTS: dict[str, str] = {icao: city for icao, city in RU_AIRPORTS_ORDERED}
 
 RU_ICAO_PREFIXES = ("UU","UI","UH","UK","UL","UM","UN","UR","US","UW","UE","UO")
 
@@ -177,18 +209,22 @@ def load_current_routes() -> dict[str, list[str]]:
 
 def make_airport_stages(current_routes: dict) -> tuple[list, list]:
     """
-    Stage 1 — города с уже известными маршрутами (идут первыми в OpenSky).
-    Stage 2 — новые города.
-    Сортировка Stage 1 по убыванию количества маршрутов.
+    Разбивает RU_AIRPORTS_ORDERED на два списка для OpenSky:
+      Stage 1 — города с уже известными маршрутами (ранний выход экономит кредиты).
+      Stage 2 — новые города.
+
+    Порядок внутри каждого Stage сохраняется из RU_AIRPORTS_ORDERED —
+    то есть Москва всегда первая, малые города в конце.
+    AirLabs и AeroDataBox используют полный список all_airports напрямую,
+    не разбитый на стейджи.
     """
     cities_with_routes = set(current_routes.keys())
     stage1, stage2 = [], []
-    for icao, city in RU_AIRPORTS.items():
+    for icao, city in RU_AIRPORTS_ORDERED:
         if city in cities_with_routes:
             stage1.append((icao, city))
         else:
             stage2.append((icao, city))
-    stage1.sort(key=lambda x: -len(current_routes.get(x[1], [])))
     print(f"  Stage 1 (известные города): {len(stage1)} аэропортов", flush=True)
     print(f"  Stage 2 (новые города):     {len(stage2)} аэропортов", flush=True)
     return stage1, stage2
@@ -950,15 +986,21 @@ def main():
     else:
         print("\n  3/4  OpenSky: не настроен, пропускаем", flush=True)
 
-    # ── 3. gogov.ru — верификация и дополнение ───────────────────────────────
+    # ── 4. gogov.ru — верификация и дополнение (временно отключён) ──────────
+    # ОТКЛЮЧЕНО: gogov.ru возвращает 429 при запуске из GitHub Actions.
+    # Раскомментируй блок ниже чтобы включить обратно.
+    #
+    # print(f"\n{'='*52}", flush=True)
+    # print(f"  4/4  gogov.ru — верификация маршрутов", flush=True)
+    # print(f"{'='*52}", flush=True)
+    # before_gogov = sum(len(v) for v in confirmed.values())
+    # confirmed = run_gogov(confirmed)
+    # after_gogov = sum(len(v) for v in confirmed.values())
+    # if after_gogov > before_gogov:
+    #     sources_used.append("gogov.ru")
     print(f"\n{'='*52}", flush=True)
-    print(f"  4/4  gogov.ru — верификация маршрутов", flush=True)
+    print(f"  4/4  gogov.ru — пропускаем (временно отключён)", flush=True)
     print(f"{'='*52}", flush=True)
-    before_gogov = sum(len(v) for v in confirmed.values())
-    confirmed = run_gogov(confirmed)
-    after_gogov = sum(len(v) for v in confirmed.values())
-    if after_gogov > before_gogov:
-        sources_used.append("gogov.ru")
 
 
     # ── Сохранение ───────────────────────────────────────────────────────────
