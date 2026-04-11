@@ -3,15 +3,23 @@
 Обновление маршрутов из России.
 
 Источники (по приоритету):
-  1. AirLabs Routes API — первичный: расписание маршрутов, только прямые рейсы
-  2. OpenSky Network   — обогащение: реальные ADS-B данные за 14 дней,
-                         работает ТОЛЬКО в режиме добавления (никогда не удаляет)
+  1. AirLabs Routes API  — первичный: расписание маршрутов, только прямые рейсы
+  2. AeroDataBox API     — дополнение: статистика маршрутов (Tier 3, 6 units/запрос),
+                           только добавляет, фильтрует по countryCode != RU
+  3. OpenSky Network     — обогащение: реальные ADS-B данные за 14 дней,
+                           работает ТОЛЬКО в режиме добавления (никогда не удаляет)
+  4. gogov.ru            — верификация через веб-скрейпинг
 
 Логика:
   - AirLabs обрабатывает все аэропорты → базовый confirmed
+  - AeroDataBox дополняет confirmed, только добавляет
   - OpenSky Stage 1 → Stage 2, только добавляет, останавливается при 429
+  - gogov.ru верифицирует и дополняет
   - Направление, найденное хотя бы одним источником, включается в итог
   - Направление, не найденное ни одним источником, удаляется
+
+Расход AeroDataBox (BASIC FREE, 600 units/мес):
+  - 31 аэропорт × 6 units × 2 запуска в месяц = 372 units ✓
 
 Экономия кредитов OpenSky:
   - Stage 1 (города с уже известными маршрутами) идут первыми
@@ -27,6 +35,7 @@ from pathlib import Path
 OPENSKY_CLIENT_ID     = os.environ.get("OPENSKY_CLIENT_ID", "")
 OPENSKY_CLIENT_SECRET = os.environ.get("OPENSKY_CLIENT_SECRET", "")
 AIRLABS_KEY           = os.environ.get("AIRLABS_KEY", "")
+AERODATABOX_KEY       = os.environ.get("AERODATABOX_KEY", "")
 
 TOKEN_URL = (
     "https://auth.opensky-network.org"
@@ -215,26 +224,16 @@ def build_output(confirmed: dict[str, set[str]], now: datetime,
 
 # ── 1. AirLabs Routes API (PRIMARY) ───────────────────────────────────────────
 
-AIRLABS_PAGE_SIZE = 50  # Лимит строк на запрос для бесплатного ключа
-
-
-def fetch_airlabs_routes_page(icao: str, api_key: str,
-                               offset: int = 0) -> list | None:
-    """
-    Один запрос к AirLabs с заданным offset.
-    None = лимит исчерпан или ошибка. [] = нет маршрутов. list = маршруты.
-    """
+def fetch_airlabs_routes(icao: str, api_key: str) -> list | None:
+    """None = лимит исчерпан. [] = нет маршрутов. list = маршруты."""
+    print(f"    → AirLabs dep_icao={icao}", flush=True)
     try:
         r = requests.get(
             "https://airlabs.co/api/v9/routes",
-            params={
-                "dep_icao": icao,
-                "api_key":  api_key,
-                "limit":    AIRLABS_PAGE_SIZE,
-                "offset":   offset,
-            },
+            params={"dep_icao": icao, "api_key": api_key},
             timeout=(10, 20),
         )
+        print(f"    ← HTTP {r.status_code}", flush=True)
         if r.status_code == 200:
             data = r.json()
             if data.get("error"):
@@ -253,69 +252,20 @@ def fetch_airlabs_routes_page(icao: str, api_key: str,
         return []
 
 
-def fetch_airlabs_routes(icao: str, api_key: str) -> tuple[list | None, int]:
-    """
-    Получает все маршруты из аэропорта через пагинацию.
-
-    Возвращает (arr_icaos, requests_made):
-      - arr_icaos = None если лимит исчерпан, [] если нет маршрутов, list если есть
-      - requests_made = количество потраченных запросов к API
-
-    Логика пагинации: если страница вернула ровно PAGE_SIZE записей —
-    запрашиваем следующую. Если меньше — это последняя страница.
-    """
-    all_icaos:     list[str] = []
-    offset         = 0
-    requests_made  = 0
-    page           = 1
-
-    while True:
-        print(f"    → AirLabs dep_icao={icao} offset={offset}", flush=True)
-        batch = fetch_airlabs_routes_page(icao, api_key, offset)
-        requests_made += 1
-
-        if batch is None:
-            # Лимит исчерпан — возвращаем None, но сохраняем уже собранное
-            if all_icaos:
-                print(f"    ⚠ Лимит на странице {page} — возвращаем {len(all_icaos)} "
-                      f"маршрутов собранных до этого", flush=True)
-                return all_icaos, requests_made
-            return None, requests_made
-
-        print(f"    ← стр.{page}: {len(batch)} маршрутов", flush=True)
-        all_icaos.extend(batch)
-
-        if len(batch) < AIRLABS_PAGE_SIZE:
-            # Последняя страница — данных больше нет
-            break
-
-        # Возможно есть ещё страница
-        offset += AIRLABS_PAGE_SIZE
-        page   += 1
-        time.sleep(1)  # небольшая пауза между страницами
-
-    return all_icaos, requests_made
-
-
 def run_airlabs_primary(api_key: str,
                         all_airports: list[tuple[str, str]]) -> dict[str, set[str]]:
     """
-    Первичный источник. Обрабатывает ВСЕ аэропорты с пагинацией.
+    Первичный источник. Обрабатывает ВСЕ аэропорты.
     При достижении лимита сохраняет всё найденное до этого момента.
-    Логирует суммарный расход запросов для контроля месячного лимита.
     """
-    confirmed:      dict[str, set[str]] = defaultdict(set)
-    total           = len(all_airports)
-    total_requests  = 0
+    confirmed: dict[str, set[str]] = defaultdict(set)
+    total = len(all_airports)
 
     for idx, (icao, city) in enumerate(all_airports, 1):
         print(f"\n[{idx}/{total}] {city} ({icao}) [AirLabs]", flush=True)
-        arr_icaos, req_count = fetch_airlabs_routes(icao, api_key)
-        total_requests += req_count
-
+        arr_icaos = fetch_airlabs_routes(icao, api_key)
         if arr_icaos is None:
-            print(f"  ⚠ AirLabs лимит (потрачено запросов: {total_requests}) "
-                  f"— останавливаемся", flush=True)
+            print("  ⚠ AirLabs лимит — останавливаемся", flush=True)
             break
 
         new_dests: set[str] = set()
@@ -331,17 +281,108 @@ def run_airlabs_primary(api_key: str,
         added = new_dests - existing
         if added:
             print(f"    + добавлено: {sorted(added)}", flush=True)
-        print(f"    → итого для {city}: {len(confirmed.get(city, set()))} направлений "
-              f"(запросов к API: {req_count})", flush=True)
+        print(f"    → итого для {city}: {len(confirmed.get(city, set()))} направлений",
+              flush=True)
         time.sleep(2)
 
     total_routes = sum(len(v) for v in confirmed.values())
-    print(f"\n  AirLabs завершён: {len(confirmed)} городов, {total_routes} маршрутов, "
-          f"потрачено запросов: {total_requests}", flush=True)
+    print(f"\n  AirLabs завершён: {len(confirmed)} городов, {total_routes} маршрутов",
+          flush=True)
     return dict(confirmed)
 
 
-# ── 2. OpenSky Network (ADDITIVE ENRICHMENT) ──────────────────────────────────
+
+# ── 2. AeroDataBox API (SUPPLEMENT) ───────────────────────────────────────────
+
+def fetch_aerodatabox_routes(icao: str, api_key: str) -> list | None:
+    """
+    Получает маршруты из аэропорта через AeroDataBox stats/routes/daily.
+    Возвращает список ICAO-кодов назначений (только международные, countryCode != RU).
+    None = ошибка или лимит. [] = нет данных.
+    Tier 3 = 6 units за запрос.
+    """
+    try:
+        r = requests.get(
+            f"https://aerodatabox.p.rapidapi.com/airports/icao/{icao}/stats/routes/daily",
+            headers={
+                "X-RapidAPI-Key":  api_key,
+                "X-RapidAPI-Host": "aerodatabox.p.rapidapi.com",
+            },
+            timeout=(10, 20),
+        )
+        if r.status_code == 200:
+            data = r.json()
+            result = []
+            for route in data.get("routes", []):
+                dest = route.get("destination", {})
+                # Фильтруем внутренние рейсы (RU → RU)
+                if dest.get("countryCode") == "RU":
+                    continue
+                arr_icao = dest.get("icao", "").upper()
+                if arr_icao:
+                    result.append(arr_icao)
+            return result
+        elif r.status_code == 429:
+            print("    AeroDataBox: лимит units исчерпан", flush=True)
+            return None
+        elif r.status_code == 403:
+            print("    AeroDataBox: доступ запрещён (403)", flush=True)
+            return None
+        else:
+            print(f"    AeroDataBox HTTP {r.status_code}", flush=True)
+            return []
+    except Exception as e:
+        print(f"    AeroDataBox ошибка: {e}", flush=True)
+        return []
+
+
+def run_aerodatabox_supplement(
+    api_key: str,
+    all_airports: list[tuple[str, str]],
+    confirmed: dict[str, set[str]],
+) -> dict[str, set[str]]:
+    """
+    Дополняет confirmed данными AeroDataBox.
+    ТОЛЬКО ДОБАВЛЯЕТ — никогда не удаляет то, что нашёл AirLabs.
+    Останавливается при исчерпании лимита (None от fetch).
+    """
+    result = {c: set(d) for c, d in confirmed.items()}
+    total       = len(all_airports)
+    added_total = 0
+    units_spent = 0
+
+    for idx, (icao, city) in enumerate(all_airports, 1):
+        print(f"\n[{idx}/{total}] {city} ({icao}) [AeroDataBox]", flush=True)
+        arr_icaos = fetch_aerodatabox_routes(icao, api_key)
+        units_spent += 6  # Tier 3 всегда 6 units
+
+        if arr_icaos is None:
+            print(f"  ⚠ AeroDataBox лимит (потрачено ~{units_spent} units) "
+                  f"— останавливаемся", flush=True)
+            break
+
+        new_dests: set[str] = set()
+        for arr_icao in arr_icaos:
+            name = icao_to_dest_name(arr_icao)
+            if name:
+                new_dests.add(name)
+
+        existing = result.get(city, set())
+        added    = new_dests - existing
+        if added:
+            result[city] = existing | new_dests
+            added_total += len(added)
+            print(f"    + добавлено: {sorted(added)}", flush=True)
+        else:
+            print(f"    → {len(new_dests)} найдено, новых нет", flush=True)
+        time.sleep(1)  # 1 req/sec — лимит BASIC плана
+
+    print(f"\n  AeroDataBox завершён: добавлено {added_total} направлений, "
+          f"потрачено ~{units_spent} units", flush=True)
+    return result
+
+
+# ── 3. OpenSky Network (ADDITIVE ENRICHMENT) ──────────────────────────────────
 
 class TokenManager:
     def __init__(self, client_id: str, client_secret: str):
@@ -840,6 +881,7 @@ def main():
     print("=== Script started ===", flush=True)
     print(f"=== AirLabs: {'доступен' if AIRLABS_KEY else 'НЕ НАСТРОЕН ⚠'} ===",
           flush=True)
+    print(f"=== AeroDataBox: {'доступен' if AERODATABOX_KEY else 'не настроен'} ===", flush=True)
     print(f"=== gogov.ru: всегда активен ===", flush=True)
     print(f"=== OpenSky: {'доступен' if OPENSKY_CLIENT_ID else 'не настроен'} ===",
           flush=True)
@@ -861,17 +903,32 @@ def main():
 
     # ── 1. AirLabs — первичный источник ──────────────────────────────────────
     print(f"\n{'='*52}", flush=True)
-    print(f"  1/3  AirLabs — первичный источник ({len(all_airports)} аэропортов)",
+    print(f"  1/4  AirLabs — первичный источник ({len(all_airports)} аэропортов)",
           flush=True)
     print(f"{'='*52}", flush=True)
     confirmed = run_airlabs_primary(AIRLABS_KEY, all_airports)
     if confirmed:
         sources_used.append("AirLabs")
 
-    # ── 2. OpenSky — обогащение (только добавление) ───────────────────────────
+
+    # ── 2. AeroDataBox — дополнение ──────────────────────────────────────────
+    if AERODATABOX_KEY:
+        print(f"\n{'='*52}", flush=True)
+        print(f"  2/4  AeroDataBox — дополнение ({len(all_airports)} аэропортов)",
+              flush=True)
+        print(f"{'='*52}", flush=True)
+        before = sum(len(v) for v in confirmed.values())
+        confirmed = run_aerodatabox_supplement(AERODATABOX_KEY, all_airports, confirmed)
+        after = sum(len(v) for v in confirmed.values())
+        if after > before:
+            sources_used.append("AeroDataBox")
+    else:
+        print("\n  2/4  AeroDataBox: AERODATABOX_KEY не задан, пропускаем", flush=True)
+
+    # ── 3. OpenSky — обогащение (только добавление) ───────────────────────────
     if OPENSKY_CLIENT_ID and OPENSKY_CLIENT_SECRET:
         print(f"\n{'='*52}", flush=True)
-        print(f"  2/3  OpenSky — обогащение ({len(all_airports)} аэропортов)",
+        print(f"  3/4  OpenSky — обогащение ({len(all_airports)} аэропортов)",
               flush=True)
         print(f"{'='*52}", flush=True)
         token_mgr = TokenManager(OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET)
@@ -891,11 +948,11 @@ def main():
         except Exception as e:
             print(f"  ⚠ OpenSky: ошибка авторизации ({e}), пропускаем", flush=True)
     else:
-        print("\n  2/3  OpenSky: не настроен, пропускаем", flush=True)
+        print("\n  3/4  OpenSky: не настроен, пропускаем", flush=True)
 
     # ── 3. gogov.ru — верификация и дополнение ───────────────────────────────
     print(f"\n{'='*52}", flush=True)
-    print(f"  3/3  gogov.ru — верификация маршрутов", flush=True)
+    print(f"  4/4  gogov.ru — верификация маршрутов", flush=True)
     print(f"{'='*52}", flush=True)
     before_gogov = sum(len(v) for v in confirmed.values())
     confirmed = run_gogov(confirmed)
