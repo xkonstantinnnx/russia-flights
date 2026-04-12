@@ -1,39 +1,125 @@
-name: Тест FTPS деплоя
+name: Тест всех вариантов деплоя Timeweb
 
 on:
   workflow_dispatch:  # только ручной запуск
 
 jobs:
-  test-ftps:
+  test-all-deploy-methods:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout
+      - name: Checkout код
         uses: actions/checkout@v4
 
-      - name: Deploy via FTPS (explicit, port 21)
-        id: ftps1
+      - name: 1. Plain FTP (порт 21)
+        id: ftp_plain
         continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server:     ${{ secrets.FTP_HOST }}
           username:   ${{ secrets.FTP_USER }}
           password:   ${{ secrets.FTP_PASS }}
-          secure:     true
+          protocol:   ftp
+          port:       21
           local-dir:  ./
           server-dir: /russia-flights/public_html/
-          timeout: 60000
+          timeout:    60000
           exclude: |
             **/.git/**
             **/.github/**
             **/update_routes.py
             **/README.md
 
-      - name: Итог
+      - name: 2. FTPS Explicit (порт 21 + TLS)
+        id: ftps_explicit
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:     ${{ secrets.FTP_HOST }}
+          username:   ${{ secrets.FTP_USER }}
+          password:   ${{ secrets.FTP_PASS }}
+          protocol:   ftps
+          port:       21
+          secure:     true
+          security:   loose          # игнорирует проблемы с сертификатом
+          timeout:    90000
+          local-dir:  ./
+          server-dir: /russia-flights/public_html/
+          exclude: |
+            **/.git/**
+            **/.github/**
+            **/update_routes.py
+            **/README.md
+
+      - name: 3. FTPS Implicit (порт 990)
+        id: ftps_implicit
+        continue-on-error: true
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:     ${{ secrets.FTP_HOST }}
+          username:   ${{ secrets.FTP_USER }}
+          password:   ${{ secrets.FTP_PASS }}
+          protocol:   ftps
+          port:       990
+          secure:     true
+          timeout:    90000
+          local-dir:  ./
+          server-dir: /russia-flights/public_html/
+          exclude: |
+            **/.git/**
+            **/.github/**
+            **/update_routes.py
+            **/README.md
+
+      - name: 4. SFTP (порт 22) — appleboy/scp-action
+        id: sftp
+        continue-on-error: true
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:       ${{ secrets.FTP_HOST }}
+          username:   ${{ secrets.FTP_USER }}
+          password:   ${{ secrets.FTP_PASS }}
+          port:       22
+          source:     "."
+          target:     "/russia-flights/public_html"
+          strip_components: 0
+          rm:         false
+          timeout:    600s
+
+      - name: 5. SFTP + rsync (если scp прошёл)
+        id: rsync
+        if: steps.sftp.outcome == 'success'
+        continue-on-error: true
+        uses: Burnett01/rsync-deployments@5.2
+        with:
+          switches: -avzr --delete --exclude='/.git' --exclude='/.github'
+          remote_path: /russia-flights/public_html/
+          remote_host: ${{ secrets.FTP_HOST }}
+          remote_user: ${{ secrets.FTP_USER }}
+          remote_password: ${{ secrets.FTP_PASS }}
+          remote_port: 22
+
+      - name: ИТОГОВАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ
         run: |
-          if [ "${{ steps.ftps1.outcome }}" == "success" ]; then
-            echo "✓ FTPS (explicit) сработал"
+          echo "╔══════════════════════════════════════════════╗"
+          echo "║           РЕЗУЛЬТАТЫ ТЕСТОВ                  ║"
+          echo "╠══════════════════════════════════════════════╣"
+          echo "║ 1. Plain FTP          : ${{ steps.ftp_plain.outcome == 'success' && '✅ УСПЕХ' || '❌ ПАДЕНИЕ' }} ║"
+          echo "║ 2. FTPS Explicit      : ${{ steps.ftps_explicit.outcome == 'success' && '✅ УСПЕХ' || '❌ ПАДЕНИЕ' }} ║"
+          echo "║ 3. FTPS Implicit      : ${{ steps.ftps_implicit.outcome == 'success' && '✅ УСПЕХ' || '❌ ПАДЕНИЕ' }} ║"
+          echo "║ 4. SFTP (scp)         : ${{ steps.sftp.outcome == 'success' && '✅ УСПЕХ' || '❌ ПАДЕНИЕ' }} ║"
+          echo "║ 5. SFTP + rsync       : ${{ steps.rsync.outcome == 'success' && '✅ УСПЕХ' || (steps.sftp.outcome != 'success' && '⏭ Пропущен') || '❌ ПАДЕНИЕ' }} ║"
+          echo "╚══════════════════════════════════════════════╝"
+          
+          echo ""
+          echo "Рекомендация:"
+          if [ "${{ steps.sftp.outcome }}" == "success" ]; then
+            echo "✅ Лучше всего использовать SFTP / rsync"
+          elif [ "${{ steps.ftps_implicit.outcome }}" == "success" ]; then
+            echo "✅ Используй FTPS Implicit (порт 990)"
+          elif [ "${{ steps.ftps_explicit.outcome }}" == "success" ]; then
+            echo "✅ Используй FTPS Explicit"
           else
-            echo "✗ FTPS (explicit) не сработал"
+            echo "❌ Все варианты упали → пиши в поддержку про whitelist AWS IP"
           fi
