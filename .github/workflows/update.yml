@@ -35,7 +35,7 @@ jobs:
           AERODATABOX_KEY:       ${{ secrets.AERODATABOX_KEY }}
           YANDEX_RASP_KEY:       ${{ secrets.YANDEX_RASP_KEY }}
         run: |
-          timeout 1200 python update_routes.py || echo "Script timed out or failed"
+          timeout 3600 python update_routes.py || echo "Script timed out or failed"
 
       - name: Commit routes.json if changed
         run: |
