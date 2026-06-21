@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(npm run *)",
+      "Bash(python3 *)",
+      "Bash(gh run list*)",
+      "Bash(gh run view*)",
+      "Bash(gh workflow view*)",
+      "Bash(ssh timeweb-flights-vps *)",
+      "Read(./**)",
+      "Edit(./**)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(gh workflow run *)",
+      "Bash(ssh timeweb-flights-vps sudo *)",
+      "Bash(ssh timeweb-flights-vps * rm *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(curl * | sh)",
+      "Bash(curl * | bash)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./**/*key*.json)",
+      "Read(~/.ssh/**)"
+    ]
+  }
+}
