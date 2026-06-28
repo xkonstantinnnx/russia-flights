@@ -824,6 +824,14 @@ def _apply_opensky_counts(route_counts, result, min_flights):
 #      нормализуем через YANDEX_DEST_ALIASES
 #   5. ТОЛЬКО ДОБАВЛЯЕТ — никогда не удаляет найденное другими источниками
 #
+# Ручная точечная проверка конкретного маршрута — через /search/:
+#   YANDEX_RASP_KEY=... python3 -c "
+#   import requests
+#   r = requests.get('https://api.rasp.yandex.net/v3.0/search/',
+#       params={'apikey': '...', 'from': 'SVO', 'to': 'ZNZ',
+#               'system': 'iata', 'transport_types': 'plane'})
+#   print(r.json().get('pagination', {}).get('total', 0), 'рейсов')"
+#
 # Лимиты API (бесплатный тариф: 500 запросов/сутки):
 #   31 аэропорт × ~5 страниц пагинации = ~155 запросов максимум
 #   На практике меньше: у большинства аэропортов total < 100 (1 запрос)
