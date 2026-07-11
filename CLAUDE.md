@@ -20,8 +20,8 @@
 ## Деплой
 - Прод: https://russia-flights.ru/ — виртуальный (shared) хостинг Timeweb.
 - GitHub Actions (`update.yml`) только обновляет `routes.json` и пушит в репозиторий. Прямой FTP-деплой из этого workflow убран 2026-04-15 после серии падений `Timeout (control socket)` на всех протоколах (FTP/FTPS/SFTP) — похоже, файрвол Timeweb блокирует AWS IP-диапазон раннеров целиком, не только SSH.
-- Единственный реальный механизм публикации на прод — Crontab самого виртуального хостинга russia-flights.ru: он сам забирает свежий `routes.json` из GitHub. Это не резервный, а ОСНОВНОЙ путь деплоя.
-- SSH-доступ к виртуальному хостингу: `ssh -i ~/.ssh/timeweb_shared [REDACTED-USER]@[REDACTED-HOST]`. Сайт живёт в `~/russia-flights/public_html/`. Crontab хостинга можно проверить через `crontab -l` по этому SSH.
+- Единственный реальный механизм публикации на прод — Crontab самого виртуального хостинга russia-flights.ru: ежечасный `curl`, забирающий свежий `routes.json` из GitHub по raw-URL. Это не резервный, а ОСНОВНОЙ путь деплоя.
+- SSH-доступ к виртуальному хостингу — через локальный `~/.ssh/config` (алиас `timeweb-shared`, ключ `~/.ssh/timeweb_shared`); реквизиты (user/host) в репозитории не хранятся. Сайт живёт в `~/russia-flights/public_html/`. Crontab хостинга можно проверить через `crontab -l` по этому SSH. Хостинг глотает stdout неинтерактивных SSH-команд — проверять crontab только интерактивной сессией.
 - Диагностические workflow `Test SSH` и `Тест всех вариантов деплоя Timeweb` (`test_proxy.yml`) — ручные (`workflow_dispatch`), для проверки протоколов. На 2026-04-12 все методы деплоя (FTP plain/FTPS×2/SFTP/rsync) падали. Не предлагать SSH-деплой из CI.
 
 ## Ключевые направления в DEST_INFO
