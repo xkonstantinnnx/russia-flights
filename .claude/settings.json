@@ -16,6 +16,7 @@
       "Bash(gh run view*)",
       "Bash(gh workflow view*)",
       "Bash(ssh timeweb-flights-vps *)",
+      "Bash(ssh timeweb-shared *)",
       "Read(./**)",
       "Edit(./**)"
     ],
@@ -23,7 +24,12 @@
       "Bash(git push *)",
       "Bash(gh workflow run *)",
       "Bash(ssh timeweb-flights-vps sudo *)",
-      "Bash(ssh timeweb-flights-vps * rm *)"
+      "Bash(ssh timeweb-flights-vps * rm *)",
+      "Bash(ssh timeweb-shared rm *)",
+      "Bash(ssh timeweb-shared * rm *)",
+      "Bash(ssh timeweb-shared sudo *)",
+      "Bash(ssh timeweb-shared * crontab -r*)",
+      "Bash(ssh timeweb-shared crontab -r*)"
     ],
     "deny": [
       "Bash(rm -rf *)",
