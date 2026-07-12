@@ -277,6 +277,11 @@ function initApp(data) {
   }
 
   /* ── LISTS ── */
+  // Экранирование строк из routes.json перед вставкой в innerHTML:
+  // сейчас имена проходят белый список в пайплайне, но если будущий
+  // источник пропустит сырое название — это не должно стать XSS
+  const esc = s => String(s).replace(/[&<>"']/g,
+    ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const ruList  = document.getElementById('ru-list');
   const dstList = document.getElementById('dst-list');
   const cEls = {}, dEls = {};
@@ -286,7 +291,7 @@ function initApp(data) {
     .forEach(city => {
       const cnt = (ROUTES[city]||[]).length;
       const r = document.createElement('div'); r.className = 'list-row';
-      r.innerHTML = `<div class="row-dot" style="background:#f0b82a"></div><span class="row-name">${city}</span><span class="row-cnt">${cnt}</span>`;
+      r.innerHTML = `<div class="row-dot" style="background:#f0b82a"></div><span class="row-name">${esc(city)}</span><span class="row-cnt">${cnt}</span>`;
       r.addEventListener('click',   () => tapRU(city));
       r.addEventListener('touchend', e => { e.preventDefault(); tapRU(city); });
       ruList.appendChild(r); cEls[city] = r;
@@ -299,7 +304,7 @@ function initApp(data) {
       const cnt   = (REVERSE[name]||[]).length;
       const color = REG[meta.r]?.c || '#888';
       const r = document.createElement('div'); r.className = 'list-row';
-      r.innerHTML = `<div class="row-dot" style="background:${color}"></div><span class="row-name">${name}</span><span class="row-tag" style="color:${color}">${meta.r}</span><span class="row-cnt">${cnt}</span>`;
+      r.innerHTML = `<div class="row-dot" style="background:${color}"></div><span class="row-name">${esc(name)}</span><span class="row-tag" style="color:${color}">${esc(meta.r)}</span><span class="row-cnt">${cnt}</span>`;
       r.addEventListener('click',    () => tapDST(name));
       r.addEventListener('touchend', e => { e.preventDefault(); tapDST(name); });
       dstList.appendChild(r); dEls[name] = r;
@@ -391,7 +396,7 @@ function initApp(data) {
     const m = L.circleMarker([meta.la, meta.lo], {
       radius:5, fillColor:color, fillOpacity:0.9, color:'#fff', weight:1, opacity:0.5
     }).addTo(map);
-    m.bindTooltip(`<b>${name}</b> · ${meta.r}`, {direction:'top', offset:[0,-4]});
+    m.bindTooltip(`<b>${esc(name)}</b> · ${esc(meta.r)}`, {direction:'top', offset:[0,-4]});
     m.on('click', () => { stab('dst'); tapDST(name); });
     dstMarkers[name] = m;
   }
@@ -405,7 +410,7 @@ function initApp(data) {
     const m = L.circleMarker([ru.la, ru.lo], {
       radius:r, fillColor:'#f0b82a', fillOpacity:0.95, color:'#fff', weight:1.5, opacity:0.8
     }).addTo(map);
-    m.bindTooltip(`<b>${city}</b> · ${cnt} направлений`, {direction:'top', offset:[0,-4]});
+    m.bindTooltip(`<b>${esc(city)}</b> · ${cnt} направлений`, {direction:'top', offset:[0,-4]});
     m.on('click', () => { stab('ru'); tapRU(city); });
     ruMarkers[city] = {m, cnt, la: ru.la, lo: ru.lo};
   }
