@@ -967,8 +967,10 @@ def run_yandex_rasp_additive(confirmed: dict[str, set[str]]) -> dict[str, set[st
 
             items, page_total = res
             for item in items:
-                if item.get("stops", "") != "":
-                    continue  # только прямые рейсы
+                # только прямые рейсы; (… or "") — чтобы stops: null
+                # не отбраковывал прямой рейс (None != "")
+                if (item.get("stops") or "") != "":
+                    continue
                 dest = _yandex_parse_dest(item.get("thread", {}))
                 if dest and dest in _DEST_NAMES_SET:
                     found_dests.add(dest)
