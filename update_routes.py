@@ -685,9 +685,14 @@ class TokenManager:
 
 def check_opensky_credits(token_mgr: TokenManager) -> int | None:
     try:
+        # Окно «вчерашние сутки»: OpenSky отдаёт только свежую историю,
+        # фиксированная дата со временем начинает возвращать 404 без
+        # rate-limit-заголовка, и проверка вырождается в «неизвестно»
+        end_ts   = int(time.time()) - 86400
+        begin_ts = end_ts - 86399
         r = requests.get(
             "https://opensky-network.org/api/flights/departure",
-            params={"airport": "EDDF", "begin": 1717200000, "end": 1717286399},
+            params={"airport": "EDDF", "begin": begin_ts, "end": end_ts},
             headers={"Authorization": f"Bearer {token_mgr.get_token()}"},
             timeout=(10, 15),
         )
@@ -719,8 +724,10 @@ def fetch_opensky_day(icao: str, begin_ts: int, end_ts: int,
             if r.status_code == 200:
                 remaining = r.headers.get("X-Rate-Limit-Remaining")
                 if remaining is not None and int(remaining) == 0:
-                    print("    ⚠ Кредиты исчерпаны", flush=True)
-                    return None
+                    # Ответ уже оплачен — используем его; остановимся на
+                    # следующем запросе, который вернёт 429
+                    print("    ⚠ Кредиты исчерпаны (этот ответ — последний)",
+                          flush=True)
                 return r.json() or []
             elif r.status_code == 404:
                 return []
