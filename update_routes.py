@@ -448,7 +448,10 @@ def build_output(confirmed: dict[str, set[str]], now: datetime,
             for icao in DEST_NAME_TO_ICAOS.get(name, []):
                 used_icao.add(icao)
     destinations: dict[str, dict] = {}
-    for icao in used_icao:
+    # sorted: у городов с несколькими аэропортами (Дубай OMDB/OMDW, Пекин,
+    # Гоа...) координаты берутся из первого ICAO по алфавиту — иначе итерация
+    # по set давала случайный аэропорт и «прыгающие» диффы между запусками
+    for icao in sorted(used_icao):
         info = DEST_INFO[icao]
         name = info["n"]
         if name not in destinations:
