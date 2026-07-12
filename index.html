@@ -64,8 +64,6 @@ body{display:flex;flex-direction:column;}
 #loading-text{font-size:13px;color:#4a9eff;}
 #loading-sub{font-size:11px;color:#2a3e56;}
 
-#back-to-map{display:none;position:fixed;bottom:20px;right:16px;z-index:2000;background:#4a9eff;color:#060c16;border:none;border-radius:20px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.5);}
-@media(min-width:900px){#back-to-map{display:none!important;}}
 
 /* ── DESKTOP LAYOUT (≥ 900px) ─────────────────────────────── */
 @media (min-width: 900px) {
@@ -401,7 +399,7 @@ function initApp(data) {
   for (const city of Object.keys(ROUTES)) {
     const cnt = (ROUTES[city]||[]).length;
     if (!cnt) continue;
-    const ru  = getRUCoords(city, ROUTES[city], DEST_META);
+    const ru  = getRUCoords(city);
     if (!ru) continue;
     const r = 5 + Math.sqrt(cnt) * 1.1;
     const m = L.circleMarker([ru.la, ru.lo], {
@@ -483,7 +481,6 @@ function initApp(data) {
     for (const e of Object.values(cEls))  { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
     for (const e of Object.values(dEls))  { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
     document.getElementById('info-bar').style.display = 'none';
-    document.getElementById('back-to-map').style.display = 'none';
     updateMarkers(null,null); drawArcs();
   }
   window.reset = reset;
@@ -508,7 +505,6 @@ function initApp(data) {
     }
     document.getElementById('info-bar').style.display='flex';
     if (cEls[name] && window.innerWidth >= 900) cEls[name].scrollIntoView({block:'nearest',behavior:'smooth'});
-    document.getElementById('back-to-map').style.display = 'block';
     updateMarkers(name,null); drawArcs();
   }
 
@@ -532,7 +528,6 @@ function initApp(data) {
     }
     document.getElementById('info-bar').style.display='flex';
     if (dEls[name] && window.innerWidth >= 900) dEls[name].scrollIntoView({block:'nearest',behavior:'smooth'});
-    document.getElementById('back-to-map').style.display = 'block';
     updateMarkers(null,name); drawArcs();
   }
 
@@ -544,14 +539,5 @@ function initApp(data) {
 </div><!-- /sidebar-wrap -->
 </div><!-- /body-wrap -->
 
-<button id="back-to-map" onclick="scrollToMap()">↑ На карту</button>
-
-<script>
-function scrollToMap() {
-  window.scrollTo({top: 0, behavior: 'smooth'});
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
-}
-</script>
 </body>
 </html>
