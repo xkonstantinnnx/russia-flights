@@ -17,7 +17,9 @@
   - OpenSky Stage 1 → Stage 2, только добавляет, останавливается при 429
   - Яндекс.Расписания дополняет confirmed, только добавляет
   - Направление, найденное хотя бы одним источником, включается в итог
-  - Направление, не найденное ни одним источником, удаляется
+  - Направление, не найденное ни одним источником, удаляется — но только
+    у городов, которые AirLabs реально опросил; города, не опрошенные
+    из-за лимита или сбоев, сохраняют текущие маршруты из routes.json
 
 Расход AeroDataBox (BASIC FREE, 600 units/мес):
   - 31 приоритетный аэропорт × 6 units = 186 units за запуск
@@ -464,8 +466,14 @@ def build_output(confirmed: dict[str, set[str]], now: datetime,
 
 # ── 1. AirLabs Routes API (PRIMARY) ───────────────────────────────────────────
 
-def fetch_airlabs_routes(icao: str, api_key: str) -> list | None:
-    """None = лимит исчерпан. [] = нет маршрутов. list = маршруты."""
+# Сентинел «запрос не удался»: аэропорт считается НЕОПРОШЕННЫМ (в отличие от [],
+# которое означает авторитетный ответ «маршрутов нет»). Города с неопрошенными
+# аэропортами сохраняют свои старые маршруты — см. main().
+AIRLABS_ERROR = object()
+
+def fetch_airlabs_routes(icao: str, api_key: str):
+    """None = лимит исчерпан (стоп источника). [] = нет маршрутов.
+    list = маршруты. AIRLABS_ERROR = сбой запроса, аэропорт не опрошен."""
     print(f"    → AirLabs dep_icao={icao}", flush=True)
     try:
         r = requests.get(
@@ -486,27 +494,41 @@ def fetch_airlabs_routes(icao: str, api_key: str) -> list | None:
             return None
         else:
             print(f"    AirLabs HTTP {r.status_code}", flush=True)
-            return []
+            return AIRLABS_ERROR
     except Exception as e:
         print(f"    AirLabs ошибка: {e}", flush=True)
-        return []
+        return AIRLABS_ERROR
 
 
 def run_airlabs_primary(api_key: str,
-                        all_airports: list[tuple[str, str]]) -> dict[str, set[str]]:
+                        all_airports: list[tuple[str, str]],
+                        ) -> tuple[dict[str, set[str]], set[str]]:
     """
     Первичный источник. Обрабатывает ВСЕ аэропорты.
     При достижении лимита сохраняет всё найденное до этого момента.
+
+    Возвращает (confirmed, queried_cities):
+      queried_cities — города, ВСЕ аэропорты которых получили авторитетный
+      ответ (в т.ч. пустой). Города вне этого множества считаются
+      неопрошенными — их старые маршруты из routes.json сохраняет main(),
+      иначе обрыв по лимиту стирал бы города, до которых не дошла очередь.
     """
     confirmed: dict[str, set[str]] = defaultdict(set)
+    unqueried_cities: set[str] = set()
     total = len(all_airports)
 
     for idx, (icao, city) in enumerate(all_airports, 1):
         print(f"\n[{idx}/{total}] {city} ({icao}) [AirLabs]", flush=True)
         arr_icaos = fetch_airlabs_routes(icao, api_key)
         if arr_icaos is None:
-            print("  ⚠ AirLabs лимит — останавливаемся", flush=True)
+            unqueried_cities.update(c for _, c in all_airports[idx - 1:])
+            print(f"  ⚠ AirLabs лимит — останавливаемся, "
+                  f"аэропорты с [{idx}/{total}] не опрошены", flush=True)
             break
+        if arr_icaos is AIRLABS_ERROR:
+            unqueried_cities.add(city)
+            time.sleep(2)
+            continue
 
         new_dests: set[str] = set()
         for arr_icao in arr_icaos:
@@ -525,10 +547,12 @@ def run_airlabs_primary(api_key: str,
               flush=True)
         time.sleep(2)
 
+    queried_cities = {c for _, c in all_airports} - unqueried_cities
     total_routes = sum(len(v) for v in confirmed.values())
-    print(f"\n  AirLabs завершён: {len(confirmed)} городов, {total_routes} маршрутов",
-          flush=True)
-    return dict(confirmed)
+    print(f"\n  AirLabs завершён: {len(confirmed)} городов, {total_routes} маршрутов, "
+          f"опрошено {len(queried_cities)} городов из "
+          f"{len({c for _, c in all_airports})}", flush=True)
+    return dict(confirmed), queried_cities
 
 
 
@@ -1019,9 +1043,25 @@ def main():
     print(f"  1/4  AirLabs — первичный источник ({len(all_airports)} аэропортов)",
           flush=True)
     print(f"{'='*52}", flush=True)
-    confirmed = run_airlabs_primary(AIRLABS_KEY, all_airports)
+    confirmed, airlabs_queried = run_airlabs_primary(AIRLABS_KEY, all_airports)
     if confirmed:
         sources_used.append("AirLabs")
+
+    # Защита от потери данных: город можно удалить из routes.json только если
+    # AirLabs реально его опросил. Города, не опрошенные из-за лимита или
+    # сбоев запросов, сохраняют свои текущие маршруты (дальше источники
+    # работают только на добавление).
+    preserved = 0
+    for city, dests in current_routes.items():
+        if city not in airlabs_queried:
+            before_ct = len(confirmed.get(city, set()))
+            confirmed[city] = confirmed.get(city, set()) | set(dests)
+            preserved += len(confirmed[city]) - before_ct
+    if preserved:
+        print(f"  ↩ AirLabs не опросил часть городов — сохранено {preserved} "
+              f"существующих маршрутов из routes.json", flush=True)
+
+    if confirmed:
         save_routes(confirmed, now, sources_used, prev_total)
 
     # ── 2. AeroDataBox — дополнение ──────────────────────────────────────────

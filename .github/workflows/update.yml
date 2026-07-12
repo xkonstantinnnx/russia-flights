@@ -34,10 +34,18 @@ jobs:
           AIRLABS_KEY:           ${{ secrets.AIRLABS_KEY }}
           AERODATABOX_KEY:       ${{ secrets.AERODATABOX_KEY }}
           YANDEX_RASP_KEY:       ${{ secrets.YANDEX_RASP_KEY }}
+        # 50 мин — внутренний timeout обязан сработать раньше timeout-minutes
+        # джобы (60), иначе GitHub убьёт джобу целиком и шаг коммита не выполнится.
+        # Падение/таймаут скрипта делает шаг красным (видно в Actions),
+        # но частичные результаты всё равно коммитятся — см. if: always() ниже.
         run: |
-          timeout 3600 python update_routes.py || echo "Script timed out or failed"
+          timeout 3000 python update_routes.py
 
       - name: Commit routes.json if changed
+        # Скрипт сохраняет routes.json после каждого источника; при падении
+        # или таймауте коммитим то, что успело сохраниться (данные не теряются —
+        # неопрошенные города сохраняют старые маршруты).
+        if: always()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
