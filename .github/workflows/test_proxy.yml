@@ -28,6 +28,8 @@ jobs:
           exclude: |
             **/.git/**
             **/.github/**
+            **/.claude/**
+            **/CLAUDE.md
             **/update_routes.py
             **/README.md
 
@@ -49,6 +51,8 @@ jobs:
           exclude: |
             **/.git/**
             **/.github/**
+            **/.claude/**
+            **/CLAUDE.md
             **/update_routes.py
             **/README.md
 
@@ -69,6 +73,8 @@ jobs:
           exclude: |
             **/.git/**
             **/.github/**
+            **/.claude/**
+            **/CLAUDE.md
             **/update_routes.py
             **/README.md
 
@@ -81,7 +87,9 @@ jobs:
           username:   ${{ secrets.FTP_USER }}
           password:   ${{ secrets.FTP_PASS }}
           port:       22
-          source:     "."
+          # Только публичные файлы сайта — НЕ ".": иначе на прод уедут
+          # CLAUDE.md, .claude/ и .git
+          source:     "index.html,routes.json,favicon.ico,favicon.svg"
           target:     "/russia-flights/public_html"
           strip_components: 0
           rm:         false
@@ -93,7 +101,7 @@ jobs:
         continue-on-error: true
         uses: Burnett01/rsync-deployments@5.2
         with:
-          switches: -avzr --delete --exclude='/.git' --exclude='/.github'
+          switches: -avzr --delete --exclude='/.git' --exclude='/.github' --exclude='/.claude' --exclude='CLAUDE.md' --exclude='update_routes.py' --exclude='README.md'
           remote_path: /russia-flights/public_html/
           remote_host: ${{ secrets.FTP_HOST }}
           remote_user: ${{ secrets.FTP_USER }}
