@@ -30,7 +30,8 @@
 Экономия кредитов OpenSky:
   - Stage 1 (города с уже известными маршрутами) идут первыми
   - Ранний выход из дней когда все маршруты города уже верифицированы
-  - RU-префиксы отсеиваются до проверки в DEST_INFO
+  - Направления определяются строго по белому списку DEST_INFO
+    (российских аэропортов в нём нет, отдельный префиксный фильтр не нужен)
 """
 
 import os, json, time, sys, requests, re
@@ -154,7 +155,10 @@ RU_AIRPORTS_ORDERED: list[tuple[str, str]] = [
 # Словарь для обратного поиска city по ICAO (используется в других местах)
 RU_AIRPORTS: dict[str, str] = {icao: city for icao, city in RU_AIRPORTS_ORDERED}
 
-RU_ICAO_PREFIXES = ("UU","UI","UH","UK","UL","UM","UN","UR","US","UW","UE","UO")
+# ВНИМАНИЕ: префиксного фильтра «российских» ICAO здесь сознательно нет.
+# Прежний RU_ICAO_PREFIXES включал "UM" (Калининград) и тем самым отсеивал
+# UMMS Минск — Беларусь делит префикс UM с Калининградской областью.
+# DEST_INFO — белый список зарубежных аэропортов, его проверки достаточно.
 
 DEST_INFO = {
     "UMMS":{"n":"Минск","c":"Беларусь","la":53.9,"lo":27.6,"r":"СНГ"},
@@ -391,8 +395,6 @@ YANDEX_DEST_ALIASES: dict[str, str] = {
 
 
 def icao_to_dest_name(arr_icao: str) -> str | None:
-    if arr_icao[:2] in RU_ICAO_PREFIXES:
-        return None
     info = DEST_INFO.get(arr_icao)
     return info["n"] if info else None
 
@@ -796,9 +798,7 @@ def run_opensky_additive(token_mgr: TokenManager,
 
             for f in result_day:
                 arr = (f.get("estArrivalAirport") or "").strip().upper()
-                if (arr and len(arr) == 4
-                        and arr[:2] not in RU_ICAO_PREFIXES
-                        and arr in DEST_INFO):
+                if arr in DEST_INFO:
                     route_counts[city][arr] += 1
 
             # Stage 1: ранний выход если OpenSky уже подтвердил все known-маршруты
