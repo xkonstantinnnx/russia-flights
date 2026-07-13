@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "devcontainer",
+      "args": [
+        "exec",
+        "--workspace-folder",
+        "/home/konstantin/projects/russia-flights",
+        "npx",
+        "--yes",
+        "@playwright/mcp@latest",
+        "--headless"
+      ]
+    }
+  }
+}
