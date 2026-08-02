@@ -1,0 +1,11 @@
+# ads.txt — russia-flights.ru
+#
+# Плейсхолдер. Строку для Travelpayouts (или другой ad/affiliate-сети)
+# вставить сюда вручную после получения в личном кабинете — формат:
+#   <ad-system domain>, <account id>, DIRECT|RESELLER, <cert authority id>
+#
+# ВАЖНО: подтверждение владения сайтом в Travelpayouts делается через
+# meta-тег в <head> или загрузку HTML-файла (см. Tools → Drive в личном
+# кабинете), а не через ads.txt — этот файл сам по себе верификацию
+# не проходит. См. плейсхолдер <meta name="travelpayouts-verification">
+# в index.html.
