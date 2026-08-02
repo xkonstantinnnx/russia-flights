@@ -40,7 +40,9 @@ body{display:flex;flex-direction:column;}
 #reset-btn{background:#0f1d2e;border:1px solid #1e3252;color:#4a9eff;font-size:11px;padding:4px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
 #chip-scroll{display:flex;gap:4px;overflow-x:auto;padding-bottom:7px;scrollbar-width:none;}
 #chip-scroll::-webkit-scrollbar{display:none;}
-.chip{font-size:11px;padding:3px 9px;border-radius:10px;background:#0f1d2e;border-left:2px solid;white-space:nowrap;flex-shrink:0;cursor:default;user-select:none;}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:10px;background:#0f1d2e;border-left:2px solid;white-space:nowrap;flex-shrink:0;cursor:default;user-select:none;}
+.chip-tp{color:inherit;text-decoration:none;opacity:.7;font-size:10px;line-height:1;cursor:pointer;}
+.chip-tp:hover{opacity:1;}
 
 #legend{display:flex;flex-wrap:wrap;gap:3px;padding:4px 12px;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
 .leg{display:flex;align-items:center;gap:4px;font-size:10px;color:#7090b0;}
@@ -235,6 +237,55 @@ const DEST_AIRPORT_IATA = {
 const CITY_IATA = { "Москва":"MOW", "Пекин":"BJS", "Шанхай":"SHA" };
 function iataForRU(city)  { return CITY_IATA[city] || RU_AIRPORT_IATA[city]  || null; }
 function iataForDest(dst) { return CITY_IATA[dst]  || DEST_AIRPORT_IATA[dst] || null; }
+
+/* ══════════════════════════════════════════════════════
+   TRAVELPAYOUTS — партнёрские ссылки
+   marker/trs/p/campaign_id заполняются вручную после регистрации
+   в Travelpayouts. Пустой marker = кнопки нигде не рендерятся.
+══════════════════════════════════════════════════════ */
+const TP_CONFIG = {
+  marker: "",       // ваш affiliate marker
+  trs: "",          // Project ID (Travelpayouts → Tools → мой проект)
+  p: "",            // Product ID программы Aviasales
+  campaign_id: "",  // Campaign ID (если применимо)
+  metrikaId: "",    // ID счётчика Яндекс.Метрики
+};
+
+function tpSearchDate() {
+  const d = new Date();
+  d.setDate(d.getDate() + 30);
+  return String(d.getDate()).padStart(2,'0') + String(d.getMonth()+1).padStart(2,'0');
+}
+
+// Deeplink на поиск Aviasales через tp.media. Возвращает null, если
+// marker не задан или для одного из городов нет IATA-кода —
+// в этом случае кнопка/иконка просто не показывается.
+function tpLink(fromCity, toDest) {
+  if (!TP_CONFIG.marker) return null;
+  const oIata = iataForRU(fromCity), dIata = iataForDest(toDest);
+  if (!oIata || !dIata) return null;
+  const u = `https://www.aviasales.com/search/${oIata}${tpSearchDate()}${dIata}1`;
+  let link = `https://tp.media/r?marker=${encodeURIComponent(TP_CONFIG.marker)}`;
+  if (TP_CONFIG.trs) link += `&trs=${encodeURIComponent(TP_CONFIG.trs)}`;
+  if (TP_CONFIG.p) link += `&p=${encodeURIComponent(TP_CONFIG.p)}`;
+  link += `&u=${encodeURIComponent(u)}`;
+  if (TP_CONFIG.campaign_id) link += `&campaign_id=${encodeURIComponent(TP_CONFIG.campaign_id)}`;
+  return link;
+}
+
+function addTpIcon(chip, fromCity, toDest) {
+  const link = tpLink(fromCity, toDest);
+  if (!link) return;
+  const a = document.createElement('a');
+  a.className = 'chip-tp';
+  a.href = link;
+  a.target = '_blank';
+  a.rel = 'nofollow sponsored noopener';
+  a.title = 'Найти билеты';
+  a.textContent = '✈';
+  a.addEventListener('click', e => e.stopPropagation());
+  chip.appendChild(a);
+}
 
 /* ══════════════════════════════════════════════════════
    REGION COLORS
@@ -545,7 +596,9 @@ function initApp(data) {
       const meta=DEST_META[dn]; if(!meta) continue;
       const color=REG[meta.r]?.c||'#888';
       const chip=document.createElement('span'); chip.className='chip';
-      chip.style.borderLeftColor=color; chip.style.color=color; chip.textContent=dn;
+      chip.style.borderLeftColor=color; chip.style.color=color;
+      chip.appendChild(document.createTextNode(dn));
+      addTpIcon(chip, name, dn);
       cs.appendChild(chip);
     }
     document.getElementById('info-bar').style.display='flex';
@@ -568,7 +621,9 @@ function initApp(data) {
     const cs=document.getElementById('chip-scroll'); cs.innerHTML='';
     for (const cn of srcs) {
       const chip=document.createElement('span'); chip.className='chip';
-      chip.style.borderLeftColor='#f0b82a'; chip.style.color='#f0b82a'; chip.textContent=cn;
+      chip.style.borderLeftColor='#f0b82a'; chip.style.color='#f0b82a';
+      chip.appendChild(document.createTextNode(cn));
+      addTpIcon(chip, cn, name);
       cs.appendChild(chip);
     }
     document.getElementById('info-bar').style.display='flex';
