@@ -295,7 +295,12 @@ function tpLink(fromCity, toDest) {
   if (!TP_CONFIG.marker) return null;
   const oIata = iataForRU(fromCity), dIata = iataForDest(toDest);
   if (!oIata || !dIata) return null;
-  const u = `https://www.aviasales.com/search/${oIata}${tpSearchDate()}${dIata}1`;
+  // .ru-домен вместо .com — сразу русский язык и рубли, без доп. параметров
+  // (проверено вживую). direct=true — предположительно фильтр «только
+  // прямые», подтвердить в реальном интерфейсе не удалось (страницу
+  // результатов блокирует капча при автоматическом заходе); неизвестный
+  // параметр Aviasales просто проигнорирует, если он не тот.
+  const u = `https://www.aviasales.ru/search/${oIata}${tpSearchDate()}${dIata}1?direct=true`;
   let link = `https://tp.media/r?marker=${encodeURIComponent(TP_CONFIG.marker)}`;
   if (TP_CONFIG.trs) link += `&trs=${encodeURIComponent(TP_CONFIG.trs)}`;
   if (TP_CONFIG.p) link += `&p=${encodeURIComponent(TP_CONFIG.p)}`;
