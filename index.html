@@ -433,7 +433,7 @@ function initApp(data) {
     badge.style.display = 'inline';
   }
   document.getElementById('h-meta').textContent =
-    fromSeed ? 'Резервные данные · март 2026' : 'Обновлено автоматически · OpenSky Network';
+    fromSeed ? 'Резервные данные · март 2026' : 'Обновлено автоматически';
 
   /* ── LEGEND ── */
   const lgBox = document.getElementById('legend');
@@ -512,7 +512,7 @@ function initApp(data) {
   /* ── MAP ── */
   const TILES = {
     gmap: { url:'https://mt{s}.google.com/vt/lyrs=m&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19} },
-    yndx: { url:'https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=ru_RU', opts:{maxZoom:19} },
+    yndx: { url:'https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=ru_RU&projection=web_mercator', opts:{maxZoom:19} },
     sat:  { url:'https://mt{s}.google.com/vt/lyrs=y&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19} },
   };
   const map = L.map('map', {center:[55,70], zoom:3, zoomControl:true, attributionControl:false, minZoom:2, maxZoom:12});
