@@ -42,11 +42,6 @@ body{display:flex;flex-direction:column;}
 #info-top{display:flex;align-items:center;justify-content:space-between;padding:7px 0 3px;}
 #info-title{font-size:13px;font-weight:600;}
 #reset-btn{background:#0f1d2e;border:1px solid #1e3252;color:#4a9eff;font-size:11px;padding:4px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
-#chip-scroll{display:flex;gap:4px;overflow-x:auto;padding-bottom:7px;scrollbar-width:none;}
-#chip-scroll::-webkit-scrollbar{display:none;}
-.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:10px;background:#0f1d2e;border-left:2px solid;white-space:nowrap;flex-shrink:0;cursor:default;user-select:none;}
-.chip-tp{color:inherit;text-decoration:none;opacity:.7;font-size:10px;line-height:1;cursor:pointer;}
-.chip-tp:hover{opacity:1;}
 
 #legend{display:flex;flex-wrap:wrap;gap:3px;padding:4px 12px;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
 .leg{display:flex;align-items:center;gap:4px;font-size:10px;color:#7090b0;}
@@ -66,6 +61,9 @@ body{display:flex;flex-direction:column;}
 .row-name{font-size:12px;color:#b8ccec;flex:1;}
 .row-tag{font-size:10px;flex:0 0 auto;margin-right:4px;}
 .row-cnt{font-size:11px;font-weight:600;color:#4a9eff;background:rgba(74,158,255,.1);padding:2px 8px;border-radius:10px;}
+.row-tp{font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;background:#4a9eff22;color:#4a9eff;border:1px solid #4a9eff55;text-decoration:none;white-space:nowrap;flex-shrink:0;}
+.row-tp:hover{background:#4a9eff33;}
+.detail-back{color:#4a9eff;}
 
 #loading{position:fixed;inset:0;background:#060c16;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:12px;}
 #loading-text{font-size:13px;color:#4a9eff;}
@@ -123,8 +121,13 @@ body{display:flex;flex-direction:column;}
   #tab-bar { flex-shrink: 0; }
   .tab-btn { font-size: 12px; padding: 9px 8px; }
 
-  /* Список растягивается на остаток высоты */
-  #lists-wrap { flex: 1; min-height: 0; }
+  /* Список растягивается на остаток высоты; при открытой детализации —
+     вторая колонка справа (detail-list), а не подмена в один клик */
+  #lists-wrap { flex: 1; min-height: 0; display: flex; flex-direction: row; }
+  #ru-list, #dst-list, #detail-list { flex: 0 0 300px; width: 300px; }
+  #detail-list { border-left: 1px solid #1e3252; }
+  #sidebar-wrap.has-detail { width: 600px; min-width: 600px; }
+  .detail-back { display: none; } /* на мобильном второй колонки нет — там свой «Назад» */
 
   /* Строки списка чуть крупнее */
   .list-row { padding: 8px 14px; }
@@ -202,7 +205,6 @@ body{display:flex;flex-direction:column;}
     <div id="info-title"></div>
     <button id="reset-btn" onclick="reset()">✕ Сбросить</button>
   </div>
-  <div id="chip-scroll"></div>
 </div>
 
 <div id="legend"></div>
@@ -215,6 +217,7 @@ body{display:flex;flex-direction:column;}
 <div id="lists-wrap">
   <div class="list-pane" id="ru-list"></div>
   <div class="list-pane" id="dst-list" style="display:none;"></div>
+  <div class="list-pane" id="detail-list" style="display:none;"></div>
 </div>
 
 <div id="tp-disclosure">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>
@@ -309,21 +312,22 @@ function tpLink(fromCity, toDest) {
   return link;
 }
 
-function addTpIcon(chip, fromCity, toDest) {
+// Кнопка «✈ Билеты» для строки detail-list — рендерится только когда
+// у обоих концов маршрута (откуда+куда) есть код IATA и задан marker.
+function makeTpButton(fromCity, toDest) {
   const link = tpLink(fromCity, toDest);
-  if (!link) return;
+  if (!link) return null;
   const a = document.createElement('a');
-  a.className = 'chip-tp';
+  a.className = 'row-tp';
   a.href = link;
   a.target = '_blank';
   a.rel = 'nofollow sponsored noopener';
-  a.title = 'Найти билеты';
-  a.textContent = '✈';
+  a.textContent = '✈ Билеты';
   a.addEventListener('click', e => {
     e.stopPropagation();
     trackTpClick(fromCity, toDest);
   });
-  chip.appendChild(a);
+  return a;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -445,8 +449,9 @@ function initApp(data) {
   // источник пропустит сырое название — это не должно стать XSS
   const esc = s => String(s).replace(/[&<>"']/g,
     ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const ruList  = document.getElementById('ru-list');
-  const dstList = document.getElementById('dst-list');
+  const ruList     = document.getElementById('ru-list');
+  const dstList    = document.getElementById('dst-list');
+  const detailList = document.getElementById('detail-list');
   const cEls = {}, dEls = {};
 
   [...Object.keys(ROUTES)]
@@ -629,6 +634,46 @@ function initApp(data) {
   /* ── STATE ── */
   let aC = null, aD = null;
 
+  // detail-list — вертикальный список конкретных пар «откуда+куда» (замена
+  // старым горизонтальным чипам: там нельзя было прокрутить дальше 3-4
+  // из 75 элементов). На десктопе — вторая колонка рядом со списком
+  // городов/направлений (сайдбар раздвигается); на мобильном — подменяет
+  // текущую панель списка, с кнопкой «Назад».
+  function openDetail(items) {
+    detailList.innerHTML = '';
+    const mobile = window.innerWidth < 900;
+    if (mobile) {
+      const back = document.createElement('div');
+      back.className = 'list-row detail-back';
+      back.innerHTML = '<span class="row-name">← Назад к списку</span>';
+      back.addEventListener('click', closeDetail);
+      detailList.appendChild(back);
+    }
+    for (const it of items) {
+      const r = document.createElement('div'); r.className = 'list-row';
+      const dot = document.createElement('div'); dot.className = 'row-dot'; dot.style.background = it.color;
+      r.appendChild(dot);
+      const nameSpan = document.createElement('span'); nameSpan.className = 'row-name'; nameSpan.textContent = it.name;
+      r.appendChild(nameSpan);
+      if (it.region) {
+        const tag = document.createElement('span'); tag.className = 'row-tag'; tag.style.color = it.color; tag.textContent = it.region;
+        r.appendChild(tag);
+      }
+      const btn = makeTpButton(it.from, it.to);
+      if (btn) r.appendChild(btn);
+      detailList.appendChild(r);
+    }
+    detailList.style.display = 'block';
+    document.getElementById('sidebar-wrap').classList.add('has-detail');
+    if (mobile) { ruList.style.display = 'none'; dstList.style.display = 'none'; }
+  }
+
+  function closeDetail() {
+    detailList.style.display = 'none';
+    document.getElementById('sidebar-wrap').classList.remove('has-detail');
+    if (window.innerWidth < 900) stab(tab);
+  }
+
   function updateMarkers(fC, tD) {
     for (const [n, m] of Object.entries(dstMarkers)) {
       const hl = !fC&&!tD || (fC&&(ROUTES[fC]||[]).includes(n)) || (tD&&n===tD);
@@ -649,6 +694,7 @@ function initApp(data) {
     for (const e of Object.values(cEls))  { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
     for (const e of Object.values(dEls))  { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
     document.getElementById('info-bar').style.display = 'none';
+    closeDetail();
     updateMarkers(null,null); drawArcs();
   }
   window.reset = reset;
@@ -663,16 +709,11 @@ function initApp(data) {
     const dests = ROUTES[name]||[];
     const title = document.getElementById('info-title');
     title.style.color='#f0b82a'; title.textContent=`✈ Из ${name} · ${dests.length} направлений`;
-    const cs=document.getElementById('chip-scroll'); cs.innerHTML='';
-    for (const dn of dests) {
-      const meta=DEST_META[dn]; if(!meta) continue;
-      const color=REG[meta.r]?.c||'#888';
-      const chip=document.createElement('span'); chip.className='chip';
-      chip.style.borderLeftColor=color; chip.style.color=color;
-      chip.appendChild(document.createTextNode(dn));
-      addTpIcon(chip, name, dn);
-      cs.appendChild(chip);
-    }
+    const items = dests.map(dn => {
+      const meta = DEST_META[dn]; if (!meta) return null;
+      return { name: dn, region: meta.r, color: REG[meta.r]?.c || '#888', from: name, to: dn };
+    }).filter(Boolean);
+    openDetail(items);
     document.getElementById('info-bar').style.display='flex';
     if (cEls[name] && window.innerWidth >= 900) cEls[name].scrollIntoView({block:'nearest',behavior:'smooth'});
     updateMarkers(name,null); drawArcs();
@@ -690,14 +731,8 @@ function initApp(data) {
     }
     const title=document.getElementById('info-title');
     title.style.color=color; title.textContent=`📍 В ${name} · из ${srcs.length} городов РФ`;
-    const cs=document.getElementById('chip-scroll'); cs.innerHTML='';
-    for (const cn of srcs) {
-      const chip=document.createElement('span'); chip.className='chip';
-      chip.style.borderLeftColor='#f0b82a'; chip.style.color='#f0b82a';
-      chip.appendChild(document.createTextNode(cn));
-      addTpIcon(chip, cn, name);
-      cs.appendChild(chip);
-    }
+    const items = srcs.map(cn => ({ name: cn, region: null, color: '#f0b82a', from: cn, to: name }));
+    openDetail(items);
     document.getElementById('info-bar').style.display='flex';
     if (dEls[name] && window.innerWidth >= 900) dEls[name].scrollIntoView({block:'nearest',behavior:'smooth'});
     updateMarkers(null,name); drawArcs();
