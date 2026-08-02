@@ -454,14 +454,32 @@ function initApp(data) {
   const detailList = document.getElementById('detail-list');
   const cEls = {}, dEls = {};
 
+  // touchend раньше вызывал handler всегда, включая отпускание пальца
+  // после скролла списка — пролистать список не получалось, каждое
+  // касание засчитывалось как тап по городу. Порог в 10px отличает
+  // скролл (палец сместился) от тапа (остался на месте).
+  function bindTap(el, handler) {
+    let sx = 0, sy = 0, moved = false;
+    el.addEventListener('touchstart', e => {
+      const t = e.touches[0]; sx = t.clientX; sy = t.clientY; moved = false;
+    }, {passive:true});
+    el.addEventListener('touchmove', e => {
+      const t = e.touches[0];
+      if (Math.abs(t.clientX-sx) > 10 || Math.abs(t.clientY-sy) > 10) moved = true;
+    }, {passive:true});
+    el.addEventListener('touchend', e => {
+      if (!moved) { e.preventDefault(); handler(); }
+    });
+    el.addEventListener('click', handler);
+  }
+
   [...Object.keys(ROUTES)]
     .sort((a,b) => (ROUTES[b]||[]).length - (ROUTES[a]||[]).length)
     .forEach(city => {
       const cnt = (ROUTES[city]||[]).length;
       const r = document.createElement('div'); r.className = 'list-row';
       r.innerHTML = `<div class="row-dot" style="background:#f0b82a"></div><span class="row-name">${esc(city)}</span><span class="row-cnt">${cnt}</span>`;
-      r.addEventListener('click',   () => tapRU(city));
-      r.addEventListener('touchend', e => { e.preventDefault(); tapRU(city); });
+      bindTap(r, () => tapRU(city));
       ruList.appendChild(r); cEls[city] = r;
     });
 
@@ -473,8 +491,7 @@ function initApp(data) {
       const color = REG[meta.r]?.c || '#888';
       const r = document.createElement('div'); r.className = 'list-row';
       r.innerHTML = `<div class="row-dot" style="background:${color}"></div><span class="row-name">${esc(name)}</span><span class="row-tag" style="color:${color}">${esc(meta.r)}</span><span class="row-cnt">${cnt}</span>`;
-      r.addEventListener('click',    () => tapDST(name));
-      r.addEventListener('touchend', e => { e.preventDefault(); tapDST(name); });
+      bindTap(r, () => tapDST(name));
       dstList.appendChild(r); dEls[name] = r;
     });
 
