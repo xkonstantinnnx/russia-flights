@@ -287,8 +287,40 @@ function addTpIcon(chip, fromCity, toDest) {
   a.rel = 'nofollow sponsored noopener';
   a.title = 'Найти билеты';
   a.textContent = '✈';
-  a.addEventListener('click', e => e.stopPropagation());
+  a.addEventListener('click', e => {
+    e.stopPropagation();
+    trackTpClick(fromCity, toDest);
+  });
   chip.appendChild(a);
+}
+
+/* ══════════════════════════════════════════════════════
+   ЯНДЕКС.МЕТРИКА — опционально, ID из TP_CONFIG.metrikaId.
+   Пустой ID = счётчик не грузится. Любая ошибка (в т.ч. не
+   загрузившийся скрипт) гасится — на работу сайта не влияет.
+══════════════════════════════════════════════════════ */
+function initMetrika() {
+  if (!TP_CONFIG.metrikaId) return;
+  try {
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    ym(TP_CONFIG.metrikaId, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true });
+  } catch(e) {
+    console.warn('Яндекс.Метрика не инициализирована:', e.message);
+  }
+}
+initMetrika();
+
+function trackTpClick(fromCity, toDest) {
+  if (!TP_CONFIG.metrikaId || typeof ym !== 'function') return;
+  try {
+    ym(TP_CONFIG.metrikaId, 'reachGoal', 'tp_click', { origin: fromCity, destination: toDest });
+  } catch(e) {
+    console.warn('Метрика: не удалось отправить цель tp_click:', e.message);
+  }
 }
 
 /* ══════════════════════════════════════════════════════
