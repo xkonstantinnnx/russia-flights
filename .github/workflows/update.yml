@@ -41,6 +41,13 @@ jobs:
         run: |
           timeout 3000 python update_routes.py
 
+      - name: Обновить текстовый снапшот для краулеров (index.html, sitemap.xml)
+        # routes.json сохраняется инкрементально по источникам (см. комментарий
+        # ниже), поэтому валиден даже при частичном падении update_routes.py —
+        # снапшот пересобираем из того, что есть.
+        if: always()
+        run: python scripts/gen_static_snapshot.py
+
       - name: Commit routes.json if changed
         # Скрипт сохраняет routes.json после каждого источника; при падении
         # или таймауте коммитим то, что успело сохраниться (данные не теряются —
@@ -49,7 +56,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add routes.json
+          git add routes.json index.html sitemap.xml
           git diff --staged --quiet \
             && echo "Маршруты не изменились, коммит не нужен" \
             || git commit -m "Обновление маршрутов $(date -u +%Y-%m-%d)"
