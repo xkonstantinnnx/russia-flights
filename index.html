@@ -44,6 +44,7 @@ body{display:flex;flex-direction:column;}
 .leaflet-tooltip::before{display:none!important;}
 
 #tile-switch{position:absolute;top:8px;right:8px;z-index:1000;display:flex;gap:4px;}
+#version-badge{position:absolute;bottom:6px;right:8px;z-index:1000;font-size:9px;color:#5a7aa0;background:#0a1520cc;padding:2px 6px;border-radius:4px;pointer-events:none;}
 .ts-btn{font-size:10px;padding:3px 9px;border-radius:8px;border:1px solid #1e3252;background:#0a1828dd;color:#7090b0;cursor:pointer;backdrop-filter:blur(4px);}
 .ts-btn.on{background:#4a9eff22;color:#4a9eff;border-color:#4a9eff88;}
 
@@ -217,6 +218,9 @@ body{display:flex;flex-direction:column;}
     <button class="ts-btn" id="ts-yndx" onclick="setTiles('yndx')">Яндекс</button>
     <button class="ts-btn" id="ts-sat"  onclick="setTiles('sat')">Спутник</button>
   </div>
+  <!-- Версия интерфейса — правится вручную при заметных изменениях index.html,
+       не привязана к обновлению routes.json (для этого есть бейдж в шапке). -->
+  <div id="version-badge">v1.0 · 2026-08-05</div>
 </div>
 
 <div id="sidebar-wrap">
@@ -577,7 +581,9 @@ function initApp(data) {
   /* ── ВИЗОВЫЙ ФИЛЬТР ──
      Работает только по dst-маркерам/dst-list — виза зависит от направления,
      не от города вылета в РФ. Фильтрация независима от текущего выделения
-     (клик по городу/направлению) — обе учитываются вместе в updateMarkers. */
+     (клик по городу/направлению) — обе учитываются вместе в updateMarkers
+     и drawArcs (иначе дуги маршрутов остаются видны, а гаснет только
+     маркер направления). */
   let visaActive = new Set(['free', 'easy', 'visa']);
   function visaMatches(destName) {
     const cat = VISA_REGIMES[DEST_META[destName]?.c];
@@ -588,6 +594,7 @@ function initApp(data) {
     document.querySelector(`.visa-btn[data-visa="${cat}"]`).classList.toggle('on', visaActive.has(cat));
     for (const [name, row] of Object.entries(dEls)) row.style.display = visaMatches(name) ? '' : 'none';
     updateMarkers(aC, aD);
+    drawArcs();
   }
   window.toggleVisaFilter = toggleVisaFilter;
 
@@ -720,7 +727,7 @@ function initApp(data) {
       const fr   = RU_COORDS[arc.f];
       const dt   = DEST_META[arc.t];
       if (!fr || !dt) continue;
-      const hl    = !curFrom && !curTo || (curFrom && arc.f===curFrom) || (curTo && arc.t===curTo);
+      const hl    = visaMatches(arc.t) && (!curFrom && !curTo || (curFrom && arc.f===curFrom) || (curTo && arc.t===curTo));
       const alpha = hl ? (curFrom||curTo ? 0.72 : 0.35) : 0.025;
       const sw    = hl ? (curFrom||curTo ? 2.0  : 1.0)  : 0.5;
       const color = REG[dt.r]?.c || '#888';
