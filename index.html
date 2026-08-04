@@ -59,6 +59,10 @@ body{display:flex;flex-direction:column;}
 #tab-bar{display:flex;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
 .tab-btn{flex:1;padding:7px 4px;font-size:12px;border:none;cursor:pointer;border-bottom:2px solid transparent;background:transparent;color:#4a6a90;}
 
+#visa-filter{display:flex;gap:4px;flex-wrap:wrap;padding:6px 12px;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
+.visa-btn{padding:4px 8px;font-size:10px;border:1px solid #1e3252;border-radius:10px;cursor:pointer;background:transparent;color:#4a6a90;}
+.visa-btn.on{background:#132238;border-color:#2a4568;color:#b8ccec;}
+
 #lists-wrap{flex:1;overflow:hidden;position:relative;}
 #tp-disclosure{flex-shrink:0;font-size:9px;line-height:1.4;color:#3a5578;padding:5px 14px;background:#060c16;border-top:1px solid #0e1e2e;}
 /* Текстовый снапшот маршрутов (см. комментарий у #static-routes-snapshot в body) */
@@ -225,6 +229,12 @@ body{display:flex;flex-direction:column;}
 
 <div id="legend"></div>
 
+<div id="visa-filter" style="display:none;">
+  <button class="visa-btn on" data-visa="free" onclick="toggleVisaFilter('free')">Без визы</button>
+  <button class="visa-btn on" data-visa="easy" onclick="toggleVisaFilter('easy')">E-виза/по прилёту</button>
+  <button class="visa-btn on" data-visa="visa" onclick="toggleVisaFilter('visa')">Виза</button>
+</div>
+
 <div id="tab-bar">
   <button class="tab-btn" id="tab-ru"  onclick="stab('ru')">🟡 Откуда (города России)</button>
   <button class="tab-btn" id="tab-dst" onclick="stab('dst')">🔵 Куда (направления)</button>
@@ -287,6 +297,56 @@ const DEST_AIRPORT_IATA = {
 const CITY_IATA = { "Москва":"MOW", "Пекин":"BJS", "Шанхай":"SHA" };
 function iataForRU(city)  { return CITY_IATA[city] || RU_AIRPORT_IATA[city]  || null; }
 function iataForDest(dst) { return CITY_IATA[dst]  || DEST_AIRPORT_IATA[dst] || null; }
+
+/* ══════════════════════════════════════════════════════
+   ВИЗОВЫЙ РЕЖИМ — см. scripts/gen_visa_regimes.py
+══════════════════════════════════════════════════════ */
+// VISA_REGIMES_START
+// Визовый режим для граждан РФ: free = без визы, easy = e-виза/по прилёту,
+// visa = нужна виза заранее. Ключи — DEST_INFO.c из routes.json.
+// Источник: https://ru.wikipedia.org/wiki/Визовые_требования_для_граждан_России (сверено 2026-08-04). Не автообновляется —
+// см. scripts/gen_visa_regimes.py, визовые правила меняются без предупреждения.
+const VISA_REGIMES = {
+  "Абхазия": "free",
+  "Азербайджан": "free",
+  "Алжир": "visa",
+  "Армения": "free",
+  "Бахрейн": "easy",
+  "Беларусь": "free",
+  "Вьетнам": "free",
+  "Гонконг (КНР)": "free",
+  "Грузия": "free",
+  "Египет": "easy",
+  "Израиль": "visa",
+  "Индия": "easy",
+  "Индонезия (Бали)": "free",
+  "Иордания": "free",
+  "Иран": "easy",
+  "КНДР": "visa",
+  "Казахстан": "free",
+  "Катар": "free",
+  "Китай": "free",
+  "Кувейт": "visa",
+  "Кыргызстан": "free",
+  "Мальдивы": "free",
+  "Марокко": "free",
+  "Монголия": "free",
+  "ОАЭ": "free",
+  "Оман": "free",
+  "Саудовская Аравия": "free",
+  "Сейшелы": "easy",
+  "Сербия": "free",
+  "Таджикистан": "free",
+  "Таиланд": "free",
+  "Танзания": "easy",
+  "Тунис": "free",
+  "Туркменистан": "easy",
+  "Турция": "free",
+  "Узбекистан": "free",
+  "Шри-Ланка": "free",
+  "Эфиопия": "easy"
+};
+// VISA_REGIMES_END
 
 /* ══════════════════════════════════════════════════════
    TRAVELPAYOUTS — партнёрские ссылки
@@ -506,11 +566,30 @@ function initApp(data) {
       const meta  = DEST_META[name];
       const cnt   = (REVERSE[name]||[]).length;
       const color = REG[meta.r]?.c || '#888';
+      const visaCat = VISA_REGIMES[meta.c] || '';
       const r = document.createElement('div'); r.className = 'list-row';
+      r.dataset.visa = visaCat;
       r.innerHTML = `<div class="row-dot" style="background:${color}"></div><span class="row-name">${esc(name)}</span><span class="row-tag" style="color:${color}">${esc(meta.r)}</span><span class="row-cnt">${cnt}</span>`;
       bindTap(r, () => tapDST(name));
       dstList.appendChild(r); dEls[name] = r;
     });
+
+  /* ── ВИЗОВЫЙ ФИЛЬТР ──
+     Работает только по dst-маркерам/dst-list — виза зависит от направления,
+     не от города вылета в РФ. Фильтрация независима от текущего выделения
+     (клик по городу/направлению) — обе учитываются вместе в updateMarkers. */
+  let visaActive = new Set(['free', 'easy', 'visa']);
+  function visaMatches(destName) {
+    const cat = VISA_REGIMES[DEST_META[destName]?.c];
+    return !cat || visaActive.has(cat); // нет данных по стране — не скрываем
+  }
+  function toggleVisaFilter(cat) {
+    if (visaActive.has(cat)) visaActive.delete(cat); else visaActive.add(cat);
+    document.querySelector(`.visa-btn[data-visa="${cat}"]`).classList.toggle('on', visaActive.has(cat));
+    for (const [name, row] of Object.entries(dEls)) row.style.display = visaMatches(name) ? '' : 'none';
+    updateMarkers(aC, aD);
+  }
+  window.toggleVisaFilter = toggleVisaFilter;
 
   /* ── TABS ── */
   let tab = 'ru';
@@ -522,6 +601,7 @@ function initApp(data) {
     document.getElementById('tab-dst').style.borderBottomColor = id==='dst' ? '#4a9eff' : 'transparent';
     ruList.style.display  = id==='ru'  ? 'block' : 'none';
     dstList.style.display = id==='dst' ? 'block' : 'none';
+    document.getElementById('visa-filter').style.display = id==='dst' ? 'flex' : 'none';
   }
   window.stab = stab;
   stab('ru');
@@ -710,7 +790,7 @@ function initApp(data) {
 
   function updateMarkers(fC, tD) {
     for (const [n, m] of Object.entries(dstMarkers)) {
-      const hl = !fC&&!tD || (fC&&(ROUTES[fC]||[]).includes(n)) || (tD&&n===tD);
+      const hl = visaMatches(n) && (!fC&&!tD || (fC&&(ROUTES[fC]||[]).includes(n)) || (tD&&n===tD));
       m.setStyle({fillOpacity: hl?0.9:0.06, opacity: hl?0.5:0.05, weight: n===tD?2:1});
       m.setRadius(n===tD ? 7 : 5);
     }
