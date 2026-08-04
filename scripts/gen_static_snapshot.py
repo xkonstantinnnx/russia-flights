@@ -36,7 +36,48 @@ def esc(s: str) -> str:
     )
 
 
-def build_fragment(data: dict) -> str:
+def build_faq_entries(data: dict, top_n: int = 5) -> list[tuple[str, str]]:
+    """Данные для FAQ считаются из routes.json — при изменении маршрутов
+    вопросы про топ-направления автоматически подстраиваются под текущие
+    данные, а не остаются висеть про то, чего уже нет."""
+    routes = data.get("routes", {})
+    dests = data.get("destinations", {})
+
+    reverse: dict[str, list[str]] = {}
+    for city, dst_list in routes.items():
+        for d in dst_list:
+            reverse.setdefault(d, []).append(city)
+    top_dests = sorted(reverse.items(), key=lambda kv: -len(kv[1]))[:top_n]
+
+    faqs = [
+        (
+            f"Куда можно улететь из России без пересадки в {CUR_YEAR} году?",
+            "Полный список направлений и городов вылета — выше на этой странице, "
+            "данные обновляются автоматически несколько раз в месяц.",
+        ),
+        (
+            "Как часто обновляются данные о прямых рейсах?",
+            "Автоматически, из нескольких независимых источников "
+            "(AirLabs, AeroDataBox, Яндекс.Расписания), без ручного вмешательства.",
+        ),
+        (
+            "Из каких городов России есть прямые международные рейсы?",
+            ", ".join(sorted(routes.keys())) + ".",
+        ),
+    ]
+    for dest, cities in top_dests:
+        country = dests.get(dest, {}).get("c")
+        dest_label = f"{dest} ({country})" if country else dest
+        faqs.append(
+            (
+                f"Из каких городов России есть прямой рейс в {dest_label}?",
+                ", ".join(sorted(cities)) + ".",
+            )
+        )
+    return faqs
+
+
+def build_fragment(data: dict, faqs: list[tuple[str, str]]) -> str:
     routes = data.get("routes", {})
     dests = data.get("destinations", {})
     updated = data.get("updated", "")
@@ -64,27 +105,19 @@ def build_fragment(data: dict) -> str:
         parts.append(f"<p>{', '.join(items)}.</p>")
 
     parts.append("<h3>Частые вопросы</h3>")
-    parts.append(
-        f"<p><b>Куда можно улететь из России без пересадки в {CUR_YEAR} году?</b><br>"
-        "Полный список направлений и городов вылета — выше на этой странице, "
-        "данные обновляются автоматически несколько раз в месяц.</p>"
-    )
-    parts.append(
-        "<p><b>Как часто обновляются данные о прямых рейсах?</b><br>"
-        "Автоматически, из нескольких независимых источников "
-        "(AirLabs, AeroDataBox, Яндекс.Расписания), без ручного вмешательства.</p>"
-    )
+    for q, a in faqs:
+        parts.append(f"<p><b>{esc(q)}</b><br>{esc(a)}</p>")
     parts.append("</div>")
     return "\n".join(parts)
 
 
-def build_jsonld(data: dict) -> str:
+def build_jsonld(data: dict, faqs: list[tuple[str, str]]) -> str:
     routes = data.get("routes", {})
     updated = data.get("updated", "")
     n_cities = len(routes)
     n_routes = sum(len(v) for v in routes.values())
-    obj = {
-        "@context": "https://schema.org",
+
+    dataset = {
         "@type": "Dataset",
         "name": "Прямые международные рейсы из городов России",
         "description": (
@@ -98,8 +131,22 @@ def build_jsonld(data: dict) -> str:
         "isAccessibleForFree": True,
     }
     if updated:
-        obj["dateModified"] = updated
-    return json.dumps(obj, ensure_ascii=False, indent=2)
+        dataset["dateModified"] = updated
+
+    faqpage = {
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": q,
+                "acceptedAnswer": {"@type": "Answer", "text": a},
+            }
+            for q, a in faqs
+        ],
+    }
+
+    graph = {"@context": "https://schema.org", "@graph": [dataset, faqpage]}
+    return json.dumps(graph, ensure_ascii=False, indent=2)
 
 
 def replace_between(text: str, start_marker: str, end_marker: str, new_content: str) -> str:
@@ -127,12 +174,13 @@ def build_sitemap(updated: str) -> str:
 def main():
     data = json.loads(ROUTES_PATH.read_text(encoding="utf-8"))
     html = INDEX_PATH.read_text(encoding="utf-8")
+    faqs = build_faq_entries(data)
 
     html = replace_between(
-        html, "<!-- STATIC_SNAPSHOT_START -->", "<!-- STATIC_SNAPSHOT_END -->", build_fragment(data)
+        html, "<!-- STATIC_SNAPSHOT_START -->", "<!-- STATIC_SNAPSHOT_END -->", build_fragment(data, faqs)
     )
 
-    jsonld_block = f'<script type="application/ld+json">\n{build_jsonld(data)}\n</script>'
+    jsonld_block = f'<script type="application/ld+json">\n{build_jsonld(data, faqs)}\n</script>'
     html = replace_between(html, "<!-- STATIC_JSONLD_START -->", "<!-- STATIC_JSONLD_END -->", jsonld_block)
 
     INDEX_PATH.write_text(html, encoding="utf-8")
