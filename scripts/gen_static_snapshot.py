@@ -129,6 +129,7 @@ def build_jsonld(data: dict, faqs: list[tuple[str, str]]) -> str:
         "inLanguage": "ru",
         "creator": {"@type": "Organization", "name": "russia-flights.ru", "url": "https://russia-flights.ru/"},
         "isAccessibleForFree": True,
+        "license": "https://creativecommons.org/licenses/by/4.0/",
     }
     if updated:
         dataset["dateModified"] = updated
