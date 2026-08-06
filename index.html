@@ -57,6 +57,8 @@ body{display:flex;flex-direction:column;}
 
 #legend{display:flex;flex-wrap:wrap;gap:3px;padding:4px 12px;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
 .leg{display:flex;align-items:center;gap:4px;font-size:10px;color:#7090b0;}
+.leg-clickable{cursor:pointer;user-select:none;}
+.leg-clickable.leg-off{opacity:.35;}
 .leg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block;}
 
 #tab-bar{display:flex;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
@@ -222,11 +224,11 @@ body{display:flex;flex-direction:column;}
   </div>
   <div id="season-switch">
     <button class="ts-btn" id="season-toggle" onclick="toggleSeason()">🌦 Сезон</button>
-    <select id="season-month" style="display:none;" onchange="setSeasonMonth(this.value)"></select>
+    <select id="season-month" style="visibility:hidden;" onchange="setSeasonMonth(this.value)"></select>
   </div>
   <!-- Версия интерфейса — правится вручную при заметных изменениях index.html,
        не привязана к обновлению routes.json (для этого есть бейдж в шапке). -->
-  <div id="version-badge">v1.0</div>
+  <div id="version-badge">v1.1</div>
 </div>
 
 <div id="sidebar-wrap">
@@ -1643,31 +1645,59 @@ function initApp(data) {
     fromSeed ? 'Резервные данные · март 2026' : 'Обновлено автоматически';
 
   /* ── СЕЗОННЫЙ СЛОЙ — состояние ──
-     Выключен по умолчанию. seasonMonth: 0=январь..11=декабрь (индекс SEASON_DATA). */
+     Выключен по умолчанию. seasonMonth: 0=январь..11=декабрь (индекс SEASON_DATA).
+     seasonFilterActive — какие категории (good/bad/unknown) показывать;
+     работает только пока seasonActive, кликается прямо по легенде (см. renderLegend). */
   let seasonActive = false;
   let seasonMonth = new Date().getMonth();
+  let seasonFilterActive = new Set(['good', 'bad', 'unknown']);
+  function seasonMatches(destName) {
+    if (!seasonActive) return true;
+    const months = SEASON_DATA[destName];
+    const val = months ? months[seasonMonth] : undefined;
+    const key = val === true ? 'good' : val === false ? 'bad' : 'unknown';
+    return seasonFilterActive.has(key);
+  }
 
   /* ── LEGEND ──
-     Переключается между списком регионов (обычный режим) и двумя пунктами
-     сезонного слоя — см. toggleSeason(). */
+     Переключается между списком регионов (обычный режим, некликабельно) и
+     тремя пунктами сезонного слоя (кликабельно — фильтрует направления,
+     как visa-btn, см. applyDstFilters). */
   const lgBox = document.getElementById('legend');
   const SEASON_COLORS = { good: '#4ade80', bad: '#f87171', unknown: '#5a6b85' };
+  const SEASON_LEGEND_ITEMS = [
+    ['Комфортный сезон', 'good', SEASON_COLORS.good],
+    ['Не сезон', 'bad', SEASON_COLORS.bad],
+    ['Нет данных', 'unknown', SEASON_COLORS.unknown],
+  ];
   function renderLegend() {
     lgBox.innerHTML = '';
-    const items = seasonActive
-      ? [['Комфортный сезон', SEASON_COLORS.good], ['Не сезон', SEASON_COLORS.bad], ['Нет данных', SEASON_COLORS.unknown]]
-      : Object.values(REG).map(v => [v.l, v.c]);
-    for (const [label, color] of items) {
-      const d = document.createElement('div'); d.className = 'leg';
-      d.innerHTML = `<span class="leg-dot" style="background:${color}"></span>${label}`;
-      lgBox.appendChild(d);
+    if (seasonActive) {
+      for (const [label, key, color] of SEASON_LEGEND_ITEMS) {
+        const d = document.createElement('div');
+        d.className = 'leg leg-clickable' + (seasonFilterActive.has(key) ? '' : ' leg-off');
+        d.innerHTML = `<span class="leg-dot" style="background:${color}"></span>${label}`;
+        d.addEventListener('click', () => toggleSeasonFilter(key));
+        lgBox.appendChild(d);
+      }
+    } else {
+      for (const v of Object.values(REG)) {
+        const d = document.createElement('div'); d.className = 'leg';
+        d.innerHTML = `<span class="leg-dot" style="background:${v.c}"></span>${v.l}`;
+        lgBox.appendChild(d);
+      }
     }
   }
   renderLegend();
 
+  function toggleSeasonFilter(key) {
+    if (seasonFilterActive.has(key)) seasonFilterActive.delete(key); else seasonFilterActive.add(key);
+    renderLegend();
+    applyDstFilters();
+  }
+
   /* ── СЕЗОННЫЙ СЛОЙ — переключатель и выбор месяца ──
-     Дуги маршрутов слой не красит (см. план) — меняется только dstColor(),
-     поэтому здесь достаточно updateMarkers(), drawArcs() звать не нужно. */
+     Дуги маршрутов слой не красит (см. план) — меняется только dstColor(). */
   const MONTH_NAMES = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
   const seasonMonthSel = document.getElementById('season-month');
   MONTH_NAMES.forEach((label, i) => {
@@ -1680,15 +1710,17 @@ function initApp(data) {
   function toggleSeason() {
     seasonActive = !seasonActive;
     document.getElementById('season-toggle').classList.toggle('on', seasonActive);
-    seasonMonthSel.style.display = seasonActive ? 'inline-block' : 'none';
+    // visibility, не display — select всегда занимает своё место справа от
+    // кнопки, чтобы кнопка не сдвигалась при появлении/исчезновении списка
+    seasonMonthSel.style.visibility = seasonActive ? 'visible' : 'hidden';
     renderLegend();
-    updateMarkers(aC, aD);
+    applyDstFilters();
   }
   window.toggleSeason = toggleSeason;
 
   function setSeasonMonth(v) {
     seasonMonth = parseInt(v, 10);
-    updateMarkers(aC, aD);
+    applyDstFilters();
   }
   window.setSeasonMonth = setSeasonMonth;
 
@@ -1757,12 +1789,22 @@ function initApp(data) {
     const cat = VISA_REGIMES[DEST_META[destName]?.c];
     return !cat || visaActive.has(cat); // нет данных по стране — не скрываем
   }
+
+  // Общая точка применения обоих фильтров (визового и сезонного) к
+  // dst-list/маркерам/дугам — вызывается из toggleVisaFilter,
+  // toggleSeasonFilter, toggleSeason и setSeasonMonth.
+  function applyDstFilters() {
+    for (const [name, row] of Object.entries(dEls)) {
+      row.style.display = (visaMatches(name) && seasonMatches(name)) ? '' : 'none';
+    }
+    updateMarkers(aC, aD);
+    drawArcs();
+  }
+
   function toggleVisaFilter(cat) {
     if (visaActive.has(cat)) visaActive.delete(cat); else visaActive.add(cat);
     document.querySelector(`.visa-btn[data-visa="${cat}"]`).classList.toggle('on', visaActive.has(cat));
-    for (const [name, row] of Object.entries(dEls)) row.style.display = visaMatches(name) ? '' : 'none';
-    updateMarkers(aC, aD);
-    drawArcs();
+    applyDstFilters();
   }
   window.toggleVisaFilter = toggleVisaFilter;
 
@@ -1905,7 +1947,7 @@ function initApp(data) {
       const fr   = RU_COORDS[arc.f];
       const dt   = DEST_META[arc.t];
       if (!fr || !dt) continue;
-      const hl    = visaMatches(arc.t) && (!curFrom && !curTo || (curFrom && arc.f===curFrom) || (curTo && arc.t===curTo));
+      const hl    = visaMatches(arc.t) && seasonMatches(arc.t) && (!curFrom && !curTo || (curFrom && arc.f===curFrom) || (curTo && arc.t===curTo));
       const alpha = hl ? (curFrom||curTo ? 0.72 : 0.35) : 0.025;
       const sw    = hl ? (curFrom||curTo ? 2.0  : 1.0)  : 0.5;
       const color = REG[dt.r]?.c || '#888';
@@ -1975,7 +2017,7 @@ function initApp(data) {
 
   function updateMarkers(fC, tD) {
     for (const [n, m] of Object.entries(dstMarkers)) {
-      const hl = visaMatches(n) && (!fC&&!tD || (fC&&(ROUTES[fC]||[]).includes(n)) || (tD&&n===tD));
+      const hl = visaMatches(n) && seasonMatches(n) && (!fC&&!tD || (fC&&(ROUTES[fC]||[]).includes(n)) || (tD&&n===tD));
       m.setStyle({fillColor: dstColor(n), fillOpacity: hl?0.9:0.06, opacity: hl?0.5:0.05, weight: n===tD?2:1});
       m.setRadius(n===tD ? 7 : 5);
     }
