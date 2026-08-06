@@ -44,9 +44,11 @@ body{display:flex;flex-direction:column;}
 .leaflet-tooltip::before{display:none!important;}
 
 #tile-switch{position:absolute;top:8px;right:8px;z-index:1000;display:flex;gap:4px;}
+#season-switch{position:absolute;top:38px;right:8px;z-index:1000;display:flex;gap:4px;align-items:center;}
 #version-badge{position:absolute;bottom:6px;right:8px;z-index:1000;font-size:9px;color:#5a7aa0;background:#0a1520cc;padding:2px 6px;border-radius:4px;pointer-events:none;}
 .ts-btn{font-size:10px;padding:3px 9px;border-radius:8px;border:1px solid #1e3252;background:#0a1828dd;color:#7090b0;cursor:pointer;backdrop-filter:blur(4px);}
 .ts-btn.on{background:#4a9eff22;color:#4a9eff;border-color:#4a9eff88;}
+#season-month{font-size:10px;padding:2px 4px;border-radius:6px;border:1px solid #1e3252;background:#0a1828dd;color:#b8ccec;}
 
 #info-bar{background:#0a1520ee;border-bottom:1px solid #1e3252;padding:0 14px;display:none;flex-direction:column;flex-shrink:0;backdrop-filter:blur(8px);}
 #info-top{display:flex;align-items:center;justify-content:space-between;padding:7px 0 3px;}
@@ -218,6 +220,10 @@ body{display:flex;flex-direction:column;}
     <button class="ts-btn" id="ts-yndx" onclick="setTiles('yndx')">Яндекс</button>
     <button class="ts-btn" id="ts-sat"  onclick="setTiles('sat')">Спутник</button>
   </div>
+  <div id="season-switch">
+    <button class="ts-btn" id="season-toggle" onclick="toggleSeason()">🌦 Сезон</button>
+    <select id="season-month" style="display:none;" onchange="setSeasonMonth(this.value)"></select>
+  </div>
   <!-- Версия интерфейса — правится вручную при заметных изменениях index.html,
        не привязана к обновлению routes.json (для этого есть бейдж в шапке). -->
   <div id="version-badge">v1.0</div>
@@ -351,6 +357,1126 @@ const VISA_REGIMES = {
   "Эфиопия": "easy"
 };
 // VISA_REGIMES_END
+
+/* ══════════════════════════════════════════════════════
+   СЕЗОННОСТЬ — см. scripts/gen_season_data.py
+══════════════════════════════════════════════════════ */
+// SEASON_DATA_START
+// Климатическая комфортность по месяцам для каждого направления.
+// Индекс массива 0 = январь ... 11 = декабрь. true = комфортно, false = не сезон.
+// Критерий: сред. дневной максимум t > 34°C или < 5°C,
+// либо сред. осадки за месяц > 200мм (муссон). Источник — Open-Meteo
+// Historical Weather API (5 лет истории). Не автообновляется —
+// см. scripts/gen_season_data.py.
+const SEASON_DATA = {
+  "Алжир": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Монастир": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Маэ": [
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false
+  ],
+  "Касабланка": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Аддис-Абеба": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "Александрия": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Каир": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "Хургада": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Эль-Аламейн": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Шарм-эль-Шейх": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "Дар-эс-Салам": [
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Занзибар": [
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Тель-Авив": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Анталья": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Стамбул": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Измир": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Даламан": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Белград": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Манама": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "Эр-Рияд": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Тегеран": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Амман": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Эль-Кувейт": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Абу-Даби": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Дубай": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Рас-эль-Хайма": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Шарджа": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Маскат": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "Доха": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Алматы": [
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false
+  ],
+  "Астана": [
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Бишкек": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false
+  ],
+  "Ош": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Шымкент": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Усть-Каменогорск": [
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Баку": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Гянджа": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Ереван": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Батуми": [
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  "Кутаиси": [
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true
+  ],
+  "Сухум": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true
+  ],
+  "Тбилиси": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Минск": [
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Ашхабад": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Душанбе": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Худжанд": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Куляб": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Навои": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Наманган": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Андижан": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Фергана": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Ургенч": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    false
+  ],
+  "Бухара": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Карши": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Самарканд": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Ташкент": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Гоа": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Коломбо": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true
+  ],
+  "Гонконг": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "Дели": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Мале": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "Бангкок": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Пхукет": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    true
+  ],
+  "Нячанг": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true
+  ],
+  "Дананг": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "Ханой": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Хошимин": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Денпасар": [
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Пекин": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false
+  ],
+  "Хайлар": [
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Тайюань": [
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false
+  ],
+  "Гуанчжоу": [
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "Санья": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+  ],
+  "Пхеньян": [
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    false
+  ],
+  "Улан-Батор": [
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Шанхай": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Чэнду": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Харбин": [
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Далянь": [
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false
+  ]
+};
+// SEASON_DATA_END
 
 /* ══════════════════════════════════════════════════════
    TRAVELPAYOUTS — партнёрские ссылки
@@ -516,13 +1642,55 @@ function initApp(data) {
   document.getElementById('h-meta').textContent =
     fromSeed ? 'Резервные данные · март 2026' : 'Обновлено автоматически';
 
-  /* ── LEGEND ── */
+  /* ── СЕЗОННЫЙ СЛОЙ — состояние ──
+     Выключен по умолчанию. seasonMonth: 0=январь..11=декабрь (индекс SEASON_DATA). */
+  let seasonActive = false;
+  let seasonMonth = new Date().getMonth();
+
+  /* ── LEGEND ──
+     Переключается между списком регионов (обычный режим) и двумя пунктами
+     сезонного слоя — см. toggleSeason(). */
   const lgBox = document.getElementById('legend');
-  for (const [k,v] of Object.entries(REG)) {
-    const d = document.createElement('div'); d.className = 'leg';
-    d.innerHTML = `<span class="leg-dot" style="background:${v.c}"></span>${v.l}`;
-    lgBox.appendChild(d);
+  const SEASON_COLORS = { good: '#4ade80', bad: '#f87171', unknown: '#5a6b85' };
+  function renderLegend() {
+    lgBox.innerHTML = '';
+    const items = seasonActive
+      ? [['Комфортный сезон', SEASON_COLORS.good], ['Не сезон', SEASON_COLORS.bad], ['Нет данных', SEASON_COLORS.unknown]]
+      : Object.values(REG).map(v => [v.l, v.c]);
+    for (const [label, color] of items) {
+      const d = document.createElement('div'); d.className = 'leg';
+      d.innerHTML = `<span class="leg-dot" style="background:${color}"></span>${label}`;
+      lgBox.appendChild(d);
+    }
   }
+  renderLegend();
+
+  /* ── СЕЗОННЫЙ СЛОЙ — переключатель и выбор месяца ──
+     Дуги маршрутов слой не красит (см. план) — меняется только dstColor(),
+     поэтому здесь достаточно updateMarkers(), drawArcs() звать не нужно. */
+  const MONTH_NAMES = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  const seasonMonthSel = document.getElementById('season-month');
+  MONTH_NAMES.forEach((label, i) => {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = label;
+    if (i === seasonMonth) opt.selected = true;
+    seasonMonthSel.appendChild(opt);
+  });
+
+  function toggleSeason() {
+    seasonActive = !seasonActive;
+    document.getElementById('season-toggle').classList.toggle('on', seasonActive);
+    seasonMonthSel.style.display = seasonActive ? 'inline-block' : 'none';
+    renderLegend();
+    updateMarkers(aC, aD);
+  }
+  window.toggleSeason = toggleSeason;
+
+  function setSeasonMonth(v) {
+    seasonMonth = parseInt(v, 10);
+    updateMarkers(aC, aD);
+  }
+  window.setSeasonMonth = setSeasonMonth;
 
   /* ── LISTS ── */
   // Экранирование строк из routes.json перед вставкой в innerHTML:
@@ -677,13 +1845,23 @@ function initApp(data) {
     "Анадырь":{la:64.73,lo:177.51},"Комсомольск-на-Амуре":{la:50.55,lo:137.00}
   };
 
-  /* ── MARKERS ── */
+  /* ── MARKERS ──
+     Цвет dst-маркера: обычно по региону, а при включённом сезонном слое —
+     по климатической комфортности выбранного месяца (SEASON_DATA). */
+  function dstColor(name) {
+    if (seasonActive) {
+      const months = SEASON_DATA[name];
+      const val = months ? months[seasonMonth] : undefined;
+      return val === true ? SEASON_COLORS.good : val === false ? SEASON_COLORS.bad : SEASON_COLORS.unknown;
+    }
+    return REG[DEST_META[name]?.r]?.c || '#888';
+  }
+
   const ruMarkers = {}, dstMarkers = {};
 
   for (const [name, meta] of Object.entries(DEST_META)) {
-    const color = REG[meta.r]?.c || '#888';
     const m = L.circleMarker([meta.la, meta.lo], {
-      radius:5, fillColor:color, fillOpacity:0.9, color:'#fff', weight:1, opacity:0.5
+      radius:5, fillColor:dstColor(name), fillOpacity:0.9, color:'#fff', weight:1, opacity:0.5
     }).addTo(map);
     m.bindTooltip(`<b>${esc(name)}</b> · ${esc(meta.r)}`, {direction:'top', offset:[0,-4]});
     m.on('click', () => { stab('dst'); tapDST(name); });
@@ -798,7 +1976,7 @@ function initApp(data) {
   function updateMarkers(fC, tD) {
     for (const [n, m] of Object.entries(dstMarkers)) {
       const hl = visaMatches(n) && (!fC&&!tD || (fC&&(ROUTES[fC]||[]).includes(n)) || (tD&&n===tD));
-      m.setStyle({fillOpacity: hl?0.9:0.06, opacity: hl?0.5:0.05, weight: n===tD?2:1});
+      m.setStyle({fillColor: dstColor(n), fillOpacity: hl?0.9:0.06, opacity: hl?0.5:0.05, weight: n===tD?2:1});
       m.setRadius(n===tD ? 7 : 5);
     }
     for (const [n, obj] of Object.entries(ruMarkers)) {
