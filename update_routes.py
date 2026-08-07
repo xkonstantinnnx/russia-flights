@@ -399,20 +399,22 @@ def icao_to_dest_name(arr_icao: str) -> str | None:
     return info["n"] if info else None
 
 
-def load_current_routes() -> dict[str, list[str]]:
+def load_current_routes() -> tuple[dict[str, list[str]], dict[str, dict]]:
     if not ROUTES_FILE.exists():
         print("  routes.json не найден — начинаем с нуля", flush=True)
-        return {}
+        return {}, {}
     try:
         with open(ROUTES_FILE, encoding="utf-8") as f:
             data = json.load(f)
         routes = data.get("routes", {})
+        weights = data.get("weights", {})
         print(f"  Загружено: {len(routes)} городов, "
-              f"{sum(len(v) for v in routes.values())} маршрутов", flush=True)
-        return routes
+              f"{sum(len(v) for v in routes.values())} маршрутов, "
+              f"{len(weights)} весов", flush=True)
+        return routes, weights
     except Exception as e:
         print(f"  Ошибка чтения routes.json: {e}", flush=True)
-        return {}
+        return {}, {}
 
 
 def make_airport_stages(current_routes: dict) -> tuple[list, list]:
@@ -439,7 +441,7 @@ def make_airport_stages(current_routes: dict) -> tuple[list, list]:
 
 
 def build_output(confirmed: dict[str, set[str]], now: datetime,
-                 sources_used: list[str]) -> dict:
+                 sources_used: list[str], weights: dict[str, dict] | None = None) -> dict:
     routes: dict[str, list[str]] = {}
     used_icao: set[str] = set()
     for city, dest_names in confirmed.items():
@@ -461,11 +463,19 @@ def build_output(confirmed: dict[str, set[str]], now: datetime,
                 "la": info["la"], "lo": info["lo"],
                 "r":  info["r"],  "c":  info["c"],
             }
+    # Веса синхронизируем со списком актуальных маршрутов: если маршрут исчез
+    # (подтверждён отсутствующим при повторном опросе AirLabs), его вес не
+    # должен продолжать висеть в файле — иначе после переименования/удаления
+    # направления weights будет тихо накапливать мусор.
+    live_keys = {f"{city}→{name}" for city, names in routes.items() for name in names}
+    clean_weights = {k: v for k, v in (weights or {}).items() if k in live_keys}
+
     return {
         "updated":      now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source":       " + ".join(sources_used),
         "routes":       routes,
         "destinations": destinations,
+        "weights":      clean_weights,
     }
 
 
@@ -478,7 +488,9 @@ AIRLABS_ERROR = object()
 
 def fetch_airlabs_routes(icao: str, api_key: str):
     """None = лимит исчерпан (стоп источника). [] = нет маршрутов.
-    list = маршруты. AIRLABS_ERROR = сбой запроса, аэропорт не опрошен."""
+    list = маршруты (СЫРЫЕ элементы ответа AirLabs, не схлопнутые до arr_icao —
+    нужны airline_iata/duration/days для весов маршрутов, см. summarize_routes()).
+    AIRLABS_ERROR = сбой запроса, аэропорт не опрошен."""
     print(f"    → AirLabs dep_icao={icao}", flush=True)
     try:
         r = requests.get(
@@ -493,7 +505,7 @@ def fetch_airlabs_routes(icao: str, api_key: str):
                 print(f"    AirLabs error: {data['error']}", flush=True)
                 return None
             routes = data.get("response", [])
-            return [f.get("arr_icao", "").upper() for f in routes if f.get("arr_icao")]
+            return [f for f in routes if f.get("arr_icao")]
         elif r.status_code == 429:
             print("    AirLabs: лимит исчерпан", flush=True)
             return None
@@ -505,41 +517,76 @@ def fetch_airlabs_routes(icao: str, api_key: str):
         return AIRLABS_ERROR
 
 
+def summarize_route_weight(flights: list[dict]) -> dict:
+    """Сворачивает сырые рейсы AirLabs для ОДНОГО направления (общий arr_icao)
+    в компактную сводку: число уникальных операторов (без учёта кодшеринга —
+    cs_airline_iata намеренно игнорируется, иначе один физический рейс с
+    несколькими кодшер-партнёрами задвоил бы счётчик перевозчиков),
+    число дней в неделю (по объединению f['days'] всех рейсов направления)
+    и время полёта в минутах (медиана по имеющимся duration, т.к. отдельные
+    записи иногда содержат выбросы/ошибки данных).
+    """
+    carriers = {f["airline_iata"] for f in flights if f.get("airline_iata")}
+    days: set[str] = set()
+    for f in flights:
+        days.update(f.get("days") or [])
+    durations = sorted(f["duration"] for f in flights if isinstance(f.get("duration"), (int, float)) and f["duration"] > 0)
+    duration_min = durations[len(durations) // 2] if durations else None
+    return {
+        "carriers": len(carriers),
+        "days_per_week": len(days) if days else None,
+        "duration_min": duration_min,
+    }
+
+
 def run_airlabs_primary(api_key: str,
                         all_airports: list[tuple[str, str]],
-                        ) -> tuple[dict[str, set[str]], set[str]]:
+                        ) -> tuple[dict[str, set[str]], set[str], dict[str, dict]]:
     """
     Первичный источник. Обрабатывает ВСЕ аэропорты.
     При достижении лимита сохраняет всё найденное до этого момента.
 
-    Возвращает (confirmed, queried_cities):
+    Возвращает (confirmed, queried_cities, route_weights):
       queried_cities — города, ВСЕ аэропорты которых получили авторитетный
       ответ (в т.ч. пустой). Города вне этого множества считаются
       неопрошенными — их старые маршруты из routes.json сохраняет main(),
       иначе обрыв по лимиту стирал бы города, до которых не дошла очередь.
+      route_weights — {"Город→Направление": {"carriers", "days_per_week",
+      "duration_min"}} ТОЛЬКО для реально опрошенных городов на этом запуске;
+      веса неопрошенных городов main() подтягивает из старого routes.json,
+      как и сами маршруты.
     """
     confirmed: dict[str, set[str]] = defaultdict(set)
     unqueried_cities: set[str] = set()
+    route_weights: dict[str, dict] = {}
     total = len(all_airports)
 
     for idx, (icao, city) in enumerate(all_airports, 1):
         print(f"\n[{idx}/{total}] {city} ({icao}) [AirLabs]", flush=True)
-        arr_icaos = fetch_airlabs_routes(icao, api_key)
-        if arr_icaos is None:
+        flights = fetch_airlabs_routes(icao, api_key)
+        if flights is None:
             unqueried_cities.update(c for _, c in all_airports[idx - 1:])
             print(f"  ⚠ AirLabs лимит — останавливаемся, "
                   f"аэропорты с [{idx}/{total}] не опрошены", flush=True)
             break
-        if arr_icaos is AIRLABS_ERROR:
+        if flights is AIRLABS_ERROR:
             unqueried_cities.add(city)
             time.sleep(2)
             continue
 
+        # Группируем сырые рейсы этого аэропорта по направлению (arr_icao),
+        # чтобы посчитать carriers/days/duration на маршрут, а не на рейс.
+        by_dest: dict[str, list[dict]] = defaultdict(list)
+        for f in flights:
+            by_dest[f["arr_icao"].upper()].append(f)
+
         new_dests: set[str] = set()
-        for arr_icao in arr_icaos:
+        for arr_icao, dest_flights in by_dest.items():
             name = icao_to_dest_name(arr_icao)
-            if name:
-                new_dests.add(name)
+            if not name:
+                continue
+            new_dests.add(name)
+            route_weights[f"{city}→{name}"] = summarize_route_weight(dest_flights)
 
         existing = confirmed.get(city, set())
         merged   = existing | new_dests
@@ -557,7 +604,7 @@ def run_airlabs_primary(api_key: str,
     print(f"\n  AirLabs завершён: {len(confirmed)} городов, {total_routes} маршрутов, "
           f"опрошено {len(queried_cities)} городов из "
           f"{len({c for _, c in all_airports})}", flush=True)
-    return dict(confirmed), queried_cities
+    return dict(confirmed), queried_cities, route_weights
 
 
 
@@ -1003,14 +1050,15 @@ def run_yandex_rasp_additive(confirmed: dict[str, set[str]]) -> dict[str, set[st
     return result
 
 def save_routes(confirmed: dict[str, set[str]], now: datetime,
-                sources_used: list[str], prev_total: int) -> None:
+                sources_used: list[str], prev_total: int,
+                weights: dict[str, dict] | None = None) -> None:
     """
     Сохраняет routes.json. Вызывается после каждого источника —
     чтобы при таймауте не потерять уже найденные маршруты.
     """
     if not confirmed:
         return
-    output = build_output(confirmed, now, sources_used)
+    output = build_output(confirmed, now, sources_used, weights)
     tmp = ROUTES_FILE.with_suffix(".tmp")
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
@@ -1041,7 +1089,7 @@ def main():
     now = datetime.now(timezone.utc)
 
     print("\n=== Загружаем текущий routes.json ===", flush=True)
-    current_routes = load_current_routes()
+    current_routes, current_weights = load_current_routes()
     prev_total = sum(len(v) for v in current_routes.values())
 
     print("\n=== Подготовка этапов ===", flush=True)
@@ -1055,26 +1103,33 @@ def main():
     print(f"  1/4  AirLabs — первичный источник ({len(all_airports)} аэропортов)",
           flush=True)
     print(f"{'='*52}", flush=True)
-    confirmed, airlabs_queried = run_airlabs_primary(AIRLABS_KEY, all_airports)
+    confirmed, airlabs_queried, route_weights = run_airlabs_primary(AIRLABS_KEY, all_airports)
     if confirmed:
         sources_used.append("AirLabs")
 
     # Защита от потери данных: город можно удалить из routes.json только если
     # AirLabs реально его опросил. Города, не опрошенные из-за лимита или
     # сбоев запросов, сохраняют свои текущие маршруты (дальше источники
-    # работают только на добавление).
+    # работают только на добавление). Веса этих маршрутов по той же причине
+    # берём из старого routes.json, а не оставляем пустыми — иначе у каждого
+    # недоопрошенного города толщина линий на карте пропадала бы до
+    # следующего полного прохода AirLabs.
     preserved = 0
     for city, dests in current_routes.items():
         if city not in airlabs_queried:
             before_ct = len(confirmed.get(city, set()))
             confirmed[city] = confirmed.get(city, set()) | set(dests)
             preserved += len(confirmed[city]) - before_ct
+            for name in dests:
+                key = f"{city}→{name}"
+                if key not in route_weights and key in current_weights:
+                    route_weights[key] = current_weights[key]
     if preserved:
         print(f"  ↩ AirLabs не опросил часть городов — сохранено {preserved} "
               f"существующих маршрутов из routes.json", flush=True)
 
     if confirmed:
-        save_routes(confirmed, now, sources_used, prev_total)
+        save_routes(confirmed, now, sources_used, prev_total, route_weights)
 
     # ── 2. AeroDataBox — дополнение ──────────────────────────────────────────
     if AERODATABOX_KEY:
@@ -1087,7 +1142,7 @@ def main():
         after = sum(len(v) for v in confirmed.values())
         if after > before:
             sources_used.append("AeroDataBox")
-        save_routes(confirmed, now, sources_used, prev_total)
+        save_routes(confirmed, now, sources_used, prev_total, route_weights)
     else:
         print("\n  2/4  AeroDataBox: не настроен, пропускаем", flush=True)
 
@@ -1113,7 +1168,7 @@ def main():
                 print("  OpenSky: кредиты исчерпаны, пропускаем", flush=True)
         except Exception as e:
             print(f"  ⚠ OpenSky: ошибка авторизации ({e}), пропускаем", flush=True)
-        save_routes(confirmed, now, sources_used, prev_total)
+        save_routes(confirmed, now, sources_used, prev_total, route_weights)
     else:
         print("\n  3/4  OpenSky: не настроен, пропускаем", flush=True)
 
@@ -1132,7 +1187,7 @@ def main():
         except Exception as e:
             print(f"  ⚠ Яндекс.Расписания: неожиданная ошибка ({e}), пропускаем",
                   flush=True)
-        save_routes(confirmed, now, sources_used, prev_total)
+        save_routes(confirmed, now, sources_used, prev_total, route_weights)
     else:
         print("\n  4/4  Яндекс.Расписания: не настроен, пропускаем", flush=True)
 
