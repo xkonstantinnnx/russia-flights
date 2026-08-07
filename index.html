@@ -228,7 +228,7 @@ body{display:flex;flex-direction:column;}
   </div>
   <!-- Версия интерфейса — правится вручную при заметных изменениях index.html,
        не привязана к обновлению routes.json (для этого есть бейдж в шапке). -->
-  <div id="version-badge">v1.2</div>
+  <div id="version-badge">v1.3</div>
 </div>
 
 <div id="sidebar-wrap">
@@ -1633,18 +1633,25 @@ function initApp(data) {
     }
 
   const allArcs = Object.entries(ROUTES).flatMap(([f,ds]) => ds.map(t => ({
-    f, t, carriers: WEIGHTS[f+'→'+t]?.carriers ?? null
+    f, t, w: WEIGHTS[f+'→'+t] || null
   })));
   const totalRoutes = allArcs.length;
 
-  // Множитель толщины линии по числу перевозчиков на маршруте.
-  // null/1 перевозчик — базовая толщина (как было раньше, без регресса
-  // для маршрутов без данных о весе); дальше — плавный рост до 4+.
-  function carrierMul(carriers) {
-    if (!carriers || carriers <= 1) return 1;
-    if (carriers === 2) return 1.4;
-    if (carriers === 3) return 1.8;
-    return 2.3; // 4+ перевозчиков
+  // Множитель толщины линии по весу маршрута. carriers (AirLabs/Jonty) —
+  // основной сигнал: null/1 перевозчик — базовая толщина (как было раньше,
+  // без регресса для маршрутов без данных), дальше плавный рост до 4+.
+  // Если carriers нет (маршрут подтверждён только OpenSky), используем
+  // days_per_week как более слабый вторичный сигнал частоты.
+  function carrierMul(w) {
+    const carriers = w?.carriers;
+    if (carriers > 1) {
+      if (carriers === 2) return 1.4;
+      if (carriers === 3) return 1.8;
+      return 2.3; // 4+ перевозчиков
+    }
+    const days = w?.days_per_week;
+    if (days >= 5) return 1.2;
+    return 1;
   }
 
   // Обновляем шапку
@@ -1965,7 +1972,7 @@ function initApp(data) {
       if (!fr || !dt) continue;
       const hl    = visaMatches(arc.t) && seasonMatches(arc.t) && (!curFrom && !curTo || (curFrom && arc.f===curFrom) || (curTo && arc.t===curTo));
       const alpha = hl ? (curFrom||curTo ? 0.72 : 0.35) : 0.025;
-      const sw    = (hl ? (curFrom||curTo ? 2.0  : 1.0)  : 0.5) * carrierMul(arc.carriers);
+      const sw    = (hl ? (curFrom||curTo ? 2.0  : 1.0)  : 0.5) * carrierMul(arc.w);
       const color = REG[dt.r]?.c || '#888';
       const p1    = map.latLngToContainerPoint([fr.la, fr.lo]);
       const p2    = map.latLngToContainerPoint([dt.la, dt.lo]);

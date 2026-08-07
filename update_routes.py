@@ -10,12 +10,25 @@
                            работает ТОЛЬКО в режиме добавления (никогда не удаляет)
   4. Яндекс.Расписания  — обогащение: официальное расписание сезона,
                            работает ТОЛЬКО в режиме добавления (никогда не удаляет)
+  5. Jonty/airline-route-data — обогащение: готовый снэпшот flightsfrom.com
+                           (MIT, без ключа), даёт carriers/duration_min там, где
+                           их не было; только добавляет, только уже известные
+                           направления из DEST_INFO
+
+Веса маршрутов (routes.json["weights"], для толщины линии на карте):
+  - AirLabs   — carriers/days_per_week/duration_min из сырых рейсов
+  - OpenSky   — days_per_week, грубая оценка из числа ADS-B-подтверждённых
+                рейсов за 14 дней (carriers/duration_min не считает)
+  - Jonty     — carriers/duration_min из снэпшота (days_per_week не даёт)
+  - Приоритет: не перезаписывать существующий вес — только заполнять
+    пустое, порядок совпадает с порядком источников выше
 
 Логика:
   - AirLabs обрабатывает все аэропорты → базовый confirmed
   - AeroDataBox дополняет confirmed, только добавляет
   - OpenSky Stage 1 → Stage 2, только добавляет, останавливается при 429
   - Яндекс.Расписания дополняет confirmed, только добавляет
+  - Jonty дополняет confirmed, только добавляет
   - Направление, найденное хотя бы одним источником, включается в итог
   - Направление, не найденное ни одним источником, удаляется — но только
     у городов, которые AirLabs реально опросил; города, не опрошенные
@@ -799,12 +812,19 @@ def fetch_opensky_day(icao: str, begin_ts: int, end_ts: int,
 def run_opensky_additive(token_mgr: TokenManager,
                          stage1: list, stage2: list,
                          confirmed: dict[str, set[str]],
-                         now: datetime) -> dict[str, set[str]]:
+                         now: datetime,
+                         weights: dict[str, dict] | None = None,
+                         ) -> tuple[dict[str, set[str]], dict[str, dict]]:
     """
     Обогащение через реальные ADS-B данные. ТОЛЬКО ДОБАВЛЯЕТ маршруты.
     Никогда не удаляет то, что нашёл AirLabs.
 
     Stage 1 первым: ранний выход при верификации известных маршрутов экономит кредиты.
+
+    route_counts (число ADS-B-подтверждённых рейсов за 14 дней) заодно
+    используется как вес для маршрутов, у которых веса ещё нет (AirLabs
+    не опросил/не нашёл) — carriers/duration_min у OpenSky нет, поэтому
+    заполняется только days_per_week, грубой оценкой per_14d/2.
     """
     DAYS_HISTORY = 14
     MIN_FLIGHTS  = 2
@@ -816,7 +836,8 @@ def run_opensky_additive(token_mgr: TokenManager,
         end   = int(datetime(day.year, day.month, day.day, 23,59,59, tzinfo=timezone.utc).timestamp())
         windows.append((begin, end))
 
-    result = {c: set(d) for c, d in confirmed.items()}
+    result         = {c: set(d) for c, d in confirmed.items()}
+    result_weights = dict(weights or {})
     route_counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     added_total = 0
 
@@ -838,10 +859,10 @@ def run_opensky_additive(token_mgr: TokenManager,
         for begin_ts, end_ts in windows:
             result_day = fetch_opensky_day(icao, begin_ts, end_ts, token_mgr)
             if result_day is None:
-                _apply_opensky_counts(route_counts, result, MIN_FLIGHTS)
+                _apply_opensky_counts(route_counts, result, MIN_FLIGHTS, result_weights)
                 print(f"\n  OpenSky: лимит на [{seq_idx}/{total}], "
                       f"добавлено {added_total} направлений всего", flush=True)
-                return result
+                return result, result_weights
 
             for f in result_day:
                 arr = (f.get("estArrivalAirport") or "").strip().upper()
@@ -873,13 +894,31 @@ def run_opensky_additive(token_mgr: TokenManager,
             print(f"    + OpenSky добавил: {sorted(added_for_city)}", flush=True)
         else:
             print(f"    → OpenSky: {len(new_for_city)} найдено, новых нет", flush=True)
+        _apply_city_opensky_weights(route_counts[city], city, MIN_FLIGHTS, result_weights)
         time.sleep(3)
 
     print(f"\n  OpenSky завершён: добавлено {added_total} направлений", flush=True)
-    return result
+    return result, result_weights
 
 
-def _apply_opensky_counts(route_counts, result, min_flights):
+def _apply_city_opensky_weights(counts: dict[str, int], city: str,
+                                min_flights: int, weights: dict[str, dict]) -> None:
+    """Дополняет weights оценкой days_per_week из ADS-B-счётчика за 14 дней.
+    Не перезаписывает существующий вес (AirLabs/Jonty точнее)."""
+    for arr, cnt in counts.items():
+        if cnt < min_flights:
+            continue
+        name = DEST_INFO[arr]["n"]
+        key  = f"{city}→{name}"
+        if key not in weights:
+            weights[key] = {
+                "carriers": None,
+                "days_per_week": min(7, round(cnt / 2)),
+                "duration_min": None,
+            }
+
+
+def _apply_opensky_counts(route_counts, result, min_flights, weights: dict[str, dict] | None = None):
     """Применяет накопленные counts к result при досрочном выходе из OpenSky."""
     for city, counts in route_counts.items():
         new_dests = {DEST_INFO[a]["n"] for a, cnt in counts.items() if cnt >= min_flights}
@@ -887,6 +926,8 @@ def _apply_opensky_counts(route_counts, result, min_flights):
         added     = new_dests - existing
         if added:
             result[city] = existing | new_dests
+        if weights is not None:
+            _apply_city_opensky_weights(counts, city, min_flights, weights)
 
 
 # ══════════════════════════════════════════════════════════════
@@ -1049,6 +1090,118 @@ def run_yandex_rasp_additive(confirmed: dict[str, set[str]]) -> dict[str, set[st
 
     return result
 
+
+# ══════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════
+#  Источник 5 — Jonty/airline-route-data (аддитивное обогащение)
+# ══════════════════════════════════════════════════════════════
+#
+# Готовый JSON-снэпшот flightsfrom.com (MIT, обновляется еженедельно).
+# Не требует ключа — публичный raw-файл на GitHub. Формат: словарь по
+# IATA-коду аэропорта вылета, у каждого — "routes": [{iata (назначение),
+# carriers: [{iata, name}], km, min}]. Страна/ICAO назначения достаются
+# вторым поиском по тому же словарю (он глобальный, ~3900 аэропортов).
+#
+# Известный баг источника: узбекские аэропорты закодированы несуществующим
+# ICAO-префиксом "UZ" вместо корректного "UT" (Ташкент UZTT вместо UTTT
+# и т.д.) — нормализуется в _normalize_jonty_icao().
+#
+# Ограничение первой версии: добавляет только направления, УЖЕ
+# присутствующие в DEST_INFO — как остальные источники. Направления вне
+# DEST_INFO (у Jonty их насчитывается около 40) требуют ручного добавления
+# координат/региона и в этот проход не попадают.
+
+JONTY_URL = "https://raw.githubusercontent.com/Jonty/airline-route-data/main/airline_routes.json"
+
+
+def fetch_jonty_data() -> dict | None:
+    """Скачивает airline_routes.json целиком (~20 МБ). None = ошибка сети/парсинга."""
+    try:
+        r = requests.get(JONTY_URL, timeout=(10, 60))
+        if r.status_code == 200:
+            return r.json()
+        print(f"    [jonty] HTTP {r.status_code}", flush=True)
+        return None
+    except Exception as e:
+        print(f"    [jonty] Ошибка загрузки: {e}", flush=True)
+        return None
+
+
+def _normalize_jonty_icao(icao: str) -> str:
+    """Jonty кодирует узбекские аэропорты несуществующим префиксом UZ
+    вместо корректного UT (баг источника, см. ANALYSIS-jonty-source.md
+    из хендоффа сессии 2026-08-07)."""
+    if icao.startswith("UZ") and len(icao) == 4:
+        return "UT" + icao[2:]
+    return icao
+
+
+def run_jonty_supplement(
+    confirmed: dict[str, set[str]],
+    weights: dict[str, dict],
+) -> tuple[dict[str, set[str]], dict[str, dict]]:
+    """
+    5-й источник. ТОЛЬКО ДОБАВЛЯЕТ маршруты и веса — никогда не удаляет
+    и не перезаписывает то, что уже нашли более авторитетные источники
+    (AirLabs/AeroDataBox/OpenSky/Яндекс).
+    """
+    result         = {c: set(d) for c, d in confirmed.items()}
+    result_weights = dict(weights)
+
+    data = fetch_jonty_data()
+    if data is None:
+        print("  [jonty] Пропускаем (не удалось загрузить датасет)", flush=True)
+        return result, result_weights
+
+    added_total  = 0
+    weight_added = 0
+
+    for icao, iata in RU_AIRPORT_IATA.items():
+        city    = RU_AIRPORTS[icao]
+        airport = data.get(iata)
+        if not airport:
+            continue
+
+        existing  = result.get(city, set())
+        new_dests: set[str] = set()
+
+        for route in airport.get("routes", []):
+            dest_iata = route.get("iata")
+            if not dest_iata:
+                continue
+            dest_entry = data.get(dest_iata)
+            if not dest_entry:
+                continue
+            if dest_entry.get("country_code") == "RU":
+                continue  # внутренний рейс РФ
+            dest_icao = _normalize_jonty_icao((dest_entry.get("icao") or "").upper())
+            name = icao_to_dest_name(dest_icao)
+            if not name:
+                continue  # направление вне DEST_INFO — не в этом проходе
+            new_dests.add(name)
+
+            key = f"{city}→{name}"
+            if key not in result_weights:
+                carriers = len(route.get("carriers") or [])
+                duration = route.get("min")
+                result_weights[key] = {
+                    "carriers":      carriers or None,
+                    "days_per_week": None,  # Jonty — снэпшот, без частоты
+                    "duration_min":  duration if isinstance(duration, (int, float)) and duration > 0 else None,
+                }
+                weight_added += 1
+
+        added = new_dests - existing
+        if added:
+            result[city] = existing | new_dests
+            added_total += len(added)
+            print(f"    + Jonty [{city}] добавил: {sorted(added)}", flush=True)
+
+    print(f"\n  [jonty] Завершён: добавлено {added_total} направлений, "
+          f"{weight_added} новых весов", flush=True)
+    return result, result_weights
+
+
 def save_routes(confirmed: dict[str, set[str]], now: datetime,
                 sources_used: list[str], prev_total: int,
                 weights: dict[str, dict] | None = None) -> None:
@@ -1081,6 +1234,7 @@ def main():
           flush=True)
     print(f"=== Яндекс.Расписания: {'доступен' if YANDEX_RASP_KEY else 'не настроен'} ===",
           flush=True)
+    print("=== Jonty/airline-route-data: доступен (без ключа) ===", flush=True)
 
     if not AIRLABS_KEY:
         print("✗ AIRLABS_KEY не задан — первичный источник недоступен", flush=True)
@@ -1100,7 +1254,7 @@ def main():
 
     # ── 1. AirLabs — первичный источник ──────────────────────────────────────
     print(f"\n{'='*52}", flush=True)
-    print(f"  1/4  AirLabs — первичный источник ({len(all_airports)} аэропортов)",
+    print(f"  1/5  AirLabs — первичный источник ({len(all_airports)} аэропортов)",
           flush=True)
     print(f"{'='*52}", flush=True)
     confirmed, airlabs_queried, route_weights = run_airlabs_primary(AIRLABS_KEY, all_airports)
@@ -1134,7 +1288,7 @@ def main():
     # ── 2. AeroDataBox — дополнение ──────────────────────────────────────────
     if AERODATABOX_KEY:
         print(f"\n{'='*52}", flush=True)
-        print(f"  2/4  AeroDataBox — дополнение ({len(all_airports)} аэропортов)",
+        print(f"  2/5  AeroDataBox — дополнение ({len(all_airports)} аэропортов)",
               flush=True)
         print(f"{'='*52}", flush=True)
         before = sum(len(v) for v in confirmed.values())
@@ -1144,12 +1298,12 @@ def main():
             sources_used.append("AeroDataBox")
         save_routes(confirmed, now, sources_used, prev_total, route_weights)
     else:
-        print("\n  2/4  AeroDataBox: не настроен, пропускаем", flush=True)
+        print("\n  2/5  AeroDataBox: не настроен, пропускаем", flush=True)
 
     # ── 3. OpenSky — обогащение (только добавление) ───────────────────────────
     if OPENSKY_CLIENT_ID and OPENSKY_CLIENT_SECRET:
         print(f"\n{'='*52}", flush=True)
-        print(f"  3/4  OpenSky — обогащение ({len(all_airports)} аэропортов)",
+        print(f"  3/5  OpenSky — обогащение ({len(all_airports)} аэропортов)",
               flush=True)
         print(f"{'='*52}", flush=True)
         token_mgr = TokenManager(OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET)
@@ -1158,8 +1312,8 @@ def main():
             credits = check_opensky_credits(token_mgr)
             if credits is None or credits > 0:
                 before = sum(len(v) for v in confirmed.values())
-                confirmed = run_opensky_additive(
-                    token_mgr, stage1, stage2, confirmed, now
+                confirmed, route_weights = run_opensky_additive(
+                    token_mgr, stage1, stage2, confirmed, now, route_weights
                 )
                 after = sum(len(v) for v in confirmed.values())
                 if after > before:
@@ -1170,12 +1324,12 @@ def main():
             print(f"  ⚠ OpenSky: ошибка авторизации ({e}), пропускаем", flush=True)
         save_routes(confirmed, now, sources_used, prev_total, route_weights)
     else:
-        print("\n  3/4  OpenSky: не настроен, пропускаем", flush=True)
+        print("\n  3/5  OpenSky: не настроен, пропускаем", flush=True)
 
     # ── 4. Яндекс.Расписания — обогащение (только добавление) ────────────────
     if YANDEX_RASP_KEY:
         print(f"\n{'='*52}", flush=True)
-        print(f"  4/4  Яндекс.Расписания — обогащение ({len(RU_AIRPORT_IATA)} аэропортов)",
+        print(f"  4/5  Яндекс.Расписания — обогащение ({len(RU_AIRPORT_IATA)} аэропортов)",
               flush=True)
         print(f"{'='*52}", flush=True)
         before_ya = sum(len(v) for v in confirmed.values())
@@ -1189,7 +1343,22 @@ def main():
                   flush=True)
         save_routes(confirmed, now, sources_used, prev_total, route_weights)
     else:
-        print("\n  4/4  Яндекс.Расписания: не настроен, пропускаем", flush=True)
+        print("\n  4/5  Яндекс.Расписания: не настроен, пропускаем", flush=True)
+
+    # ── 5. Jonty/airline-route-data — обогащение (только добавление) ─────────
+    print(f"\n{'='*52}", flush=True)
+    print(f"  5/5  Jonty/airline-route-data — обогащение ({len(RU_AIRPORT_IATA)} аэропортов)",
+          flush=True)
+    print(f"{'='*52}", flush=True)
+    before_jonty = sum(len(v) for v in confirmed.values())
+    try:
+        confirmed, route_weights = run_jonty_supplement(confirmed, route_weights)
+        after_jonty = sum(len(v) for v in confirmed.values())
+        if after_jonty > before_jonty:
+            sources_used.append("Jonty/airline-route-data")
+    except Exception as e:
+        print(f"  ⚠ Jonty: неожиданная ошибка ({e}), пропускаем", flush=True)
+    save_routes(confirmed, now, sources_used, prev_total, route_weights)
 
     # ── Финальный итог ───────────────────────────────────────────────────────
     if not confirmed:
