@@ -77,6 +77,16 @@ body{display:flex;flex-direction:column;}
 #arc-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;}
 .leaflet-container{background:var(--rf-bg);}
 .leaflet-control-zoom{z-index:700;}
+/* Текстовый снапшот для JS-less краулеров (см. комментарий у <details> в
+   конце body) — должен быть невидим реальным посетителям (список
+   маршрутов текстом уже доступен в интерфейсе, см. showFullView('text')),
+   но остаться в сыром HTML: краулеры вроде GPTBot/ClaudeBot не выполняют
+   CSS, поэтому display:none их не касается — они всё равно читают текст
+   из ответа сервера. Раньше эта информация случайно выезжала на 40px
+   внизу мобильного экрана — details получал flex-shrink:0 и место в
+   раскладке, не подобает быть частью потока после переверстки на
+   абсолютно спозиционированную панель. */
+#static-routes-snapshot{display:none;}
 .rf-lift{filter:brightness(1.55) saturate(1.15) contrast(.94);}
 .rf-arc{stroke-dasharray:5 7;animation:rfdash 1.6s linear infinite;}
 @keyframes rfdash{to{stroke-dashoffset:-24;}}
@@ -91,20 +101,32 @@ body{display:flex;flex-direction:column;}
    Claude Design это меню разбито на «ИСТОЧНИК»/«ТИП» (2×4 сетка) — но
    Яндекс-спутника/гибрида/рельефа не существует, полную сетку строить не
    стали (см. обсуждение с пользователем 08.08.2026), поэтому список плоский. */
-#map-ctrl{position:absolute;top:8px;right:8px;z-index:700;}
-.map-ctrl-btn{display:flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--rf-line);border-radius:9px;background:var(--rf-chip);backdrop-filter:blur(10px);color:var(--rf-t2);font-family:var(--rf-font);font-size:12px;cursor:pointer;box-shadow:var(--rf-shadow);}
+/* Как в макете: внешний контейнер несёт панель (фон/блюр/бордер/тень),
+   сама кнопка внутри — прозрачная, только квадратная точка + текст + ▾. */
+#map-ctrl{position:absolute;top:14px;right:14px;z-index:700;background:var(--rf-panel);backdrop-filter:blur(14px);border:1px solid var(--rf-line);border-radius:9px;box-shadow:var(--rf-shadow);}
+.map-ctrl-btn{display:flex;align-items:center;gap:8px;padding:7px 11px;border:none;background:transparent;color:var(--rf-t2);font-family:var(--rf-font);font-size:12px;cursor:pointer;}
 .map-ctrl-dot{width:7px;height:7px;border-radius:2px;background:var(--rf-accent);flex:none;}
 .map-ctrl-caret{color:var(--rf-t5);font-size:10px;}
-.map-menu{position:absolute;top:44px;right:0;width:190px;padding:6px;background:var(--rf-panel);backdrop-filter:blur(16px);border:1px solid var(--rf-line);border-radius:10px;box-shadow:var(--rf-shadow);display:flex;flex-direction:column;gap:2px;}
-.map-menu-item{display:block;width:100%;text-align:left;padding:7px 9px;border:none;border-radius:6px;background:transparent;color:var(--rf-t2);font-family:var(--rf-font);font-size:12.5px;cursor:pointer;}
-.map-menu-item:hover{background:var(--rf-hover-bg);}
-.map-menu-item.on{background:var(--rf-accent-soft);color:var(--rf-accent);}
+.map-menu{position:absolute;top:44px;right:0;width:214px;padding:10px;background:var(--rf-panel);backdrop-filter:blur(16px);border:1px solid var(--rf-line);border-radius:10px;box-shadow:var(--rf-shadow);}
+.map-menu-label{font-family:var(--rf-mono);font-size:9px;letter-spacing:.14em;color:var(--rf-t5);margin-bottom:7px;}
+.map-menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.map-menu-item{padding:6px 9px;border-radius:6px;cursor:pointer;font-size:11.5px;font-family:var(--rf-font);border:1px solid var(--rf-line);background:var(--rf-input);color:var(--rf-t3);}
+.map-menu-item.on{border-color:var(--rf-accent-border);background:var(--rf-accent-soft);color:var(--rf-accent);}
+.map-menu-note{margin-top:11px;padding-top:9px;border-top:1px solid var(--rf-line2);font-size:10.5px;line-height:1.45;color:var(--rf-t4);}
 
 #season-switch{position:absolute;top:52px;right:8px;z-index:700;display:flex;gap:4px;align-items:center;}
 #version-badge{position:absolute;bottom:6px;left:8px;z-index:700;font-size:9px;color:var(--rf-t2);background:var(--rf-bar);padding:2px 6px;border-radius:4px;pointer-events:none;}
-.ts-btn{font-family:var(--rf-mono);font-size:10px;padding:3px 9px;border-radius:8px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-t2);cursor:pointer;backdrop-filter:blur(4px);}
+.ts-btn{font-family:var(--rf-mono);font-size:10px;line-height:1;padding:6px 9px;border-radius:8px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-t2);cursor:pointer;backdrop-filter:blur(4px);}
 .ts-btn.on{background:var(--rf-accent-soft);color:var(--rf-accent);border-color:var(--rf-accent-border);}
-#season-month{font-size:10px;padding:2px 4px;border-radius:6px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-text);}
+/* Свой вид у <select> — без нативной OS-стрелки, чтобы не спорила с ▾
+   у соседней кнопки-меню и держала ту же высоту/скругление. */
+#season-month{
+  -webkit-appearance:none;appearance:none;
+  font-family:var(--rf-mono);font-size:10px;line-height:1;
+  padding:6px 22px 6px 9px;border-radius:8px;border:1px solid var(--rf-line);
+  background:var(--rf-chip-solid) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><path d='M1 2 L4 6 L7 2' fill='none' stroke='%234A5764' stroke-width='1.3'/></svg>") no-repeat right 8px center;
+  color:var(--rf-text);cursor:pointer;
+}
 
 /* Легенда — плавающий чип-кластер на карте (не часть панели, видна всегда) */
 /* z-index ниже панели (600), чтобы на мобильном при развороте bottom-sheet
@@ -251,7 +273,6 @@ body{display:flex;flex-direction:column;}
   #panel { top: 14px; bottom: 14px; left: 14px; width: 396px; border-radius: 14px; }
   /* right:56 (не 16) — оставляет место зум-контролу Leaflet в том же углу */
   #legend { bottom: 16px; right: 56px; }
-  #map-ctrl { top: 12px; right: 12px; }
   #season-switch { top: 56px; }
   .ts-btn { font-size: 11px; padding: 4px 11px; }
 }
@@ -312,11 +333,15 @@ body{display:flex;flex-direction:column;}
       <span class="map-ctrl-caret">▾</span>
     </button>
     <div id="map-menu" class="map-menu" style="display:none;">
-      <button class="map-menu-item on" data-tile="gmap"   onclick="setTiles('gmap')">Google</button>
-      <button class="map-menu-item"    data-tile="yndx"   onclick="setTiles('yndx')">Яндекс</button>
-      <button class="map-menu-item"    data-tile="sat"    onclick="setTiles('sat')">Спутник</button>
-      <button class="map-menu-item"    data-tile="hybrid" onclick="setTiles('hybrid')">Гибрид</button>
-      <button class="map-menu-item"    data-tile="relief" onclick="setTiles('relief')">Рельеф</button>
+      <div class="map-menu-label">ТИП КАРТЫ</div>
+      <div class="map-menu-grid">
+        <button class="map-menu-item on" data-tile="gmap"   onclick="setTiles('gmap')">Google</button>
+        <button class="map-menu-item"    data-tile="yndx"   onclick="setTiles('yndx')">Яндекс</button>
+        <button class="map-menu-item"    data-tile="sat"    onclick="setTiles('sat')">Спутник</button>
+        <button class="map-menu-item"    data-tile="hybrid" onclick="setTiles('hybrid')">Гибрид</button>
+        <button class="map-menu-item"    data-tile="relief" onclick="setTiles('relief')">Рельеф</button>
+      </div>
+      <div class="map-menu-note">Спутник/гибрид — Esri, рельеф — OpenTopoMap. Полного набора «Яндекс × тип» нет: у Яндекса в проекте только схема.</div>
     </div>
   </div>
   <div id="season-switch">
@@ -2380,13 +2405,15 @@ function initApp(data) {
     // кнопки, чтобы кнопка не сдвигалась при появлении/исчезновении списка
     seasonMonthSel.style.visibility = seasonActive ? 'visible' : 'hidden';
     renderLegend();
-    applyDstFilters();
+    updateMarkers(curFrom, curTo);
+    drawArcs();
   }
   window.toggleSeason = toggleSeason;
 
   function setSeasonMonth(v) {
     seasonMonth = parseInt(v, 10);
-    applyDstFilters();
+    updateMarkers(curFrom, curTo);
+    drawArcs();
   }
   window.setSeasonMonth = setSeasonMonth;
 
@@ -3260,9 +3287,12 @@ function initApp(data) {
       m.setRadius(active ? 5.5 : 4);
     }
     for (const [n, obj] of Object.entries(ruMarkers)) {
-      const dim = tD && !(REVERSE[tD]||[]).includes(n);
-      const isA = n===fC;
-      obj.m.setStyle({ color: originColor(isA), fillColor: haloColor(), opacity: dim?0.15:(isA?1:0.8), fillOpacity: dim?0.22:0.9, weight: isA?2.5:1.5 });
+      const isA = n === fC;
+      // Как в макете: когда выбран город — все остальные гаснут, чтобы
+      // активный явно выделялся. В обратном режиме (выбрано направление)
+      // гаснут только те города, откуда туда нет рейса.
+      const dim = !isA && (fC || (tD && !(REVERSE[tD]||[]).includes(n)));
+      obj.m.setStyle({ color: originColor(isA), fillColor: haloColor(), opacity: dim?0.2:(isA?1:0.85), fillOpacity: dim?0.25:0.9, weight: isA?2.5:1.5 });
       const r = (5+Math.sqrt(obj.cnt)*1.1)*(isA?1.25:1);
       obj.m.setRadius(r);
     }
