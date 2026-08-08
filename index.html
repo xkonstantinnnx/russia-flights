@@ -22,77 +22,135 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha512-Zcn6bjR/8RZbLEpLIeOwNtzREBAJnUKESxces60Mpoj+2okopSAcSUIUOseddDm0cxnGQzxIR7vJgsLZbdLE3w=="
       crossorigin="anonymous"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;overflow:hidden;background:#0d1117;font-family:-apple-system,'Segoe UI',Arial,sans-serif;color:#b8ccec;}
+/* ── ДИЗАЙН-ТОКЕНЫ ──
+   Тёмная тема — значения по умолчанию на :root (совпадают с исходной
+   палитрой сайта). [data-theme="light"] на <html> переопределяет их —
+   переключатель в шапке, состояние в localStorage (см. initTheme в конце
+   скрипта). Семантические цвета карты (регионы/виза/сезон/RU-маркер в JS)
+   намеренно не токенизированы — это картографическая семантика, не тема. */
+:root{
+  --rf-bg:#0d1117; --rf-panel:#060c16; --rf-bar:#0a1520ee; --rf-chip:#0a1828cc; --rf-chip-solid:#0a1828dd;
+  --rf-line:#1e3252; --rf-line2:#0e1e2e; --rf-line3:#0a1520;
+  --rf-text:#b8ccec; --rf-t2:#7090b0; --rf-t3:#4a6a90; --rf-t4:#2a3e56; --rf-t5:#3a5578;
+  --rf-accent:#4a9eff; --rf-accent-soft:rgba(74,158,255,.1); --rf-accent-border:#4a9eff55;
+  --rf-active-bg:#0f1d2e; --rf-hover-bg:#0f1d2e; --rf-row-bg:#132238; --rf-row-border:#2a4568;
+  --rf-good:#34d399; --rf-shadow:0 4px 16px #0008;
+  --rf-font:'IBM Plex Sans',-apple-system,'Segoe UI',Arial,sans-serif;
+  --rf-mono:'IBM Plex Mono',monospace;
+}
+:root[data-theme="light"]{
+  --rf-bg:#e8ecf0; --rf-panel:#ffffff; --rf-bar:#ffffffee; --rf-chip:#f2f5f8cc; --rf-chip-solid:#f2f5f8dd;
+  --rf-line:#d8dfe6; --rf-line2:#e4eaef; --rf-line3:#edf1f5;
+  --rf-text:#0f1720; --rf-t2:#3d4a57; --rf-t3:#5e6c7a; --rf-t4:#98a5b2; --rf-t5:#7b8a99;
+  --rf-accent:#0e7c90; --rf-accent-soft:rgba(14,124,144,.1); --rf-accent-border:#0e7c9055;
+  --rf-active-bg:#eaf6f8; --rf-hover-bg:#edf2f6; --rf-row-bg:#eaf6f8; --rf-row-border:#bbdce3;
+  --rf-good:#0e7c90; --rf-shadow:0 4px 16px #14233022;
+}
+html,body{height:100%;overflow:hidden;background:var(--rf-bg);font-family:var(--rf-font);color:var(--rf-text);}
 body{display:flex;flex-direction:column;}
-#hdr{background:#0a1520ee;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #1e3252;backdrop-filter:blur(8px);z-index:1000;position:relative;}
-.h-title{font-size:13px;font-weight:600;color:#4a9eff;}
-.h-meta{font-size:10px;color:#2a3e56;margin-top:1px;}
-.h-badges{display:flex;gap:5px;flex-wrap:wrap;}
-.badge{font-size:10px;color:#4a9eff;background:#0a1828cc;padding:2px 8px;border-radius:10px;border:1px solid #1e3252;}
-#badge-updated{font-size:10px;color:#34d39988;background:#0a1828cc;padding:2px 8px;border-radius:10px;border:1px solid #34d39944;}
+#hdr{background:var(--rf-bar);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--rf-line);backdrop-filter:blur(8px);z-index:1000;position:relative;}
+.h-title{font-size:13px;font-weight:600;color:var(--rf-accent);}
+.h-meta{font-size:10px;color:var(--rf-t4);margin-top:1px;}
+.h-badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.badge{font-size:10px;color:var(--rf-accent);background:var(--rf-chip);padding:2px 8px;border-radius:10px;border:1px solid var(--rf-line);cursor:pointer;}
+#badge-updated{font-size:10px;color:#34d39988;background:var(--rf-chip);padding:2px 8px;border-radius:10px;border:1px solid #34d39944;}
+#theme-toggle{font-size:12px;line-height:1;color:var(--rf-t2);background:var(--rf-chip);padding:4px 7px;border-radius:10px;border:1px solid var(--rf-line);cursor:pointer;}
 
 #map-wrap{position:relative;flex-shrink:0;height:260px;}
 #map{width:100%;height:100%;}
 #arc-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;}
-.leaflet-container{background:#0d1117;}
-.leaflet-control-zoom a{background:#0a1828!important;color:#4a9eff!important;border-color:#1e3252!important;}
-.leaflet-control-zoom a:hover{background:#102030!important;}
+.leaflet-container{background:var(--rf-bg);}
+.leaflet-control-zoom a{background:var(--rf-chip-solid)!important;color:var(--rf-accent)!important;border-color:var(--rf-line)!important;}
+.leaflet-control-zoom a:hover{background:var(--rf-hover-bg)!important;}
 .leaflet-control-attribution{display:none!important;}
-.leaflet-tooltip{background:#0a1828ee!important;border:1px solid #1e3252!important;color:#b8ccec!important;font-size:11px!important;border-radius:6px!important;padding:4px 9px!important;box-shadow:0 4px 16px #0008!important;}
+.leaflet-tooltip{background:var(--rf-chip-solid)!important;border:1px solid var(--rf-line)!important;color:var(--rf-text)!important;font-size:11px!important;border-radius:6px!important;padding:4px 9px!important;box-shadow:var(--rf-shadow)!important;}
 .leaflet-tooltip::before{display:none!important;}
 
-#tile-switch{position:absolute;top:8px;right:8px;z-index:1000;display:flex;gap:4px;}
+#tile-switch{position:absolute;top:8px;right:8px;z-index:1000;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px;max-width:calc(100% - 16px);}
 #season-switch{position:absolute;top:38px;right:8px;z-index:1000;display:flex;gap:4px;align-items:center;}
-#version-badge{position:absolute;bottom:6px;right:8px;z-index:1000;font-size:9px;color:#5a7aa0;background:#0a1520cc;padding:2px 6px;border-radius:4px;pointer-events:none;}
-.ts-btn{font-size:10px;padding:3px 9px;border-radius:8px;border:1px solid #1e3252;background:#0a1828dd;color:#7090b0;cursor:pointer;backdrop-filter:blur(4px);}
-.ts-btn.on{background:#4a9eff22;color:#4a9eff;border-color:#4a9eff88;}
-#season-month{font-size:10px;padding:2px 4px;border-radius:6px;border:1px solid #1e3252;background:#0a1828dd;color:#b8ccec;}
+#version-badge{position:absolute;bottom:6px;right:8px;z-index:1000;font-size:9px;color:var(--rf-t2);background:var(--rf-bar);padding:2px 6px;border-radius:4px;pointer-events:none;}
+.ts-btn{font-family:var(--rf-mono);font-size:10px;padding:3px 9px;border-radius:8px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-t2);cursor:pointer;backdrop-filter:blur(4px);}
+.ts-btn.on{background:var(--rf-accent-soft);color:var(--rf-accent);border-color:var(--rf-accent-border);}
+#season-month{font-size:10px;padding:2px 4px;border-radius:6px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-text);}
 
-#info-bar{background:#0a1520ee;border-bottom:1px solid #1e3252;padding:0 14px;display:none;flex-direction:column;flex-shrink:0;backdrop-filter:blur(8px);}
+#info-bar{background:var(--rf-bar);border-bottom:1px solid var(--rf-line);padding:0 14px;display:none;flex-direction:column;flex-shrink:0;backdrop-filter:blur(8px);}
 #info-top{display:flex;align-items:center;justify-content:space-between;padding:7px 0 3px;}
 #info-title{font-size:13px;font-weight:600;}
-#reset-btn{background:#0f1d2e;border:1px solid #1e3252;color:#4a9eff;font-size:11px;padding:4px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
+#reset-btn{background:var(--rf-active-bg);border:1px solid var(--rf-line);color:var(--rf-accent);font-size:11px;padding:4px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
 
-#legend{display:flex;flex-wrap:wrap;gap:3px;padding:4px 12px;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
-.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:#7090b0;}
+#legend{display:flex;flex-wrap:wrap;gap:3px;padding:4px 12px;flex-shrink:0;background:var(--rf-panel);border-bottom:1px solid var(--rf-line2);}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--rf-t2);}
 .leg-clickable{cursor:pointer;user-select:none;}
 .leg-clickable.leg-off{opacity:.35;}
 .leg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block;}
 
-#tab-bar{display:flex;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
-.tab-btn{flex:1;padding:7px 4px;font-size:12px;border:none;cursor:pointer;border-bottom:2px solid transparent;background:transparent;color:#4a6a90;}
+#tab-bar{display:flex;flex-shrink:0;background:var(--rf-panel);border-bottom:1px solid var(--rf-line2);}
+.tab-btn{flex:1;padding:7px 4px;font-size:12px;border:none;cursor:pointer;border-bottom:2px solid transparent;background:transparent;color:var(--rf-t3);font-family:var(--rf-font);}
 
-#visa-filter{display:flex;gap:4px;flex-wrap:wrap;padding:6px 12px;flex-shrink:0;background:#060c16;border-bottom:1px solid #0e1e2e;}
-.visa-btn{padding:4px 8px;font-size:10px;border:1px solid #1e3252;border-radius:10px;cursor:pointer;background:transparent;color:#4a6a90;}
-.visa-btn.on{background:#132238;border-color:#2a4568;color:#b8ccec;}
+#visa-filter{display:flex;gap:4px;flex-wrap:wrap;padding:6px 12px;flex-shrink:0;background:var(--rf-panel);border-bottom:1px solid var(--rf-line2);}
+.visa-btn{padding:4px 8px;font-size:10px;border:1px solid var(--rf-line);border-radius:10px;cursor:pointer;background:transparent;color:var(--rf-t3);font-family:var(--rf-font);}
+.visa-btn.on{background:var(--rf-row-bg);border-color:var(--rf-row-border);color:var(--rf-text);}
 
 #lists-wrap{flex:1;overflow:hidden;position:relative;}
-#tp-disclosure{flex-shrink:0;font-size:9px;line-height:1.4;color:#3a5578;padding:5px 14px;background:#060c16;border-top:1px solid #0e1e2e;}
+#tp-disclosure{flex-shrink:0;font-size:9px;line-height:1.4;color:var(--rf-t5);padding:5px 14px;background:var(--rf-panel);border-top:1px solid var(--rf-line2);}
 /* Текстовый снапшот маршрутов (см. комментарий у #static-routes-snapshot в body) */
-#static-routes-snapshot{flex-shrink:0;background:#060c16;border-top:1px solid #0e1e2e;color:#7d93b8;font-size:11px;}
-#static-routes-snapshot summary{cursor:pointer;padding:6px 14px;color:#4a9eff;user-select:none;}
+#static-routes-snapshot{flex-shrink:0;background:var(--rf-panel);border-top:1px solid var(--rf-line2);color:var(--rf-t2);font-size:11px;}
+#static-routes-snapshot summary{cursor:pointer;padding:6px 14px;color:var(--rf-accent);user-select:none;}
 #static-routes-snapshot[open]{max-height:40vh;overflow-y:auto;}
 #static-routes-snapshot .ssr-inner{padding:0 14px 14px;}
-#static-routes-snapshot h3{font-size:12px;color:#b8ccec;margin-top:10px;}
+#static-routes-snapshot h3{font-size:12px;color:var(--rf-text);margin-top:10px;}
 #static-routes-snapshot p{line-height:1.5;margin-top:4px;}
-.list-pane{height:100%;overflow-y:auto;background:#060c16;scrollbar-width:thin;scrollbar-color:#162338 transparent;}
+.list-pane{height:100%;overflow-y:auto;background:var(--rf-panel);scrollbar-width:thin;scrollbar-color:var(--rf-line3) transparent;}
 .list-pane::-webkit-scrollbar{width:3px;}
-.list-pane::-webkit-scrollbar-thumb{background:#162338;border-radius:2px;}
-.list-row{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;border-bottom:1px solid #0a1520;transition:background .1s;}
-.list-row:active{background:#0f1d2e;}
+.list-pane::-webkit-scrollbar-thumb{background:var(--rf-line3);border-radius:2px;}
+.list-row{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;border-bottom:1px solid var(--rf-line3);transition:background .1s;}
+.list-row:active{background:var(--rf-hover-bg);}
 .row-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.row-name{font-size:12px;color:#b8ccec;flex:1;}
+.row-name{font-size:12px;color:var(--rf-text);flex:1;}
 .row-tag{font-size:10px;flex:0 0 auto;margin-right:4px;}
-.row-cnt{font-size:11px;font-weight:600;color:#4a9eff;background:rgba(74,158,255,.1);padding:2px 8px;border-radius:10px;}
-.row-tp{font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;background:#4a9eff22;color:#4a9eff;border:1px solid #4a9eff55;text-decoration:none;white-space:nowrap;flex-shrink:0;}
-.row-tp:hover{background:#4a9eff33;}
-.detail-back{color:#4a9eff;}
+.row-cnt{font-family:var(--rf-mono);font-size:11px;font-weight:600;color:var(--rf-accent);background:var(--rf-accent-soft);padding:2px 8px;border-radius:10px;}
+.row-tp{font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;background:var(--rf-accent-soft);color:var(--rf-accent);border:1px solid var(--rf-accent-border);text-decoration:none;white-space:nowrap;flex-shrink:0;}
+.row-tp:hover{background:var(--rf-active-bg);}
+.detail-back{color:var(--rf-accent);}
 
-#loading{position:fixed;inset:0;background:#060c16;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:12px;}
-#loading-text{font-size:13px;color:#4a9eff;}
-#loading-sub{font-size:11px;color:#2a3e56;}
+#loading{position:fixed;inset:0;background:var(--rf-panel);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:12px;}
+#loading-text{font-size:13px;color:var(--rf-accent);}
+#loading-sub{font-size:11px;color:var(--rf-t4);}
+
+/* ── СТРАНИЦА СТАТИСТИКИ ── (см. scripts/gen_stats.py, вкладка «Стата») */
+#stats-pane{display:none;height:100%;overflow-y:auto;background:var(--rf-panel);padding:14px;scrollbar-width:thin;scrollbar-color:var(--rf-line3) transparent;}
+.stat-badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-bottom:14px;}
+.stat-badge{padding:10px;background:var(--rf-bg);border:1px solid var(--rf-line2);border-radius:10px;}
+.stat-badge b{display:block;font-family:var(--rf-mono);font-size:19px;font-weight:600;color:var(--rf-accent);letter-spacing:-.02em;}
+.stat-badge span{display:block;margin-top:4px;font-family:var(--rf-mono);font-size:8.5px;letter-spacing:.08em;color:var(--rf-t4);}
+.stat-card{padding:14px;background:var(--rf-bg);border:1px solid var(--rf-line2);border-radius:11px;margin-bottom:12px;}
+.stat-card h3{font-size:13px;font-weight:600;color:var(--rf-text);}
+.stat-card p.stat-note{margin-top:3px;font-size:11px;color:var(--rf-t3);}
+.stat-bar-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.stat-bar-row .sb-name{flex:none;width:104px;font-size:11.5px;color:var(--rf-t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stat-bar-row .sb-track{flex:1;height:13px;border-radius:4px;background:var(--rf-line2);}
+.stat-bar-row .sb-fill{height:100%;border-radius:4px;background:var(--rf-accent);opacity:.8;}
+.stat-bar-row .sb-val{flex:none;width:26px;text-align:right;font-family:var(--rf-mono);font-size:11px;color:var(--rf-text);}
+.stat-coverage{margin-top:8px;font-size:10.5px;color:var(--rf-t4);}
+.stat-freq-cols{display:flex;align-items:flex-end;gap:8px;height:110px;margin-top:12px;}
+.stat-freq-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;height:100%;}
+.stat-freq-col .sf-val{font-family:var(--rf-mono);font-size:11px;color:var(--rf-text);}
+.stat-freq-col .sf-bar{width:100%;border-radius:4px 4px 0 0;background:var(--rf-accent);opacity:.8;}
+.stat-freq-col .sf-label{font-size:9.5px;text-align:center;color:var(--rf-t3);}
+.stat-visa-row{margin-top:9px;}
+.stat-visa-row .vr-top{display:flex;align-items:center;gap:7px;}
+.stat-visa-row .vr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.stat-visa-row .vr-label{flex:1;font-size:11.5px;color:var(--rf-t2);}
+.stat-visa-row .vr-val{font-family:var(--rf-mono);font-size:11px;color:var(--rf-text);}
+.stat-visa-row .vr-pct{font-family:var(--rf-mono);font-size:10px;color:var(--rf-t4);}
+.stat-visa-row .vr-track{margin-top:4px;margin-left:15px;height:5px;border-radius:3px;background:var(--rf-line2);}
+.stat-visa-row .vr-fill{height:100%;border-radius:3px;}
+.stat-visa-row .vr-note{margin-top:3px;margin-left:15px;font-size:10px;color:var(--rf-t4);}
 
 
 /* ── DESKTOP LAYOUT (≥ 900px) ─────────────────────────────── */
@@ -122,15 +180,15 @@ body{display:flex;flex-direction:column;}
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border-right: 1px solid #1e3252;
-    background: #060c16;
+    border-right: 1px solid var(--rf-line);
+    background: var(--rf-panel);
     order: -1; /* сайдбар слева */
   }
 
   /* Инфобар в сайдбаре — занимает нужное место */
   #info-bar {
     flex-shrink: 0;
-    border-bottom: 1px solid #1e3252;
+    border-bottom: 1px solid var(--rf-line);
     border-right: none;
   }
 
@@ -138,7 +196,7 @@ body{display:flex;flex-direction:column;}
   #legend {
     padding: 6px 14px;
     gap: 4px 10px;
-    border-bottom: 1px solid #1e3252;
+    border-bottom: 1px solid var(--rf-line);
   }
   .leg { font-size: 11px; }
 
@@ -150,7 +208,8 @@ body{display:flex;flex-direction:column;}
      вторая колонка справа (detail-list), а не подмена в один клик */
   #lists-wrap { flex: 1; min-height: 0; display: flex; flex-direction: row; }
   #ru-list, #dst-list, #detail-list { flex: 0 0 300px; width: 300px; }
-  #detail-list { border-left: 1px solid #1e3252; }
+  #stats-pane { flex: 1; min-width: 0; }
+  #detail-list { border-left: 1px solid var(--rf-line); }
   #sidebar-wrap.has-detail { width: 600px; min-width: 600px; }
   .detail-back { display: none; } /* на мобильном второй колонки нет — там свой «Назад» */
 
@@ -189,7 +248,7 @@ body{display:flex;flex-direction:column;}
     flex-direction: column;
     overflow: hidden;
     min-height: 0;
-    background: #060c16;
+    background: var(--rf-panel);
   }
 }
 </style>
@@ -207,9 +266,10 @@ body{display:flex;flex-direction:column;}
     <div class="h-meta" id="h-meta">Загрузка...</div>
   </div>
   <div class="h-badges">
-    <span class="badge" id="b-cities">—</span>
-    <span class="badge" id="b-routes">—</span>
+    <span class="badge" id="b-cities" onclick="stab('stats')">—</span>
+    <span class="badge" id="b-routes" onclick="stab('stats')">—</span>
     <span id="badge-updated" style="display:none"></span>
+    <button id="theme-toggle" onclick="toggleTheme()" title="Светлая/тёмная тема">🌙</button>
   </div>
 </div>
 
@@ -221,6 +281,8 @@ body{display:flex;flex-direction:column;}
     <button class="ts-btn on" id="ts-gmap" onclick="setTiles('gmap')">Google</button>
     <button class="ts-btn" id="ts-yndx" onclick="setTiles('yndx')">Яндекс</button>
     <button class="ts-btn" id="ts-sat"  onclick="setTiles('sat')">Спутник</button>
+    <button class="ts-btn" id="ts-hybrid" onclick="setTiles('hybrid')">Гибрид</button>
+    <button class="ts-btn" id="ts-relief" onclick="setTiles('relief')">Рельеф</button>
   </div>
   <div id="season-switch">
     <button class="ts-btn" id="season-toggle" onclick="toggleSeason()">🌦 Сезон</button>
@@ -228,7 +290,7 @@ body{display:flex;flex-direction:column;}
   </div>
   <!-- Версия интерфейса — правится вручную при заметных изменениях index.html,
        не привязана к обновлению routes.json (для этого есть бейдж в шапке). -->
-  <div id="version-badge">v1.3</div>
+  <div id="version-badge">v2.0</div>
 </div>
 
 <div id="sidebar-wrap">
@@ -250,12 +312,14 @@ body{display:flex;flex-direction:column;}
 <div id="tab-bar">
   <button class="tab-btn" id="tab-ru"  onclick="stab('ru')">🟡 Откуда (города России)</button>
   <button class="tab-btn" id="tab-dst" onclick="stab('dst')">🔵 Куда (направления)</button>
+  <button class="tab-btn" id="tab-stats" onclick="stab('stats')">📊 Стата</button>
 </div>
 
 <div id="lists-wrap">
   <div class="list-pane" id="ru-list"></div>
   <div class="list-pane" id="dst-list" style="display:none;"></div>
   <div class="list-pane" id="detail-list" style="display:none;"></div>
+  <div id="stats-pane"></div>
 </div>
 
 <div id="tp-disclosure">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>
@@ -264,6 +328,22 @@ body{display:flex;flex-direction:column;}
         integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg=="
         crossorigin="anonymous"></script>
 <script>
+/* ══════════════════════════════════════════════════════
+   ТЕМА — светлая/тёмная, до загрузки данных (чтобы не мигало на loading-экране)
+══════════════════════════════════════════════════════ */
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  localStorage.setItem('rf-theme', next);
+  applyTheme(next);
+}
+window.toggleTheme = toggleTheme;
+applyTheme(localStorage.getItem('rf-theme') || 'dark');
+
 /* ══════════════════════════════════════════════════════
    SEED DATA — резервные данные на случай недоступности routes.json
    (обновляются вручную при необходимости)
@@ -1481,6 +1561,479 @@ const SEASON_DATA = {
 // SEASON_DATA_END
 
 /* ══════════════════════════════════════════════════════
+   СТАТИСТИКА СЕТИ — см. scripts/gen_stats.py
+   Пересчитывается из routes.json/VISA_REGIMES/SEASON_DATA/
+   network_trend.json при каждом запуске генератора.
+══════════════════════════════════════════════════════ */
+// STATS_DATA_START
+// Агрегаты для страницы статистики. Пересчитывается из routes.json,
+// VISA_REGIMES, SEASON_DATA и network_trend.json — см. scripts/gen_stats.py.
+const STATS_DATA = {
+  "updated": "2026-08-07T14:40:28Z",
+  "badges": [
+    {
+      "value": 47,
+      "label": "ГОРОДОВ ВЫЛЕТА"
+    },
+    {
+      "value": 492,
+      "label": "МАРШРУТОВ"
+    },
+    {
+      "value": 42,
+      "label": "СТРАН"
+    },
+    {
+      "value": 81,
+      "label": "ГОРОДОВ ПРИЛЁТА"
+    },
+    {
+      "value": 10.5,
+      "label": "В СРЕДНЕМ НА ГОРОД"
+    }
+  ],
+  "topCities": [
+    {
+      "name": "Москва",
+      "value": 76
+    },
+    {
+      "name": "Санкт-Петербург",
+      "value": 39
+    },
+    {
+      "name": "Екатеринбург",
+      "value": 34
+    },
+    {
+      "name": "Новосибирск",
+      "value": 30
+    },
+    {
+      "name": "Казань",
+      "value": 30
+    },
+    {
+      "name": "Сочи",
+      "value": 24
+    },
+    {
+      "name": "Красноярск",
+      "value": 20
+    },
+    {
+      "name": "Уфа",
+      "value": 20
+    },
+    {
+      "name": "Мин. Воды",
+      "value": 20
+    },
+    {
+      "name": "Самара",
+      "value": 19
+    },
+    {
+      "name": "Краснодар",
+      "value": 15
+    },
+    {
+      "name": "Тюмень",
+      "value": 15
+    },
+    {
+      "name": "Иркутск",
+      "value": 13
+    },
+    {
+      "name": "Владивосток",
+      "value": 11
+    },
+    {
+      "name": "Челябинск",
+      "value": 11
+    },
+    {
+      "name": "Нижний Новгород",
+      "value": 11
+    },
+    {
+      "name": "Пермь",
+      "value": 11
+    },
+    {
+      "name": "Хабаровск",
+      "value": 10
+    },
+    {
+      "name": "Сургут",
+      "value": 9
+    },
+    {
+      "name": "Махачкала",
+      "value": 9
+    },
+    {
+      "name": "Омск",
+      "value": 7
+    },
+    {
+      "name": "Оренбург",
+      "value": 7
+    },
+    {
+      "name": "Волгоград",
+      "value": 6
+    },
+    {
+      "name": "Грозный",
+      "value": 5
+    },
+    {
+      "name": "Нижневартовск",
+      "value": 4
+    },
+    {
+      "name": "Владикавказ",
+      "value": 4
+    },
+    {
+      "name": "Калининград",
+      "value": 4
+    },
+    {
+      "name": "Чита",
+      "value": 3
+    },
+    {
+      "name": "Южно-Сахалинск",
+      "value": 3
+    },
+    {
+      "name": "Якутск",
+      "value": 3
+    },
+    {
+      "name": "Астрахань",
+      "value": 2
+    },
+    {
+      "name": "Ульяновск",
+      "value": 2
+    },
+    {
+      "name": "Благовещенск",
+      "value": 1
+    },
+    {
+      "name": "Мурманск",
+      "value": 1
+    },
+    {
+      "name": "Воронеж",
+      "value": 1
+    },
+    {
+      "name": "Чебоксары",
+      "value": 1
+    },
+    {
+      "name": "Саранск",
+      "value": 1
+    },
+    {
+      "name": "Магнитогорск",
+      "value": 1
+    },
+    {
+      "name": "Архангельск",
+      "value": 1
+    },
+    {
+      "name": "Петрозаводск",
+      "value": 1
+    },
+    {
+      "name": "Ноябрьск",
+      "value": 1
+    },
+    {
+      "name": "Набережные Челны",
+      "value": 1
+    },
+    {
+      "name": "Череповец",
+      "value": 1
+    },
+    {
+      "name": "Сыктывкар",
+      "value": 1
+    },
+    {
+      "name": "Ханты-Мансийск",
+      "value": 1
+    },
+    {
+      "name": "Кызыл",
+      "value": 1
+    },
+    {
+      "name": "Улан-Удэ",
+      "value": 1
+    }
+  ],
+  "topDests": [
+    {
+      "name": "Анталья · Турция",
+      "value": 29
+    },
+    {
+      "name": "Ташкент · Узбекистан",
+      "value": 23
+    },
+    {
+      "name": "Ереван · Армения",
+      "value": 20
+    },
+    {
+      "name": "Минск · Беларусь",
+      "value": 20
+    },
+    {
+      "name": "Шарм-эль-Шейх · Египет",
+      "value": 18
+    },
+    {
+      "name": "Батуми · Грузия",
+      "value": 16
+    },
+    {
+      "name": "Нячанг · Вьетнам",
+      "value": 16
+    },
+    {
+      "name": "Дубай · ОАЭ",
+      "value": 15
+    },
+    {
+      "name": "Хургада · Египет",
+      "value": 15
+    },
+    {
+      "name": "Наманган · Узбекистан",
+      "value": 14
+    },
+    {
+      "name": "Стамбул · Турция",
+      "value": 14
+    },
+    {
+      "name": "Бишкек · Кыргызстан",
+      "value": 13
+    },
+    {
+      "name": "Душанбе · Таджикистан",
+      "value": 13
+    },
+    {
+      "name": "Кутаиси · Грузия",
+      "value": 13
+    },
+    {
+      "name": "Ош · Кыргызстан",
+      "value": 12
+    }
+  ],
+  "freq": {
+    "buckets": [
+      {
+        "label": "Ежедневно",
+        "value": 34
+      },
+      {
+        "label": "5–6 раз в неделю",
+        "value": 16
+      },
+      {
+        "label": "3–4 раза в неделю",
+        "value": 34
+      },
+      {
+        "label": "1–2 раза в неделю",
+        "value": 78
+      }
+    ],
+    "covered": 162,
+    "total": 492
+  },
+  "durationByRegion": {
+    "regions": [
+      {
+        "name": "Европа",
+        "min": 170,
+        "max": 245,
+        "median": 185,
+        "n": 5
+      },
+      {
+        "name": "СНГ",
+        "min": 60,
+        "max": 470,
+        "median": 200,
+        "n": 212
+      },
+      {
+        "name": "БВ",
+        "min": 120,
+        "max": 555,
+        "median": 295,
+        "n": 81
+      },
+      {
+        "name": "Африка",
+        "min": 190,
+        "max": 540,
+        "median": 350,
+        "n": 39
+      },
+      {
+        "name": "Азия",
+        "min": 85,
+        "max": 745,
+        "median": 415,
+        "n": 76
+      },
+      {
+        "name": "ЛА",
+        "min": 865,
+        "max": 865,
+        "median": 865,
+        "n": 1
+      }
+    ],
+    "global_min": 60,
+    "global_max": 865
+  },
+  "visa": {
+    "rows": [
+      {
+        "key": "free",
+        "label": "Без визы",
+        "value": 429,
+        "pct": 88,
+        "cities": 47
+      },
+      {
+        "key": "easy",
+        "label": "Виза по прилёту / электронная",
+        "value": 55,
+        "pct": 11,
+        "cities": 20
+      },
+      {
+        "key": "visa",
+        "label": "Нужна виза заранее",
+        "value": 4,
+        "pct": 1,
+        "cities": 2
+      }
+    ],
+    "classified": 488,
+    "total": 492
+  },
+  "seasonality": {
+    "months": [
+      {
+        "label": "янв",
+        "value": 348
+      },
+      {
+        "label": "фев",
+        "value": 404
+      },
+      {
+        "label": "мар",
+        "value": 466
+      },
+      {
+        "label": "апр",
+        "value": 463
+      },
+      {
+        "label": "май",
+        "value": 396
+      },
+      {
+        "label": "июн",
+        "value": 304
+      },
+      {
+        "label": "июл",
+        "value": 219
+      },
+      {
+        "label": "авг",
+        "value": 224
+      },
+      {
+        "label": "сен",
+        "value": 367
+      },
+      {
+        "label": "окт",
+        "value": 376
+      },
+      {
+        "label": "ноя",
+        "value": 405
+      },
+      {
+        "label": "дек",
+        "value": 382
+      }
+    ],
+    "covered": 488,
+    "total": 492
+  },
+  "trend": {
+    "points": [
+      {
+        "month": "2026-03",
+        "routes": 124,
+        "source": "git-history"
+      },
+      {
+        "month": "2026-04",
+        "routes": 486,
+        "source": "git-history"
+      },
+      {
+        "month": "2026-05",
+        "routes": 473,
+        "source": "git-history"
+      },
+      {
+        "month": "2026-06",
+        "routes": 481,
+        "source": "git-history"
+      },
+      {
+        "month": "2026-07",
+        "routes": 496,
+        "source": "git-history"
+      },
+      {
+        "month": "2026-08",
+        "routes": 492,
+        "source": "snapshot"
+      }
+    ],
+    "delta_text": "+368 маршрутов с марта 2026"
+  }
+};
+// STATS_DATA_END
+
+/* ══════════════════════════════════════════════════════
    TRAVELPAYOUTS — партнёрские ссылки
    marker/trs/p/campaign_id заполняются вручную после регистрации
    в Travelpayouts. Пустой marker = кнопки нигде не рендерятся.
@@ -1756,6 +2309,7 @@ function initApp(data) {
   const ruList     = document.getElementById('ru-list');
   const dstList    = document.getElementById('dst-list');
   const detailList = document.getElementById('detail-list');
+  const statsPane  = document.getElementById('stats-pane');
   const cEls = {}, dEls = {};
 
   // touchend раньше вызывал handler всегда, включая отпускание пальца
@@ -1831,33 +2385,213 @@ function initApp(data) {
   }
   window.toggleVisaFilter = toggleVisaFilter;
 
+  /* ── СТАТИСТИКА СЕТИ ──
+     Данные — const STATS_DATA (см. scripts/gen_stats.py), рендерится один
+     раз при первом переключении на вкладку «Стата» (см. stab()). */
+  const STATS_VISA_COLORS = { free:'#34d399', easy:'#fbbf24', visa:'#f87171' };
+  const MONTH_FULL_RU = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+
+  function renderStats() {
+    const s = STATS_DATA;
+    if (!s || !s.badges) {
+      statsPane.innerHTML = '<p style="padding:20px;color:var(--rf-t3);font-size:12px;">Данные статистики ещё не сгенерированы (scripts/gen_stats.py).</p>';
+      return;
+    }
+
+    const badgesHtml = s.badges.map(b =>
+      `<div class="stat-badge"><b>${esc(String(b.value))}</b><span>${esc(b.label)}</span></div>`
+    ).join('');
+
+    const topCitiesMax = Math.max(...s.topCities.map(r => r.value), 1);
+    const topCitiesHtml = s.topCities.slice(0, 10).map(r => `
+      <div class="stat-bar-row">
+        <div class="sb-name">${esc(r.name)}</div>
+        <div class="sb-track"><div class="sb-fill" style="width:${Math.round(r.value/topCitiesMax*100)}%"></div></div>
+        <div class="sb-val">${r.value}</div>
+      </div>`).join('');
+
+    const topDestsMax = Math.max(...s.topDests.map(r => r.value), 1);
+    const topDestsHtml = s.topDests.map(r => `
+      <div class="stat-bar-row">
+        <div class="sb-name">${esc(r.name)}</div>
+        <div class="sb-track"><div class="sb-fill" style="width:${Math.round(r.value/topDestsMax*100)}%"></div></div>
+        <div class="sb-val">${r.value}</div>
+      </div>`).join('');
+
+    const freqMax = Math.max(...s.freq.buckets.map(b => b.value), 1);
+    const freqHtml = s.freq.buckets.map(b => `
+      <div class="stat-freq-col">
+        <div class="sf-val">${b.value}</div>
+        <div class="sf-bar" style="height:${Math.max(4, Math.round(b.value/freqMax*90))}px"></div>
+        <div class="sf-label">${esc(b.label)}</div>
+      </div>`).join('');
+
+    const durMax = s.durationByRegion.global_max || 1;
+    const regionsHtml = s.durationByRegion.regions.map(r => `
+      <div class="stat-bar-row">
+        <div class="sb-name">${esc(r.name)}</div>
+        <div class="sb-track"><div class="sb-fill" style="width:${Math.round(r.median/durMax*100)}%"></div></div>
+        <div class="sb-val" style="width:auto;font-size:10px;color:var(--rf-t3);">${Math.round(r.median/60)}ч (${Math.round(r.min/60)}–${Math.round(r.max/60)}ч)</div>
+      </div>`).join('');
+
+    const visaHtml = s.visa.rows.map(v => {
+      const color = STATS_VISA_COLORS[v.key] || 'var(--rf-accent)';
+      return `
+      <div class="stat-visa-row">
+        <div class="vr-top">
+          <span class="vr-dot" style="background:${color}"></span>
+          <span class="vr-label">${esc(v.label)}</span>
+          <span class="vr-val">${v.value}</span>
+          <span class="vr-pct">${v.pct}%</span>
+        </div>
+        <div class="vr-track"><div class="vr-fill" style="width:${v.pct}%;background:${color}"></div></div>
+        <div class="vr-note">доступно из ${v.cities} городов</div>
+      </div>`;
+    }).join('');
+
+    // Донат — три дуги SVG по накопленному проценту (та же арифметика, что в макете).
+    const R = 46, C = 2 * Math.PI * R;
+    let acc = 0;
+    const donutHtml = s.visa.rows.map(v => {
+      const frac = s.visa.classified ? v.value / s.visa.classified : 0;
+      const len = C * frac;
+      const offset = -acc;
+      acc += len;
+      const color = STATS_VISA_COLORS[v.key] || 'var(--rf-accent)';
+      return `<circle cx="58" cy="58" r="${R}" fill="none" stroke="${color}" stroke-width="14" stroke-dasharray="${len.toFixed(1)} ${(C-len).toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" transform="rotate(-90 58 58)"/>`;
+    }).join('');
+
+    // Сезонность сети — линия по 12 месяцам (климатический комфорт, SEASON_DATA).
+    const seaVals = s.seasonality.months.map(m => m.value);
+    const seaMin = Math.min(...seaVals), seaMax = Math.max(...seaVals);
+    const spx = i => 20 + i * (560 / 11);
+    const spy = v => 130 - (seaMax > seaMin ? (v - seaMin) / (seaMax - seaMin) : 0.5) * 100;
+    const seaPoints = s.seasonality.months.map((m, i) => ({ x: spx(i), y: spy(m.value), v: m.value, label: m.label }));
+    const seaLine = seaPoints.map((p, i) => (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' ');
+    const seaArea = seaLine + ` L${spx(11).toFixed(1)} 130 L${spx(0).toFixed(1)} 130 Z`;
+    const seaDotsHtml = seaPoints.map(p =>
+      `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.6" fill="var(--rf-accent)"/>`).join('');
+    const seaLabelsHtml = seaPoints.map(p =>
+      `<text x="${p.x.toFixed(1)}" y="148" text-anchor="middle" font-family="var(--rf-mono)" font-size="9" fill="var(--rf-t4)">${esc(p.label)}</text>`).join('');
+
+    // Динамика сети — грубая оценка по git-истории + снапшоты вперёд (network_trend.json).
+    let trendHtml = '';
+    if (s.trend && s.trend.points && s.trend.points.length) {
+      const tMax = Math.max(...s.trend.points.map(p => p.routes), 1);
+      const bars = s.trend.points.map(p => {
+        const [y, m] = p.month.split('-');
+        const label = MONTH_FULL_RU[parseInt(m, 10) - 1].slice(0, 3) + ' ' + y.slice(2);
+        const h = Math.max(4, Math.round(p.routes / tMax * 90));
+        const title = `${p.month}: ${p.routes} маршрутов${p.source === 'git-history' ? ' (оценка по git-истории)' : ''}`;
+        return `<div title="${esc(title)}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="width:100%;height:${h}px;border-radius:3px 3px 0 0;background:var(--rf-accent);opacity:${p.source==='git-history'?0.45:0.85};"></div>
+          <div style="font-size:8.5px;color:var(--rf-t4);font-family:var(--rf-mono);">${esc(label)}</div>
+        </div>`;
+      }).join('');
+      trendHtml = `
+      <div class="stat-card">
+        <h3>Динамика сети</h3>
+        <p class="stat-note">Число маршрутов по месяцам. ${esc(s.trend.delta_text || '')} — светлые столбцы восстановлены по git-истории (грубая оценка), тёмные — точные снапшоты.</p>
+        <div style="display:flex;align-items:flex-end;gap:5px;height:110px;margin-top:12px;">${bars}</div>
+      </div>`;
+    }
+
+    statsPane.innerHTML = `
+      <div class="stat-badges">${badgesHtml}</div>
+
+      <div class="stat-card">
+        <h3>Города по числу направлений</h3>
+        <p class="stat-note">Сколько прямых международных направлений доступно из каждого города.</p>
+        ${topCitiesHtml}
+      </div>
+
+      <div class="stat-card">
+        <h3>Направления по числу городов-источников</h3>
+        <p class="stat-note">Из скольких городов России есть прямой рейс в это направление.</p>
+        ${topDestsHtml}
+      </div>
+
+      <div class="stat-card">
+        <h3>Частота рейсов</h3>
+        <p class="stat-note">Распределение маршрутов по числу дней вылета в неделю.</p>
+        <div class="stat-freq-cols">${freqHtml}</div>
+        <div class="stat-coverage">частота известна для ${s.freq.covered} из ${s.freq.total} маршрутов</div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Длительность полёта по регионам</h3>
+        <p class="stat-note">Медиана и разброс (мин–макс) времени в пути.</p>
+        ${regionsHtml}
+      </div>
+
+      <div class="stat-card">
+        <h3>Визовый режим и доступность</h3>
+        <p class="stat-note">Доля направлений по визовому режиму и число городов вылета в каждой группе.</p>
+        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:10px;">
+          <svg width="116" height="116" viewBox="0 0 116 116" style="flex-shrink:0;">
+            <circle cx="58" cy="58" r="${R}" fill="none" stroke="var(--rf-line2)" stroke-width="14"/>
+            ${donutHtml}
+          </svg>
+          <div style="flex:1;min-width:180px;">${visaHtml}</div>
+        </div>
+        <div class="stat-coverage">виза известна для ${s.visa.classified} из ${s.visa.total} маршрутов</div>
+      </div>
+
+      <div class="stat-card">
+        <h3>Сезонность сети</h3>
+        <p class="stat-note">Сколько направлений климатически комфортны в каждом месяце (SEASON_DATA).</p>
+        <svg viewBox="0 0 600 160" width="100%" height="150" style="margin-top:8px;display:block;overflow:visible;">
+          <path d="${seaArea}" fill="var(--rf-accent-soft)"/>
+          <path d="${seaLine}" fill="none" stroke="var(--rf-accent)" stroke-width="2" stroke-linejoin="round"/>
+          ${seaDotsHtml}${seaLabelsHtml}
+        </svg>
+        <div class="stat-coverage">по направлениям с данными сезонности: ${s.seasonality.covered} из ${s.seasonality.total}</div>
+      </div>
+
+      ${trendHtml}
+    `;
+  }
+
   /* ── TABS ── */
   let tab = 'ru';
+  let statsRendered = false;
   function stab(id) {
     tab = id;
-    document.getElementById('tab-ru').style.color             = id==='ru'  ? '#f0b82a' : '#4a6a90';
+    document.getElementById('tab-ru').style.color             = id==='ru'  ? '#f0b82a' : 'var(--rf-t3)';
     document.getElementById('tab-ru').style.borderBottomColor = id==='ru'  ? '#f0b82a' : 'transparent';
-    document.getElementById('tab-dst').style.color             = id==='dst' ? '#4a9eff' : '#4a6a90';
-    document.getElementById('tab-dst').style.borderBottomColor = id==='dst' ? '#4a9eff' : 'transparent';
-    ruList.style.display  = id==='ru'  ? 'block' : 'none';
-    dstList.style.display = id==='dst' ? 'block' : 'none';
+    document.getElementById('tab-dst').style.color             = id==='dst' ? 'var(--rf-accent)' : 'var(--rf-t3)';
+    document.getElementById('tab-dst').style.borderBottomColor = id==='dst' ? 'var(--rf-accent)' : 'transparent';
+    document.getElementById('tab-stats').style.color             = id==='stats' ? 'var(--rf-accent)' : 'var(--rf-t3)';
+    document.getElementById('tab-stats').style.borderBottomColor = id==='stats' ? 'var(--rf-accent)' : 'transparent';
+    ruList.style.display    = id==='ru'    ? 'block' : 'none';
+    dstList.style.display   = id==='dst'   ? 'block' : 'none';
+    statsPane.style.display = id==='stats' ? 'block' : 'none';
     document.getElementById('visa-filter').style.display = id==='dst' ? 'flex' : 'none';
+    if (id === 'stats' && !statsRendered) { renderStats(); statsRendered = true; }
   }
   window.stab = stab;
   stab('ru');
 
   /* ── MAP ── */
   const TILES = {
-    gmap: { url:'https://mt{s}.google.com/vt/lyrs=m&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19} },
-    yndx: { url:'https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=ru_RU&projection=web_mercator', opts:{maxZoom:19} },
-    sat:  { url:'https://mt{s}.google.com/vt/lyrs=y&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19} },
+    gmap:   { url:'https://mt{s}.google.com/vt/lyrs=m&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19} },
+    yndx:   { url:'https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=ru_RU&projection=web_mercator', opts:{maxZoom:19} },
+    sat:    { url:'https://mt{s}.google.com/vt/lyrs=y&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19} },
+    // Гибрид = спутник + подписи отдельным слоем поверх (два L.tileLayer).
+    hybrid: { url:'https://mt{s}.google.com/vt/lyrs=y&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19},
+              labelsUrl:'https://mt{s}.google.com/vt/lyrs=h&hl=ru&x={x}&y={y}&z={z}',     labelsOpts:{subdomains:'0123',maxZoom:19} },
+    relief: { url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',                     opts:{subdomains:'abc',maxZoom:17} },
   };
   const map = L.map('map', {center:[55,70], zoom:3, zoomControl:true, attributionControl:false, minZoom:2, maxZoom:12});
   let tileLayer = L.tileLayer(TILES.gmap.url, TILES.gmap.opts).addTo(map);
+  let labelsLayer = null;
 
   window.setTiles = function(key) {
     map.removeLayer(tileLayer);
-    tileLayer = L.tileLayer(TILES[key].url, TILES[key].opts).addTo(map);
+    if (labelsLayer) { map.removeLayer(labelsLayer); labelsLayer = null; }
+    const t = TILES[key];
+    tileLayer = L.tileLayer(t.url, t.opts).addTo(map);
+    if (t.labelsUrl) labelsLayer = L.tileLayer(t.labelsUrl, t.labelsOpts).addTo(map);
     document.querySelectorAll('.ts-btn').forEach(b => b.classList.remove('on'));
     document.getElementById('ts-' + key).classList.add('on');
   };

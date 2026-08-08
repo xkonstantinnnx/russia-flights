@@ -1,0 +1,38 @@
+[
+  {
+    "month": "2026-03",
+    "routes": 124,
+    "cities": 26,
+    "source": "git-history"
+  },
+  {
+    "month": "2026-04",
+    "routes": 486,
+    "cities": 41,
+    "source": "git-history"
+  },
+  {
+    "month": "2026-05",
+    "routes": 473,
+    "cities": 44,
+    "source": "git-history"
+  },
+  {
+    "month": "2026-06",
+    "routes": 481,
+    "cities": 46,
+    "source": "git-history"
+  },
+  {
+    "month": "2026-07",
+    "routes": 496,
+    "cities": 47,
+    "source": "git-history"
+  },
+  {
+    "month": "2026-08",
+    "routes": 492,
+    "cities": 47,
+    "source": "snapshot"
+  }
+]
