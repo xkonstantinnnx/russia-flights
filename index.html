@@ -27,36 +27,42 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
+a{color:var(--rf-accent);text-decoration:none;}
+a:hover{color:var(--rf-accent-hi);}
 /* ── ДИЗАЙН-ТОКЕНЫ ──
    Тёмная тема — значения по умолчанию на :root (совпадают с исходной
    палитрой сайта). [data-theme="light"] на <html> переопределяет их —
    переключатель в шапке, состояние в localStorage (см. initTheme в конце
    скрипта). Семантические цвета карты (регионы/виза/сезон/RU-маркер в JS)
    намеренно не токенизированы — это картографическая семантика, не тема. */
+/* Палитра — точные значения из макета Claude Design (untitled/project/
+   "Russia Flights - Карта прямых рейсов.dc.html"), не старая палитра сайта. */
 :root{
-  --rf-bg:#0d1117; --rf-panel:#060c16; --rf-bar:#0a1520ee; --rf-chip:#0a1828cc; --rf-chip-solid:#0a1828dd;
-  --rf-line:#1e3252; --rf-line2:#0e1e2e; --rf-line3:#0a1520;
-  --rf-text:#b8ccec; --rf-t2:#7090b0; --rf-t3:#4a6a90; --rf-t4:#2a3e56; --rf-t5:#3a5578;
-  --rf-accent:#4a9eff; --rf-accent-soft:rgba(74,158,255,.1); --rf-accent-border:#4a9eff55;
-  --rf-active-bg:#0f1d2e; --rf-hover-bg:#0f1d2e; --rf-row-bg:#132238; --rf-row-border:#2a4568;
-  --rf-good:#34d399; --rf-shadow:0 4px 16px #0008;
+  --rf-bg:#0A0F15; --rf-panel:rgba(10,14,20,.94); --rf-panel-flat:#0A0E14; --rf-tile:#0B1118;
+  --rf-bar:rgba(9,13,18,.92); --rf-chip:#0E141B; --rf-chip-solid:#0E141B; --rf-input:#0C1219; --rf-hover-bg:#0E151D;
+  --rf-line:#1A242F; --rf-line2:#161F29; --rf-line3:#10171F;
+  --rf-text:#E6EDF3; --rf-t2:#A8B6C4; --rf-t3:#7B8A99; --rf-t4:#5A6B7A; --rf-t5:#4A5764;
+  --rf-accent:#5FD4E4; --rf-accent-hi:#8FE6F2; --rf-accent-soft:#0E1A1F; --rf-accent-border:#24404A;
+  --rf-shadow:0 20px 60px rgba(0,0,0,.55); --rf-area-fill:rgba(95,212,228,.14);
   --rf-font:'IBM Plex Sans',-apple-system,'Segoe UI',Arial,sans-serif;
   --rf-mono:'IBM Plex Mono',monospace;
 }
 :root[data-theme="light"]{
-  --rf-bg:#e8ecf0; --rf-panel:#ffffff; --rf-bar:#ffffffee; --rf-chip:#f2f5f8cc; --rf-chip-solid:#f2f5f8dd;
-  --rf-line:#d8dfe6; --rf-line2:#e4eaef; --rf-line3:#edf1f5;
-  --rf-text:#0f1720; --rf-t2:#3d4a57; --rf-t3:#5e6c7a; --rf-t4:#98a5b2; --rf-t5:#7b8a99;
-  --rf-accent:#0e7c90; --rf-accent-soft:rgba(14,124,144,.1); --rf-accent-border:#0e7c9055;
-  --rf-active-bg:#eaf6f8; --rf-hover-bg:#edf2f6; --rf-row-bg:#eaf6f8; --rf-row-border:#bbdce3;
-  --rf-good:#0e7c90; --rf-shadow:0 4px 16px #14233022;
+  --rf-bg:#E8ECF0; --rf-panel:rgba(255,255,255,.96); --rf-panel-flat:#FFFFFF; --rf-tile:#F7F9FB;
+  --rf-bar:rgba(255,255,255,.93); --rf-chip:#F2F5F8; --rf-chip-solid:#F2F5F8; --rf-input:#F4F6F9; --rf-hover-bg:#EDF2F6;
+  --rf-line:#D8DFE6; --rf-line2:#E4EAEF; --rf-line3:#EDF1F5;
+  --rf-text:#0F1720; --rf-t2:#3D4A57; --rf-t3:#5E6C7A; --rf-t4:#7B8A99; --rf-t5:#98A5B2;
+  --rf-accent:#0E7C90; --rf-accent-hi:#0B5F6F; --rf-accent-soft:#EAF6F8; --rf-accent-border:#BBDCE3;
+  --rf-shadow:0 20px 50px rgba(20,35,50,.16); --rf-area-fill:rgba(14,124,144,.12);
 }
 html,body{height:100%;overflow:hidden;background:var(--rf-bg);font-family:var(--rf-font);color:var(--rf-text);}
 body{display:flex;flex-direction:column;}
 #hdr{background:var(--rf-bar);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--rf-line);backdrop-filter:blur(8px);z-index:1000;position:relative;}
-.h-title{font-size:13px;font-weight:600;color:var(--rf-accent);}
-.h-meta{font-size:10px;color:var(--rf-t4);margin-top:1px;}
+.h-brand{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.h-title{font-family:var(--rf-mono);font-size:12.5px;font-weight:600;letter-spacing:.2em;color:var(--rf-text);}
+.h-meta{font-family:var(--rf-mono);font-size:9px;letter-spacing:.16em;color:var(--rf-t4);margin-top:1px;}
 .h-badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 .badge{font-size:10px;color:var(--rf-accent);background:var(--rf-chip);padding:2px 8px;border-radius:10px;border:1px solid var(--rf-line);cursor:pointer;}
 #badge-updated{font-size:10px;color:#34d39988;background:var(--rf-chip);padding:2px 8px;border-radius:10px;border:1px solid #34d39944;}
 #theme-toggle{font-size:12px;line-height:1;color:var(--rf-t2);background:var(--rf-chip);padding:4px 7px;border-radius:10px;border:1px solid var(--rf-line);cursor:pointer;}
@@ -72,8 +78,21 @@ body{display:flex;flex-direction:column;}
 .leaflet-tooltip{background:var(--rf-chip-solid)!important;border:1px solid var(--rf-line)!important;color:var(--rf-text)!important;font-size:11px!important;border-radius:6px!important;padding:4px 9px!important;box-shadow:var(--rf-shadow)!important;}
 .leaflet-tooltip::before{display:none!important;}
 
-#tile-switch{position:absolute;top:8px;right:8px;z-index:700;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px;max-width:calc(100% - 16px);}
-#season-switch{position:absolute;top:38px;right:8px;z-index:700;display:flex;gap:4px;align-items:center;}
+/* Переключатель типа карты — выпадающее меню (кнопка с текущим выбором +
+   плоский список из 5 реально работающих вариантов тайлов). В макете
+   Claude Design это меню разбито на «ИСТОЧНИК»/«ТИП» (2×4 сетка) — но
+   Яндекс-спутника/гибрида/рельефа не существует, полную сетку строить не
+   стали (см. обсуждение с пользователем 08.08.2026), поэтому список плоский. */
+#map-ctrl{position:absolute;top:8px;right:8px;z-index:700;}
+.map-ctrl-btn{display:flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--rf-line);border-radius:9px;background:var(--rf-chip);backdrop-filter:blur(10px);color:var(--rf-t2);font-family:var(--rf-font);font-size:12px;cursor:pointer;box-shadow:var(--rf-shadow);}
+.map-ctrl-dot{width:7px;height:7px;border-radius:2px;background:var(--rf-accent);flex:none;}
+.map-ctrl-caret{color:var(--rf-t5);font-size:10px;}
+.map-menu{position:absolute;top:44px;right:0;width:190px;padding:6px;background:var(--rf-panel);backdrop-filter:blur(16px);border:1px solid var(--rf-line);border-radius:10px;box-shadow:var(--rf-shadow);display:flex;flex-direction:column;gap:2px;}
+.map-menu-item{display:block;width:100%;text-align:left;padding:7px 9px;border:none;border-radius:6px;background:transparent;color:var(--rf-t2);font-family:var(--rf-font);font-size:12.5px;cursor:pointer;}
+.map-menu-item:hover{background:var(--rf-hover-bg);}
+.map-menu-item.on{background:var(--rf-accent-soft);color:var(--rf-accent);}
+
+#season-switch{position:absolute;top:52px;right:8px;z-index:700;display:flex;gap:4px;align-items:center;}
 #version-badge{position:absolute;bottom:6px;right:8px;z-index:700;font-size:9px;color:var(--rf-t2);background:var(--rf-bar);padding:2px 6px;border-radius:4px;pointer-events:none;}
 .ts-btn{font-family:var(--rf-mono);font-size:10px;padding:3px 9px;border-radius:8px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-t2);cursor:pointer;backdrop-filter:blur(4px);}
 .ts-btn.on{background:var(--rf-accent-soft);color:var(--rf-accent);border-color:var(--rf-accent-border);}
@@ -100,14 +119,14 @@ body{display:flex;flex-direction:column;}
 .panel-h1{font-size:16px;font-weight:600;letter-spacing:-.015em;color:var(--rf-text);}
 .panel-sub{margin-top:5px;font-size:12.5px;line-height:1.5;color:var(--rf-t3);}
 .stat-cells{margin-top:13px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rf-line2);border:1px solid var(--rf-line2);border-radius:9px;overflow:hidden;}
-.stat-cell{padding:10px 6px;background:var(--rf-bg);cursor:pointer;border:none;font-family:var(--rf-font);text-align:left;}
+.stat-cell{padding:10px 6px;background:var(--rf-tile);cursor:pointer;border:none;font-family:var(--rf-font);text-align:left;}
 .stat-cell b{display:block;font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--rf-text);}
 .stat-cell span{display:block;margin-top:2px;font-family:var(--rf-mono);font-size:7.5px;letter-spacing:.05em;line-height:1.3;color:var(--rf-t4);}
 .panel-more-link{margin-top:9px;text-align:right;font-size:11.5px;}
 .panel-more-link a{color:var(--rf-accent);text-decoration:none;}
 
 .panel-search{padding:11px 16px;border-bottom:1px solid var(--rf-line2);display:flex;flex-direction:column;gap:9px;flex:none;}
-.panel-search input{width:100%;padding:8px 10px;background:var(--rf-chip-solid);border:1px solid var(--rf-line);border-radius:7px;color:var(--rf-text);font-size:13px;font-family:var(--rf-font);}
+.panel-search input{width:100%;padding:8px 10px;background:var(--rf-input);border:1px solid var(--rf-line);border-radius:7px;color:var(--rf-text);font-size:13px;font-family:var(--rf-font);}
 .panel-chips{display:flex;gap:3px;flex-wrap:wrap;}
 .panel-chip{font-family:var(--rf-mono);padding:4px 8px;border-radius:6px;cursor:pointer;font-size:10.5px;border:1px solid var(--rf-line);background:transparent;color:var(--rf-t3);}
 .panel-chip.on{border-color:var(--rf-accent-border);background:var(--rf-accent-soft);color:var(--rf-accent);}
@@ -159,7 +178,7 @@ body{display:flex;flex-direction:column;}
 .card-season-strip div{flex:1;height:20px;border-radius:3px;}
 .card-season-labels{margin-top:6px;display:flex;justify-content:space-between;font-family:var(--rf-mono);font-size:9px;letter-spacing:.06em;color:var(--rf-t5);}
 .card-info-grid{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rf-line2);border:1px solid var(--rf-line2);border-radius:9px;overflow:hidden;}
-.card-info-cell{padding:11px 12px;background:var(--rf-bg);}
+.card-info-cell{padding:11px 12px;background:var(--rf-tile);}
 .card-info-cell .ci-label{font-family:var(--rf-mono);font-size:9px;letter-spacing:.08em;color:var(--rf-t5);}
 .card-info-cell .ci-val{margin-top:4px;font-size:13.5px;font-weight:500;color:var(--rf-text);}
 .card-footer{flex:none;padding:14px 16px;border-top:1px solid var(--rf-line2);background:var(--rf-panel);}
@@ -179,10 +198,10 @@ body{display:flex;flex-direction:column;}
 /* ── СТРАНИЦА СТАТИСТИКИ ── (см. scripts/gen_stats.py) — внутри .full-view */
 #stats-pane{padding:14px;}
 .stat-badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-bottom:14px;}
-.stat-badge{padding:10px;background:var(--rf-bg);border:1px solid var(--rf-line2);border-radius:10px;}
+.stat-badge{padding:10px;background:var(--rf-panel-flat);border:1px solid var(--rf-line2);border-radius:10px;}
 .stat-badge b{display:block;font-family:var(--rf-mono);font-size:19px;font-weight:600;color:var(--rf-accent);letter-spacing:-.02em;}
 .stat-badge span{display:block;margin-top:4px;font-family:var(--rf-mono);font-size:8.5px;letter-spacing:.08em;color:var(--rf-t4);}
-.stat-card{padding:14px;background:var(--rf-bg);border:1px solid var(--rf-line2);border-radius:11px;margin-bottom:12px;}
+.stat-card{padding:14px;background:var(--rf-panel-flat);border:1px solid var(--rf-line2);border-radius:11px;margin-bottom:12px;}
 .stat-card h3{font-size:13px;font-weight:600;color:var(--rf-text);}
 .stat-card p.stat-note{margin-top:3px;font-size:11px;color:var(--rf-t3);}
 .stat-bar-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
@@ -211,10 +230,9 @@ body{display:flex;flex-direction:column;}
 @media (min-width: 900px) {
   #panel { top: 14px; bottom: 14px; left: 14px; width: 396px; border-radius: 14px; }
   #legend { bottom: 16px; right: 16px; }
-  #tile-switch { top: 12px; right: 12px; }
+  #map-ctrl { top: 12px; right: 12px; }
+  #season-switch { top: 56px; }
   .ts-btn { font-size: 11px; padding: 4px 11px; }
-  .h-title { font-size: 15px; }
-  .h-meta  { font-size: 11px; }
   .badge, #badge-updated { font-size: 11px; }
 }
 
@@ -240,9 +258,18 @@ body{display:flex;flex-direction:column;}
 </div>
 
 <div id="hdr">
-  <div style="cursor:pointer;" onclick="goHome()">
-    <h1 class="h-title">✈ Прямые рейсы из России</h1>
-    <div class="h-meta" id="h-meta">Загрузка...</div>
+  <div class="h-brand" onclick="goHome()">
+    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="13" fill="none" stroke="var(--rf-t4)" stroke-width="1.2"></circle>
+      <ellipse cx="16" cy="16" rx="5.6" ry="13" fill="none" stroke="var(--rf-t5)" stroke-width="1"></ellipse>
+      <path d="M5 22 Q16 2 27 12" fill="none" stroke="var(--rf-accent)" stroke-width="1.8" stroke-linecap="round"></path>
+      <circle cx="5" cy="22" r="2.6" fill="var(--rf-accent)"></circle>
+      <circle cx="27" cy="12" r="1.8" fill="none" stroke="var(--rf-accent)" stroke-width="1.6"></circle>
+    </svg>
+    <div style="display:flex;flex-direction:column;gap:1px;">
+      <h1 class="h-title">RUSSIA<span aria-hidden="true">·</span>FLIGHTS<span class="sr-only"> — прямые рейсы из России</span></h1>
+      <div class="h-meta" id="h-meta">ПРЯМЫЕ МЕЖДУНАРОДНЫЕ</div>
+    </div>
   </div>
   <div class="h-badges">
     <span class="badge" id="b-cities" onclick="showFullView('stats')">—</span>
@@ -256,12 +283,19 @@ body{display:flex;flex-direction:column;}
 <div id="map-wrap">
   <div id="map"></div>
   <svg id="arc-svg"></svg>
-  <div id="tile-switch">
-    <button class="ts-btn on" id="ts-gmap" onclick="setTiles('gmap')">Google</button>
-    <button class="ts-btn" id="ts-yndx" onclick="setTiles('yndx')">Яндекс</button>
-    <button class="ts-btn" id="ts-sat"  onclick="setTiles('sat')">Спутник</button>
-    <button class="ts-btn" id="ts-hybrid" onclick="setTiles('hybrid')">Гибрид</button>
-    <button class="ts-btn" id="ts-relief" onclick="setTiles('relief')">Рельеф</button>
+  <div id="map-ctrl">
+    <button class="map-ctrl-btn" onclick="toggleMapMenu()">
+      <span class="map-ctrl-dot"></span>
+      <span id="map-ctrl-label">Google</span>
+      <span class="map-ctrl-caret">▾</span>
+    </button>
+    <div id="map-menu" class="map-menu" style="display:none;">
+      <button class="map-menu-item on" data-tile="gmap"   onclick="setTiles('gmap')">Google</button>
+      <button class="map-menu-item"    data-tile="yndx"   onclick="setTiles('yndx')">Яндекс</button>
+      <button class="map-menu-item"    data-tile="sat"    onclick="setTiles('sat')">Спутник</button>
+      <button class="map-menu-item"    data-tile="hybrid" onclick="setTiles('hybrid')">Гибрид</button>
+      <button class="map-menu-item"    data-tile="relief" onclick="setTiles('relief')">Рельеф</button>
+    </div>
   </div>
   <div id="season-switch">
     <button class="ts-btn" id="season-toggle" onclick="toggleSeason()">🌦 Сезон</button>
@@ -2609,15 +2643,20 @@ function initApp(data) {
     }
     html += `</div>`;
 
-    html += `<div class="card-section">
-      <div class="card-section-label">РЕЙС</div>
-      <div class="card-chips">
-        <span class="card-chip">${w?.carriers ? esc(w.carriers + ' ' + pluralCarriers(w.carriers)) : 'перевозчик неизвестен'}</span>
-        <span class="card-chip">${w?.days_per_week ? (w.days_per_week>=7?'ежедневно':esc(w.days_per_week+' раз в неделю')) : 'частота неизвестна'}</span>
-        ${w?.duration_min ? `<span class="card-chip">В пути ~${esc(fmtDuration(w.duration_min))}</span>` : ''}
-      </div>
-      <div class="card-note">Вылет из ${esc(city)}${RU_AIRPORT_IATA[city] ? ' ('+esc(RU_AIRPORT_IATA[city])+')' : ''}</div>
-    </div>`;
+    // Чипы «Рейс» — только то, что реально известно по маршруту; нет данных —
+    // просто не рисуем чип (не заглушка «неизвестно»), появится сам, когда
+    // источник это отдаст.
+    const flightChips = [];
+    if (w?.carriers) flightChips.push(esc(w.carriers + ' ' + pluralCarriers(w.carriers)));
+    if (w?.days_per_week) flightChips.push(w.days_per_week >= 7 ? 'ежедневно' : esc(w.days_per_week + ' раз в неделю'));
+    if (w?.duration_min) flightChips.push('В пути ~' + esc(fmtDuration(w.duration_min)));
+    if (flightChips.length) {
+      html += `<div class="card-section">
+        <div class="card-section-label">РЕЙС</div>
+        <div class="card-chips">${flightChips.map(c => `<span class="card-chip">${c}</span>`).join('')}</div>
+        <div class="card-note">Вылет из ${esc(city)}${RU_AIRPORT_IATA[city] ? ' ('+esc(RU_AIRPORT_IATA[city])+')' : ''}</div>
+      </div>`;
+    }
 
     const months = SEASON_DATA[dest];
     if (months) {
@@ -2894,7 +2933,7 @@ function initApp(data) {
         <h3>Сезонность сети</h3>
         <p class="stat-note">Сколько направлений климатически комфортны в каждом месяце (SEASON_DATA).</p>
         <svg viewBox="0 0 600 160" width="100%" height="150" style="margin-top:8px;display:block;overflow:visible;">
-          <path d="${seaArea}" fill="var(--rf-accent-soft)"/>
+          <path d="${seaArea}" fill="var(--rf-area-fill)"/>
           <path d="${seaLine}" fill="none" stroke="var(--rf-accent)" stroke-width="2" stroke-linejoin="round"/>
           ${seaDotsHtml}${seaLabelsHtml}
         </svg>
@@ -2924,15 +2963,26 @@ function initApp(data) {
   let tileLayer = L.tileLayer(TILES.gmap.url, TILES.gmap.opts).addTo(map);
   let labelsLayer = null;
 
+  const TILE_LABELS = { gmap:'Google', yndx:'Яндекс', sat:'Спутник', hybrid:'Гибрид', relief:'Рельеф' };
   window.setTiles = function(key) {
     map.removeLayer(tileLayer);
     if (labelsLayer) { map.removeLayer(labelsLayer); labelsLayer = null; }
     const t = TILES[key];
     tileLayer = L.tileLayer(t.url, t.opts).addTo(map);
     if (t.labelsUrl) labelsLayer = L.tileLayer(t.labelsUrl, t.labelsOpts).addTo(map);
-    document.querySelectorAll('.ts-btn').forEach(b => b.classList.remove('on'));
-    document.getElementById('ts-' + key).classList.add('on');
+    document.getElementById('map-ctrl-label').textContent = TILE_LABELS[key];
+    document.querySelectorAll('.map-menu-item').forEach(b => b.classList.toggle('on', b.dataset.tile === key));
+    document.getElementById('map-menu').style.display = 'none';
   };
+
+  window.toggleMapMenu = function() {
+    const menu = document.getElementById('map-menu');
+    menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+  };
+  document.addEventListener('click', e => {
+    const ctrl = document.getElementById('map-ctrl');
+    if (ctrl && !ctrl.contains(e.target)) document.getElementById('map-menu').style.display = 'none';
+  });
 
   /* ── ARCS ── */
   const arcSvg  = document.getElementById('arc-svg');
