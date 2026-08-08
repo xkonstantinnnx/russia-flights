@@ -61,7 +61,8 @@ body{display:flex;flex-direction:column;}
 #badge-updated{font-size:10px;color:#34d39988;background:var(--rf-chip);padding:2px 8px;border-radius:10px;border:1px solid #34d39944;}
 #theme-toggle{font-size:12px;line-height:1;color:var(--rf-t2);background:var(--rf-chip);padding:4px 7px;border-radius:10px;border:1px solid var(--rf-line);cursor:pointer;}
 
-#map-wrap{position:relative;flex-shrink:0;height:260px;}
+#body-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
+#map-wrap{position:absolute;inset:0;}
 #map{width:100%;height:100%;}
 #arc-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;}
 .leaflet-container{background:var(--rf-bg);}
@@ -71,59 +72,112 @@ body{display:flex;flex-direction:column;}
 .leaflet-tooltip{background:var(--rf-chip-solid)!important;border:1px solid var(--rf-line)!important;color:var(--rf-text)!important;font-size:11px!important;border-radius:6px!important;padding:4px 9px!important;box-shadow:var(--rf-shadow)!important;}
 .leaflet-tooltip::before{display:none!important;}
 
-#tile-switch{position:absolute;top:8px;right:8px;z-index:1000;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px;max-width:calc(100% - 16px);}
-#season-switch{position:absolute;top:38px;right:8px;z-index:1000;display:flex;gap:4px;align-items:center;}
-#version-badge{position:absolute;bottom:6px;right:8px;z-index:1000;font-size:9px;color:var(--rf-t2);background:var(--rf-bar);padding:2px 6px;border-radius:4px;pointer-events:none;}
+#tile-switch{position:absolute;top:8px;right:8px;z-index:700;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px;max-width:calc(100% - 16px);}
+#season-switch{position:absolute;top:38px;right:8px;z-index:700;display:flex;gap:4px;align-items:center;}
+#version-badge{position:absolute;bottom:6px;right:8px;z-index:700;font-size:9px;color:var(--rf-t2);background:var(--rf-bar);padding:2px 6px;border-radius:4px;pointer-events:none;}
 .ts-btn{font-family:var(--rf-mono);font-size:10px;padding:3px 9px;border-radius:8px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-t2);cursor:pointer;backdrop-filter:blur(4px);}
 .ts-btn.on{background:var(--rf-accent-soft);color:var(--rf-accent);border-color:var(--rf-accent-border);}
 #season-month{font-size:10px;padding:2px 4px;border-radius:6px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-text);}
 
-#info-bar{background:var(--rf-bar);border-bottom:1px solid var(--rf-line);padding:0 14px;display:none;flex-direction:column;flex-shrink:0;backdrop-filter:blur(8px);}
-#info-top{display:flex;align-items:center;justify-content:space-between;padding:7px 0 3px;}
-#info-title{font-size:13px;font-weight:600;}
-#reset-btn{background:var(--rf-active-bg);border:1px solid var(--rf-line);color:var(--rf-accent);font-size:11px;padding:4px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;}
-
-#legend{display:flex;flex-wrap:wrap;gap:3px;padding:4px 12px;flex-shrink:0;background:var(--rf-panel);border-bottom:1px solid var(--rf-line2);}
+/* Легенда — плавающий чип-кластер на карте (не часть панели, видна всегда) */
+/* z-index ниже панели (600), чтобы на мобильном при развороте bottom-sheet
+   до 74vh легенда уходила под панель, а не наплывала поверх списка. */
+#legend{position:absolute;z-index:550;display:flex;flex-wrap:wrap;gap:3px 9px;padding:7px 10px;background:var(--rf-chip-solid);border:1px solid var(--rf-line);border-radius:9px;backdrop-filter:blur(10px);box-shadow:var(--rf-shadow);}
 .leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--rf-t2);}
 .leg-clickable{cursor:pointer;user-select:none;}
 .leg-clickable.leg-off{opacity:.35;}
 .leg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block;}
 
-#tab-bar{display:flex;flex-shrink:0;background:var(--rf-panel);border-bottom:1px solid var(--rf-line2);}
-.tab-btn{flex:1;padding:7px 4px;font-size:12px;border:none;cursor:pointer;border-bottom:2px solid transparent;background:transparent;color:var(--rf-t3);font-family:var(--rf-font);}
+/* ── ПЛАВАЮЩАЯ/ДОКНУТАЯ ПАНЕЛЬ — drill-down: обзор → список направлений → карточка ── */
+#panel{position:absolute;z-index:600;background:var(--rf-panel);border:1px solid var(--rf-line);box-shadow:var(--rf-shadow);display:flex;flex-direction:column;overflow:hidden;}
+.panel-grabber{display:none;}
+.panel-view{flex:1;min-height:0;display:flex;flex-direction:column;}
+.panel-scroll{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--rf-line3) transparent;}
+.panel-scroll::-webkit-scrollbar{width:3px;}
+.panel-scroll::-webkit-scrollbar-thumb{background:var(--rf-line3);border-radius:2px;}
 
-#visa-filter{display:flex;gap:4px;flex-wrap:wrap;padding:6px 12px;flex-shrink:0;background:var(--rf-panel);border-bottom:1px solid var(--rf-line2);}
-.visa-btn{padding:4px 8px;font-size:10px;border:1px solid var(--rf-line);border-radius:10px;cursor:pointer;background:transparent;color:var(--rf-t3);font-family:var(--rf-font);}
-.visa-btn.on{background:var(--rf-row-bg);border-color:var(--rf-row-border);color:var(--rf-text);}
+.panel-hero{padding:16px 16px 14px;border-bottom:1px solid var(--rf-line2);}
+.panel-h1{font-size:16px;font-weight:600;letter-spacing:-.015em;color:var(--rf-text);}
+.panel-sub{margin-top:5px;font-size:12.5px;line-height:1.5;color:var(--rf-t3);}
+.stat-cells{margin-top:13px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rf-line2);border:1px solid var(--rf-line2);border-radius:9px;overflow:hidden;}
+.stat-cell{padding:10px 6px;background:var(--rf-bg);cursor:pointer;border:none;font-family:var(--rf-font);text-align:left;}
+.stat-cell b{display:block;font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--rf-text);}
+.stat-cell span{display:block;margin-top:2px;font-family:var(--rf-mono);font-size:7.5px;letter-spacing:.05em;line-height:1.3;color:var(--rf-t4);}
+.panel-more-link{margin-top:9px;text-align:right;font-size:11.5px;}
+.panel-more-link a{color:var(--rf-accent);text-decoration:none;}
 
-#lists-wrap{flex:1;overflow:hidden;position:relative;}
-#tp-disclosure{flex-shrink:0;font-size:9px;line-height:1.4;color:var(--rf-t5);padding:5px 14px;background:var(--rf-panel);border-top:1px solid var(--rf-line2);}
-/* Текстовый снапшот маршрутов (см. комментарий у #static-routes-snapshot в body) */
-#static-routes-snapshot{flex-shrink:0;background:var(--rf-panel);border-top:1px solid var(--rf-line2);color:var(--rf-t2);font-size:11px;}
-#static-routes-snapshot summary{cursor:pointer;padding:6px 14px;color:var(--rf-accent);user-select:none;}
-#static-routes-snapshot[open]{max-height:40vh;overflow-y:auto;}
-#static-routes-snapshot .ssr-inner{padding:0 14px 14px;}
-#static-routes-snapshot h3{font-size:12px;color:var(--rf-text);margin-top:10px;}
-#static-routes-snapshot p{line-height:1.5;margin-top:4px;}
-.list-pane{height:100%;overflow-y:auto;background:var(--rf-panel);scrollbar-width:thin;scrollbar-color:var(--rf-line3) transparent;}
-.list-pane::-webkit-scrollbar{width:3px;}
-.list-pane::-webkit-scrollbar-thumb{background:var(--rf-line3);border-radius:2px;}
-.list-row{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;border-left:3px solid transparent;border-bottom:1px solid var(--rf-line3);transition:background .1s;}
-.list-row:active{background:var(--rf-hover-bg);}
-.row-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.row-name{font-size:12px;color:var(--rf-text);flex:1;}
-.row-tag{font-size:10px;flex:0 0 auto;margin-right:4px;}
-.row-cnt{font-family:var(--rf-mono);font-size:11px;font-weight:600;color:var(--rf-accent);background:var(--rf-accent-soft);padding:2px 8px;border-radius:10px;}
-.row-tp{font-size:10px;font-weight:600;padding:4px 10px;border-radius:8px;background:var(--rf-accent-soft);color:var(--rf-accent);border:1px solid var(--rf-accent-border);text-decoration:none;white-space:nowrap;flex-shrink:0;}
-.row-tp:hover{background:var(--rf-active-bg);}
-.detail-back{color:var(--rf-accent);}
+.panel-search{padding:11px 16px;border-bottom:1px solid var(--rf-line2);display:flex;flex-direction:column;gap:9px;flex:none;}
+.panel-search input{width:100%;padding:8px 10px;background:var(--rf-chip-solid);border:1px solid var(--rf-line);border-radius:7px;color:var(--rf-text);font-size:13px;font-family:var(--rf-font);}
+.panel-chips{display:flex;gap:3px;flex-wrap:wrap;}
+.panel-chip{font-family:var(--rf-mono);padding:4px 8px;border-radius:6px;cursor:pointer;font-size:10.5px;border:1px solid var(--rf-line);background:transparent;color:var(--rf-t3);}
+.panel-chip.on{border-color:var(--rf-accent-border);background:var(--rf-accent-soft);color:var(--rf-accent);}
+
+.panel-section-label{padding:12px 16px 6px;font-family:var(--rf-mono);font-size:10px;letter-spacing:.14em;color:var(--rf-t5);flex:none;}
+
+.city-row,.dest-row{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;border-bottom:1px solid var(--rf-line3);}
+.city-row:hover,.dest-row:hover{background:var(--rf-hover-bg);}
+.city-row .cr-name{font-size:14px;font-weight:500;color:var(--rf-text);}
+.city-row .cr-meta{margin-top:3px;font-family:var(--rf-mono);font-size:10px;letter-spacing:.08em;color:var(--rf-t4);}
+.city-row .cr-count{font-family:var(--rf-mono);font-size:13px;font-weight:600;color:var(--rf-text);text-align:right;}
+.cr-arrow{color:var(--rf-t5);font-size:13px;flex:none;}
+
+.dest-row .dr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dest-row .dr-body{flex:1;min-width:0;}
+.dest-row .dr-name{font-size:14px;font-weight:500;color:var(--rf-text);}
+.dest-row .dr-country{font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t4);margin-left:6px;}
+.dest-row .dr-meta{margin-top:3px;font-size:11.5px;color:var(--rf-t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dest-row .dr-visa{font-family:var(--rf-mono);font-size:10px;letter-spacing:.05em;flex:none;}
+
+.panel-footer-links{display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding:14px 16px 18px;font-size:11.5px;color:var(--rf-t4);}
+.panel-footer-links a{color:var(--rf-accent);text-decoration:none;}
+
+.panel-list-head{flex:none;padding:14px 16px 12px;border-bottom:1px solid var(--rf-line2);}
+.plh-top{display:flex;align-items:flex-start;gap:10px;}
+.plh-name{flex:1;min-width:0;font-size:19px;font-weight:600;letter-spacing:-.015em;color:var(--rf-text);}
+.panel-clear-btn{flex:none;width:26px;height:26px;border-radius:6px;border:1px solid var(--rf-line);background:var(--rf-chip);color:var(--rf-t3);font-size:14px;line-height:1;cursor:pointer;}
+.plh-meta{margin-top:11px;font-family:var(--rf-mono);font-size:11px;letter-spacing:.06em;color:var(--rf-t3);}
+.plh-meta b{color:var(--rf-text);font-size:13px;font-weight:600;}
+.panel-airports{margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;}
+.panel-airports span{font-family:var(--rf-mono);font-size:10px;letter-spacing:.08em;padding:3px 7px;border-radius:5px;background:var(--rf-chip);border:1px solid var(--rf-line);color:var(--rf-t3);}
+
+.panel-back{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;background:var(--rf-chip);border:1px solid var(--rf-line);border-radius:7px;color:var(--rf-t2);font-size:12px;cursor:pointer;font-family:var(--rf-font);}
+.panel-card-head{flex:none;display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--rf-line2);}
+.panel-card-head .route-code{font-family:var(--rf-mono);font-size:10.5px;letter-spacing:.1em;color:var(--rf-t5);}
+
+.card-country{font-size:12px;color:var(--rf-t3);}
+.card-city{margin-top:4px;font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.1;color:var(--rf-text);}
+.card-visa-box{margin-top:14px;display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:9px;border:1px solid;}
+.card-visa-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.card-visa-label{font-size:13.5px;font-weight:600;}
+.card-visa-note{margin-top:2px;font-size:11.5px;color:var(--rf-t3);}
+.card-section{padding:16px 18px 0;}
+.card-section-label{font-family:var(--rf-mono);font-size:10px;letter-spacing:.14em;color:var(--rf-t5);margin-bottom:9px;}
+.card-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.card-chip{padding:6px 10px;background:var(--rf-chip);border:1px solid var(--rf-line);border-radius:7px;font-size:12.5px;color:var(--rf-t2);}
+.card-note{margin-top:9px;font-size:12px;color:var(--rf-t3);}
+.card-season-strip{display:flex;gap:3px;}
+.card-season-strip div{flex:1;height:20px;border-radius:3px;}
+.card-season-labels{margin-top:6px;display:flex;justify-content:space-between;font-family:var(--rf-mono);font-size:9px;letter-spacing:.06em;color:var(--rf-t5);}
+.card-info-grid{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rf-line2);border:1px solid var(--rf-line2);border-radius:9px;overflow:hidden;}
+.card-info-cell{padding:11px 12px;background:var(--rf-bg);}
+.card-info-cell .ci-label{font-family:var(--rf-mono);font-size:9px;letter-spacing:.08em;color:var(--rf-t5);}
+.card-info-cell .ci-val{margin-top:4px;font-size:13.5px;font-weight:500;color:var(--rf-text);}
+.card-footer{flex:none;padding:14px 16px;border-top:1px solid var(--rf-line2);background:var(--rf-panel);}
+.card-footer .disclosure{font-size:9.5px;line-height:1.4;color:var(--rf-t5);margin-bottom:9px;}
+.card-tp-btn{display:block;text-align:center;padding:10px 14px;border:1px solid var(--rf-accent-border);border-radius:8px;background:var(--rf-accent-soft);color:var(--rf-accent);font-size:13px;font-weight:500;text-decoration:none;}
+
+.panel-empty{padding:34px 20px;text-align:center;font-size:13px;color:var(--rf-t4);}
+
+/* ── ПОЛНОЭКРАННЫЕ ВИДЫ (Статистика / О проекте) — поверх карты ── */
+.full-view{position:absolute;inset:0;z-index:900;background:var(--rf-panel);overflow-y:auto;display:none;}
+.full-view-inner{max-width:760px;margin:0 auto;padding:16px 16px 60px;}
 
 #loading{position:fixed;inset:0;background:var(--rf-panel);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:12px;}
 #loading-text{font-size:13px;color:var(--rf-accent);}
 #loading-sub{font-size:11px;color:var(--rf-t4);}
 
-/* ── СТРАНИЦА СТАТИСТИКИ ── (см. scripts/gen_stats.py, вкладка «Стата») */
-#stats-pane{display:none;height:100%;overflow-y:auto;background:var(--rf-panel);padding:14px;scrollbar-width:thin;scrollbar-color:var(--rf-line3) transparent;}
+/* ── СТРАНИЦА СТАТИСТИКИ ── (см. scripts/gen_stats.py) — внутри .full-view */
+#stats-pane{padding:14px;}
 .stat-badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-bottom:14px;}
 .stat-badge{padding:10px;background:var(--rf-bg);border:1px solid var(--rf-line2);border-radius:10px;}
 .stat-badge b{display:block;font-family:var(--rf-mono);font-size:19px;font-weight:600;color:var(--rf-accent);letter-spacing:-.02em;}
@@ -153,103 +207,28 @@ body{display:flex;flex-direction:column;}
 .stat-visa-row .vr-note{margin-top:3px;margin-left:15px;font-size:10px;color:var(--rf-t4);}
 
 
-/* ── DESKTOP LAYOUT (≥ 900px) ─────────────────────────────── */
+/* ── DESKTOP (≥ 900px): панель плавает поверх карты слева ─── */
 @media (min-width: 900px) {
-  body { flex-direction: column; overflow: hidden; }
-
-  /* body-wrap: карта + сайдбар в строку */
-  #body-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    overflow: hidden;
-    min-height: 0;
-  }
-
-  /* Карта растягивается на всю высоту */
-  #map-wrap {
-    flex: 1;
-    height: auto !important;
-    min-height: 0;
-  }
-
-  /* Сайдбар */
-  #sidebar-wrap {
-    width: 300px;
-    min-width: 300px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border-right: 1px solid var(--rf-line);
-    background: var(--rf-panel);
-    order: -1; /* сайдбар слева */
-  }
-
-  /* Инфобар в сайдбаре — занимает нужное место */
-  #info-bar {
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--rf-line);
-    border-right: none;
-  }
-
-  /* Легенда в сайдбаре — крупнее */
-  #legend {
-    padding: 6px 14px;
-    gap: 4px 10px;
-    border-bottom: 1px solid var(--rf-line);
-  }
-  .leg { font-size: 11px; }
-
-  /* Табы в сайдбаре */
-  #tab-bar { flex-shrink: 0; }
-  .tab-btn { font-size: 12px; padding: 9px 8px; }
-
-  /* Список растягивается на остаток высоты; при открытой детализации —
-     вторая колонка справа (detail-list), а не подмена в один клик */
-  #lists-wrap { flex: 1; min-height: 0; display: flex; flex-direction: row; }
-  #ru-list, #dst-list, #detail-list { flex: 0 0 300px; width: 300px; }
-  #stats-pane { flex: 1; min-width: 0; }
-  #detail-list { border-left: 1px solid var(--rf-line); }
-  #sidebar-wrap.has-detail { width: 600px; min-width: 600px; }
-  .detail-back { display: none; } /* на мобильном второй колонки нет — там свой «Назад» */
-
-  /* Строки списка чуть крупнее */
-  .list-row { padding: 8px 14px; }
-  .row-name { font-size: 13px; }
-  .row-cnt  { font-size: 11px; }
-
-  /* Тайлы и зум */
+  #panel { top: 14px; bottom: 14px; left: 14px; width: 396px; border-radius: 14px; }
+  #legend { bottom: 16px; right: 16px; }
   #tile-switch { top: 12px; right: 12px; }
   .ts-btn { font-size: 11px; padding: 4px 11px; }
-
-  /* Шапка крупнее */
   .h-title { font-size: 15px; }
   .h-meta  { font-size: 11px; }
   .badge, #badge-updated { font-size: 11px; }
 }
 
-/* ── MOBILE LAYOUT (< 900px) ──────────────────────────────── */
-/* #body-wrap/#sidebar-wrap без этих правил не ограничены по высоте —
-   контент (список городов, футер про партнёрские ссылки) уходит за
-   пределы body{overflow:hidden} и становится недостижим прокруткой.
-   Тот же приём, что в десктопном блоке (flex-колонка + min-height:0),
-   только вертикально вместо горизонтального. */
+/* ── MOBILE (< 900px): панель — bottom sheet (peek/full) ───── */
 @media (max-width: 899.98px) {
-  #body-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-height: 0;
+  #panel {
+    left: 0; right: 0; bottom: 0;
+    border-radius: 16px 16px 0 0;
+    height: 136px;
+    transition: height .28s cubic-bezier(.4,0,.2,1);
   }
-  #sidebar-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-height: 0;
-    background: var(--rf-panel);
-  }
+  #panel.sheet-full { height: 74vh; }
+  .panel-grabber { display: block; flex: none; width: 40px; height: 4px; border-radius: 3px; background: var(--rf-line); margin: 9px auto 4px; cursor: pointer; }
+  #legend { bottom: 150px; left: 14px; right: auto; }
 }
 </style>
 </head>
@@ -261,13 +240,13 @@ body{display:flex;flex-direction:column;}
 </div>
 
 <div id="hdr">
-  <div>
+  <div style="cursor:pointer;" onclick="goHome()">
     <h1 class="h-title">✈ Прямые рейсы из России</h1>
     <div class="h-meta" id="h-meta">Загрузка...</div>
   </div>
   <div class="h-badges">
-    <span class="badge" id="b-cities" onclick="stab('stats')">—</span>
-    <span class="badge" id="b-routes" onclick="stab('stats')">—</span>
+    <span class="badge" id="b-cities" onclick="showFullView('stats')">—</span>
+    <span class="badge" id="b-routes" onclick="showFullView('stats')">—</span>
     <span id="badge-updated" style="display:none"></span>
     <button id="theme-toggle" onclick="toggleTheme()" title="Светлая/тёмная тема">🌙</button>
   </div>
@@ -288,41 +267,84 @@ body{display:flex;flex-direction:column;}
     <button class="ts-btn" id="season-toggle" onclick="toggleSeason()">🌦 Сезон</button>
     <select id="season-month" style="visibility:hidden;" onchange="setSeasonMonth(this.value)"></select>
   </div>
+  <div id="legend"></div>
   <!-- Версия интерфейса — правится вручную при заметных изменениях index.html,
        не привязана к обновлению routes.json (для этого есть бейдж в шапке). -->
   <div id="version-badge">v2.0</div>
-</div>
 
-<div id="sidebar-wrap">
-<div id="info-bar">
-  <div id="info-top">
-    <div id="info-title"></div>
-    <button id="reset-btn" onclick="reset()">✕ Сбросить</button>
+  <!-- Плавающая (desktop) / bottom-sheet (mobile) панель: drill-down
+       обзор → список направлений города (или город прилёта → города-источники,
+       обратный поиск) → карточка конкретного маршрута. Состояние — panelView()
+       в скрипте ниже, три sc-if-подобных блока переключаются через display. -->
+  <div id="panel">
+    <div class="panel-grabber" onclick="toggleSheet()"></div>
+
+    <div class="panel-view" id="view-overview">
+      <div class="panel-scroll">
+        <div class="panel-hero">
+          <div class="panel-h1">Куда можно улететь напрямую из России</div>
+          <div class="panel-sub">Вся сеть прямых международных рейсов на карте. Выберите город вылета или направление.</div>
+          <div class="stat-cells" id="overview-cells"></div>
+          <div class="panel-more-link"><a href="#" onclick="showFullView('stats');return false;">Вся статистика сети →</a></div>
+        </div>
+        <div class="panel-search">
+          <input id="overview-query" placeholder="Город вылета, город назначения или страна" oninput="onOverviewQuery(this.value)">
+        </div>
+        <div class="panel-section-label" id="overview-list-label">ГОРОДА ВЫЛЕТА</div>
+        <div id="overview-list"></div>
+        <div class="panel-footer-links">
+          <a href="#" onclick="showFullView('about');return false;">О проекте</a>
+          <span style="flex:1;"></span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v2.0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-view" id="view-list" style="display:none;">
+      <div class="panel-list-head">
+        <div class="plh-top">
+          <div class="plh-name" id="list-title"></div>
+          <button class="panel-clear-btn" onclick="goHome()" title="Сбросить">×</button>
+        </div>
+        <div class="plh-meta" id="list-meta"></div>
+        <div class="panel-airports" id="list-airports"></div>
+      </div>
+      <div class="panel-search">
+        <input id="list-query" placeholder="Город или страна" oninput="onListQuery(this.value)">
+        <div class="panel-chips" id="list-visa-chips">
+          <button class="panel-chip on" data-visa="free" onclick="toggleVisaFilter('free')">Без визы</button>
+          <button class="panel-chip on" data-visa="easy" onclick="toggleVisaFilter('easy')">E-виза/по прилёту</button>
+          <button class="panel-chip on" data-visa="visa" onclick="toggleVisaFilter('visa')">Виза</button>
+        </div>
+        <div class="panel-chips" id="list-month-chips"></div>
+      </div>
+      <div class="panel-scroll" id="list-rows"></div>
+    </div>
+
+    <div class="panel-view" id="view-card" style="display:none;">
+      <div class="panel-card-head">
+        <button class="panel-back" onclick="backToList()">‹ Все направления</button>
+        <div style="flex:1;"></div>
+        <span class="route-code" id="card-route-code"></span>
+      </div>
+      <div class="panel-scroll" id="card-body"></div>
+    </div>
   </div>
 </div>
 
-<div id="legend"></div>
-
-<div id="visa-filter" style="display:none;">
-  <button class="visa-btn on" data-visa="free" onclick="toggleVisaFilter('free')">Без визы</button>
-  <button class="visa-btn on" data-visa="easy" onclick="toggleVisaFilter('easy')">E-виза/по прилёту</button>
-  <button class="visa-btn on" data-visa="visa" onclick="toggleVisaFilter('visa')">Виза</button>
+<div class="full-view" id="view-stats">
+  <div class="full-view-inner">
+    <button class="panel-back" onclick="goHome()">‹ На карту</button>
+    <div id="stats-pane"></div>
+  </div>
 </div>
 
-<div id="tab-bar">
-  <button class="tab-btn" id="tab-ru"  onclick="stab('ru')">🟡 Откуда (города России)</button>
-  <button class="tab-btn" id="tab-dst" onclick="stab('dst')">🔵 Куда (направления)</button>
-  <button class="tab-btn" id="tab-stats" onclick="stab('stats')">📊 Стата</button>
+<div class="full-view" id="view-about">
+  <div class="full-view-inner">
+    <button class="panel-back" onclick="goHome()">‹ На карту</button>
+    <div id="about-pane"></div>
+  </div>
 </div>
-
-<div id="lists-wrap">
-  <div class="list-pane" id="ru-list"></div>
-  <div class="list-pane" id="dst-list" style="display:none;"></div>
-  <div class="list-pane" id="detail-list" style="display:none;"></div>
-  <div id="stats-pane"></div>
-</div>
-
-<div id="tp-disclosure">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg=="
@@ -2062,8 +2084,8 @@ function tpLink(fromCity, toDest) {
   return link;
 }
 
-// Кнопка «✈ Билеты» для строки detail-list — рендерится только когда
-// у обоих концов маршрута (откуда+куда) есть код IATA и задан marker.
+// Кнопка «Найти билеты» для карточки маршрута (view-card) — рендерится
+// только когда у обоих концов маршрута (откуда+куда) есть код IATA и задан marker.
 function makeTpButton(fromCity, toDest) {
   const link = tpLink(fromCity, toDest);
   if (!link) return null;
@@ -2294,15 +2316,11 @@ function initApp(data) {
   // источник пропустит сырое название — это не должно стать XSS
   const esc = s => String(s).replace(/[&<>"']/g,
     ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const ruList     = document.getElementById('ru-list');
-  const dstList    = document.getElementById('dst-list');
-  const detailList = document.getElementById('detail-list');
   const statsPane  = document.getElementById('stats-pane');
-  const cEls = {}, dEls = {};
 
   // touchend раньше вызывал handler всегда, включая отпускание пальца
   // после скролла списка — пролистать список не получалось, каждое
-  // касание засчитывалось как тап по городу. Порог в 10px отличает
+  // касание засчитывалось как тап по строке. Порог в 10px отличает
   // скролл (палец сместился) от тапа (остался на месте).
   function bindTap(el, handler) {
     let sx = 0, sy = 0, moved = false;
@@ -2319,63 +2337,410 @@ function initApp(data) {
     el.addEventListener('click', handler);
   }
 
-  [...Object.keys(ROUTES)]
-    .sort((a,b) => (ROUTES[b]||[]).length - (ROUTES[a]||[]).length)
-    .forEach(city => {
-      const cnt = (ROUTES[city]||[]).length;
-      const r = document.createElement('div'); r.className = 'list-row';
-      r.innerHTML = `<div class="row-dot" style="background:#f0b82a"></div><span class="row-name">${esc(city)}</span><span class="row-cnt">${cnt}</span>`;
-      bindTap(r, () => tapRU(city));
-      ruList.appendChild(r); cEls[city] = r;
-    });
-
-  [...Object.keys(DEST_META)]
-    .sort((a,b) => (REVERSE[b]||[]).length - (REVERSE[a]||[]).length)
-    .forEach(name => {
-      const meta  = DEST_META[name];
-      const cnt   = (REVERSE[name]||[]).length;
-      const color = REG[meta.r]?.c || '#888';
-      const visaCat = VISA_REGIMES[meta.c] || '';
-      const r = document.createElement('div'); r.className = 'list-row';
-      r.dataset.visa = visaCat;
-      r.innerHTML = `<div class="row-dot" style="background:${color}"></div><span class="row-name">${esc(name)}</span><span class="row-tag" style="color:${color}">${esc(meta.r)}</span><span class="row-cnt">${cnt}</span>`;
-      bindTap(r, () => tapDST(name));
-      dstList.appendChild(r); dEls[name] = r;
-    });
+  function fmtDuration(min) {
+    const h = Math.floor(min/60), m = min%60;
+    return h + 'ч' + (m ? ' ' + m + 'м' : '');
+  }
+  function pluralCarriers(n) {
+    const m10 = n%10, m100 = n%100;
+    if (m10===1 && m100!==11) return 'перевозчик';
+    if ([2,3,4].includes(m10) && ![12,13,14].includes(m100)) return 'перевозчика';
+    return 'перевозчиков';
+  }
 
   /* ── ВИЗОВЫЙ ФИЛЬТР ──
-     Работает только по dst-маркерам/dst-list — виза зависит от направления,
-     не от города вылета в РФ. Фильтрация независима от текущего выделения
-     (клик по городу/направлению) — обе учитываются вместе в updateMarkers
-     и drawArcs (иначе дуги маршрутов остаются видны, а гаснет только
+     Работает только по направлениям — виза зависит от страны прилёта,
+     не от города вылета в РФ. Учитывается вместе с сезонным слоем в
+     updateMarkers/drawArcs (иначе дуги остаются видны, а гаснет только
      маркер направления). */
   let visaActive = new Set(['free', 'easy', 'visa']);
   function visaMatches(destName) {
     const cat = VISA_REGIMES[DEST_META[destName]?.c];
     return !cat || visaActive.has(cat); // нет данных по стране — не скрываем
   }
-
-  // Общая точка применения обоих фильтров (визового и сезонного) к
-  // dst-list/маркерам/дугам — вызывается из toggleVisaFilter,
-  // toggleSeasonFilter, toggleSeason и setSeasonMonth.
-  function applyDstFilters() {
-    for (const [name, row] of Object.entries(dEls)) {
-      row.style.display = (visaMatches(name) && seasonMatches(name)) ? '' : 'none';
-    }
-    updateMarkers(aC, aD);
-    drawArcs();
-  }
+  const VISA_INFO = {
+    free: { label:'Без визы', color:'#34d399', note:'Въезд по загранпаспорту, виза не требуется' },
+    easy: { label:'Электронная виза / по прилёту', color:'#fbbf24', note:'Оформляется онлайн заранее или прямо в аэропорту' },
+    visa: { label:'Нужна виза заранее', color:'#f87171', note:'Требуется оформленная заранее виза' },
+  };
 
   function toggleVisaFilter(cat) {
     if (visaActive.has(cat)) visaActive.delete(cat); else visaActive.add(cat);
-    document.querySelector(`.visa-btn[data-visa="${cat}"]`).classList.toggle('on', visaActive.has(cat));
-    applyDstFilters();
+    const btn = document.querySelector(`#list-visa-chips .panel-chip[data-visa="${cat}"]`);
+    if (btn) btn.classList.toggle('on', visaActive.has(cat));
+    if (panelView === 'list') renderListView();
+    updateMarkers(curFrom, curTo);
+    drawArcs();
   }
   window.toggleVisaFilter = toggleVisaFilter;
 
+  /* ══════════════════════════════════════════════════════
+     ПАНЕЛЬ — drill-down обзор → список направлений → карточка.
+     panelView: 'overview' | 'list' | 'card'. listMode (только для 'list'/'card'):
+     'from-city' — выбран город вылета, показываем его направления;
+     'to-dest'   — выбрано направление (обратный поиск), показываем города-источники.
+  ══════════════════════════════════════════════════════ */
+  const viewOverview = document.getElementById('view-overview');
+  const viewList     = document.getElementById('view-list');
+  const viewCard     = document.getElementById('view-card');
+  const panelEl      = document.getElementById('panel');
+  const overviewList = document.getElementById('overview-list');
+  const overviewCellsEl = document.getElementById('overview-cells');
+  const overviewListLabel = document.getElementById('overview-list-label');
+  const listTitleEl  = document.getElementById('list-title');
+  const listMetaEl   = document.getElementById('list-meta');
+  const listAirportsEl = document.getElementById('list-airports');
+  const listRowsEl   = document.getElementById('list-rows');
+  const cardBodyEl   = document.getElementById('card-body');
+  const cardRouteCodeEl = document.getElementById('card-route-code');
+  const MONTH_SHORT_RU = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+
+  let panelView = 'overview';
+  let listMode = 'from-city';
+  let selCity = null, selDest = null;
+  let overviewQuery = '';
+  let listQuery = '';
+  let listMonth = 'all';
+  let sheet = 'peek';
+
+  function renderOverviewCells() {
+    const countries = new Set(Object.values(DEST_META).map(m => m.c)).size;
+    const cells = [
+      { value: totalRoutes, label: 'НАПРАВЛЕНИЙ' },
+      { value: Object.keys(ROUTES).length, label: 'ГОРОДОВ ВЫЛЕТА' },
+      { value: countries, label: 'СТРАН' },
+      { value: Object.keys(DEST_META).length, label: 'ГОРОДОВ ПРИЛЁТА' },
+    ];
+    overviewCellsEl.innerHTML = cells.map(c =>
+      `<button class="stat-cell" onclick="showFullView('stats')"><b>${c.value}</b><span>${esc(c.label)}</span></button>`
+    ).join('');
+  }
+
+  function cityRowHtml(city) {
+    const cnt = (ROUTES[city]||[]).length;
+    const countries = new Set((ROUTES[city]||[]).map(d => DEST_META[d]?.c).filter(Boolean)).size;
+    const apt = RU_AIRPORT_IATA[city] || '';
+    return `<div class="city-row" data-city="${esc(city)}">
+      <div style="flex:1;min-width:0;">
+        <div class="cr-name">${esc(city)}</div>
+        <div class="cr-meta">${esc(apt)}</div>
+      </div>
+      <div>
+        <div class="cr-count">${cnt}</div>
+        <div class="cr-meta" style="text-align:right;">${countries} стран</div>
+      </div>
+      <span class="cr-arrow">›</span>
+    </div>`;
+  }
+
+  function destSearchRowHtml(dest) {
+    const meta = DEST_META[dest] || {};
+    const color = REG[meta.r]?.c || '#888';
+    const cnt = (REVERSE[dest]||[]).length;
+    return `<div class="dest-row" data-dest="${esc(dest)}">
+      <span class="dr-dot" style="background:${color}"></span>
+      <div class="dr-body">
+        <div><span class="dr-name">${esc(dest)}</span><span class="dr-country">${esc(meta.c||'')}</span></div>
+        <div class="dr-meta">${cnt} городов вылета из РФ</div>
+      </div>
+      <span class="cr-arrow">›</span>
+    </div>`;
+  }
+
+  function renderOverviewList() {
+    const q = overviewQuery;
+    let html;
+    if (!q) {
+      overviewListLabel.textContent = 'ГОРОДА ВЫЛЕТА';
+      html = Object.keys(ROUTES)
+        .sort((a,b) => (ROUTES[b]||[]).length - (ROUTES[a]||[]).length)
+        .map(cityRowHtml).join('');
+    } else {
+      overviewListLabel.textContent = 'РЕЗУЛЬТАТЫ ПОИСКА';
+      const cityMatches = Object.keys(ROUTES).filter(c => c.toLowerCase().includes(q));
+      const destMatches = Object.keys(DEST_META).filter(d =>
+        d.toLowerCase().includes(q) || (DEST_META[d].c||'').toLowerCase().includes(q));
+      html = cityMatches.map(cityRowHtml).join('') + destMatches.map(destSearchRowHtml).join('');
+      if (!cityMatches.length && !destMatches.length) html = '<div class="panel-empty">Ничего не найдено</div>';
+    }
+    overviewList.innerHTML = html;
+    overviewList.querySelectorAll('[data-city]').forEach(el => bindTap(el, () => openCity(el.dataset.city)));
+    overviewList.querySelectorAll('[data-dest]').forEach(el => bindTap(el, () => openReverse(el.dataset.dest)));
+  }
+
+  function onOverviewQuery(v) {
+    overviewQuery = v.trim().toLowerCase();
+    renderOverviewList();
+  }
+  window.onOverviewQuery = onOverviewQuery;
+
+  function monthMatches(dest) {
+    if (listMonth === 'all') return true;
+    const months = SEASON_DATA[dest];
+    return months ? months[listMonth] === true : false;
+  }
+
+  function filteredFromCity() {
+    const q = listQuery;
+    return (ROUTES[selCity]||[]).filter(d => {
+      if (!visaMatches(d) || !monthMatches(d)) return false;
+      if (q) {
+        const meta = DEST_META[d] || {};
+        if (!(d + ' ' + (meta.c||'')).toLowerCase().includes(q)) return false;
+      }
+      return true;
+    }).sort((a,b) => a.localeCompare(b, 'ru'));
+  }
+
+  function filteredToDest() {
+    const q = listQuery;
+    return (REVERSE[selDest]||[]).filter(c => !q || c.toLowerCase().includes(q))
+      .sort((a,b) => a.localeCompare(b, 'ru'));
+  }
+
+  function destRowHtml(city, dest) {
+    const meta = DEST_META[dest] || {};
+    const color = REG[meta.r]?.c || '#888';
+    const w = WEIGHTS[city+'→'+dest];
+    const visaCat = VISA_REGIMES[meta.c];
+    const vi = VISA_INFO[visaCat];
+    const bits = [meta.r];
+    if (w?.duration_min) bits.push(fmtDuration(w.duration_min));
+    if (w?.days_per_week) bits.push(w.days_per_week >= 7 ? 'ежедневно' : w.days_per_week + ' раз/нед');
+    return `<div class="dest-row" data-dest="${esc(dest)}">
+      <span class="dr-dot" style="background:${color}"></span>
+      <div class="dr-body">
+        <div><span class="dr-name">${esc(dest)}</span><span class="dr-country">${esc(meta.c||'')}</span></div>
+        <div class="dr-meta">${esc(bits.join(' · '))}</div>
+      </div>
+      ${vi ? `<span class="dr-visa" style="color:${vi.color}">${esc(vi.label.split(' ')[0].toUpperCase())}</span>` : ''}
+      <span class="cr-arrow">›</span>
+    </div>`;
+  }
+
+  function cityReverseRowHtml(city, dest) {
+    const w = WEIGHTS[city+'→'+dest];
+    const apt = RU_AIRPORT_IATA[city] || '';
+    const bits = [apt];
+    if (w?.duration_min) bits.push(fmtDuration(w.duration_min));
+    return `<div class="dest-row" data-city="${esc(city)}">
+      <span class="dr-dot" style="background:#f0b82a"></span>
+      <div class="dr-body">
+        <div><span class="dr-name">${esc(city)}</span></div>
+        <div class="dr-meta">${esc(bits.filter(Boolean).join(' · '))}</div>
+      </div>
+      <span class="cr-arrow">›</span>
+    </div>`;
+  }
+
+  function renderMonthChips() {
+    const box = document.getElementById('list-month-chips');
+    if (listMode !== 'from-city') { box.innerHTML = ''; return; }
+    let html = `<button class="panel-chip${listMonth==='all'?' on':''}" onclick="setListMonth('all')">Весь год</button>`;
+    MONTH_SHORT_RU.forEach((m,i) => {
+      html += `<button class="panel-chip${listMonth===i?' on':''}" onclick="setListMonth(${i})">${m}</button>`;
+    });
+    box.innerHTML = html;
+  }
+  function setListMonth(v) {
+    listMonth = v === 'all' ? 'all' : parseInt(v, 10);
+    renderListView();
+  }
+  window.setListMonth = setListMonth;
+
+  function renderListView() {
+    const filtersRow = document.getElementById('list-visa-chips');
+    filtersRow.style.display = listMode === 'from-city' ? 'flex' : 'none';
+    document.getElementById('list-query').placeholder = listMode === 'from-city' ? 'Город или страна' : 'Город России';
+    document.getElementById('list-query').value = listQuery;
+    document.querySelectorAll('#list-visa-chips .panel-chip').forEach(b => b.classList.toggle('on', visaActive.has(b.dataset.visa)));
+
+    if (listMode === 'from-city') {
+      const city = selCity;
+      const all = ROUTES[city] || [];
+      const shown = filteredFromCity();
+      const countries = new Set(all.map(d => DEST_META[d]?.c).filter(Boolean)).size;
+      listTitleEl.textContent = city;
+      listMetaEl.innerHTML = `<b>${shown.length}</b> из ${all.length} направлений · ${countries} стран`;
+      const apt = RU_AIRPORT_IATA[city];
+      listAirportsEl.innerHTML = apt ? `<span>${esc(apt)}</span>` : '';
+      renderMonthChips();
+      listRowsEl.innerHTML = shown.length ? shown.map(d => destRowHtml(city, d)).join('') : '<div class="panel-empty">Под фильтры ничего не подошло</div>';
+      listRowsEl.querySelectorAll('[data-dest]').forEach(el => bindTap(el, () => openCard(city, el.dataset.dest)));
+    } else {
+      const dest = selDest;
+      const meta = DEST_META[dest] || {};
+      const all = REVERSE[dest] || [];
+      const shown = filteredToDest();
+      listTitleEl.textContent = dest + (meta.c ? ' · ' + meta.c : '');
+      listMetaEl.innerHTML = `<b>${shown.length}</b> из ${all.length} городов России`;
+      const daPt = DEST_AIRPORT_IATA[dest];
+      listAirportsEl.innerHTML = daPt ? `<span>${esc(daPt)}</span>` : '';
+      renderMonthChips();
+      listRowsEl.innerHTML = shown.length ? shown.map(c => cityReverseRowHtml(c, dest)).join('') : '<div class="panel-empty">Под фильтры ничего не подошло</div>';
+      listRowsEl.querySelectorAll('[data-city]').forEach(el => bindTap(el, () => openCard(el.dataset.city, dest)));
+    }
+  }
+
+  function onListQuery(v) {
+    listQuery = v.trim().toLowerCase();
+    renderListView();
+  }
+  window.onListQuery = onListQuery;
+
+  function renderCardView() {
+    const city = selCity, dest = selDest;
+    const meta = DEST_META[dest] || {};
+    const w = WEIGHTS[city+'→'+dest];
+    cardRouteCodeEl.textContent = (RU_AIRPORT_IATA[city]||city) + ' → ' + (DEST_AIRPORT_IATA[dest]||dest);
+
+    const visaCat = VISA_REGIMES[meta.c];
+    const vi = VISA_INFO[visaCat];
+
+    let html = `<div style="padding:20px 18px 16px;">
+      <div class="card-country">${esc(meta.c||'')}</div>
+      <div class="card-city">${esc(dest)}</div>`;
+    if (vi) {
+      html += `<div class="card-visa-box" style="border-color:${vi.color}55;background:${vi.color}18;">
+        <span class="card-visa-dot" style="background:${vi.color}"></span>
+        <div><div class="card-visa-label" style="color:${vi.color}">${esc(vi.label)}</div>
+        <div class="card-visa-note">${esc(vi.note)}</div></div>
+      </div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="card-section">
+      <div class="card-section-label">РЕЙС</div>
+      <div class="card-chips">
+        <span class="card-chip">${w?.carriers ? esc(w.carriers + ' ' + pluralCarriers(w.carriers)) : 'перевозчик неизвестен'}</span>
+        <span class="card-chip">${w?.days_per_week ? (w.days_per_week>=7?'ежедневно':esc(w.days_per_week+' раз в неделю')) : 'частота неизвестна'}</span>
+        ${w?.duration_min ? `<span class="card-chip">В пути ~${esc(fmtDuration(w.duration_min))}</span>` : ''}
+      </div>
+      <div class="card-note">Вылет из ${esc(city)}${RU_AIRPORT_IATA[city] ? ' ('+esc(RU_AIRPORT_IATA[city])+')' : ''}</div>
+    </div>`;
+
+    const months = SEASON_DATA[dest];
+    if (months) {
+      html += `<div class="card-section">
+        <div class="card-section-label">СЕЗОННОСТЬ (климатический комфорт)</div>
+        <div class="card-season-strip">${months.map(v => `<div title="${v?'комфортно':'не сезон'}" style="background:${v?'#34d399':'#f87171'};opacity:${v?0.85:0.55}"></div>`).join('')}</div>
+        <div class="card-season-labels"><span>ЯНВ</span><span>АПР</span><span>ИЮЛ</span><span>ОКТ</span><span>ДЕК</span></div>
+      </div>`;
+    }
+
+    html += `<div class="card-section" style="padding-bottom:16px;">
+      <div class="card-section-label">НАПРАВЛЕНИЕ</div>
+      <div class="card-info-grid">
+        <div class="card-info-cell"><div class="ci-label">РЕГИОН</div><div class="ci-val">${esc(meta.r||'—')}</div></div>
+        <div class="card-info-cell"><div class="ci-label">АЭРОПОРТ</div><div class="ci-val">${esc(DEST_AIRPORT_IATA[dest]||'—')}</div></div>
+        <div class="card-info-cell"><div class="ci-label">ГОРОДОВ ИЗ РФ</div><div class="ci-val">${(REVERSE[dest]||[]).length}</div></div>
+      </div>
+    </div>`;
+
+    cardBodyEl.innerHTML = html;
+
+    let footer = viewCard.querySelector('.card-footer');
+    if (!footer) { footer = document.createElement('div'); footer.className = 'card-footer'; viewCard.appendChild(footer); }
+    footer.innerHTML = `<div class="disclosure">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>`;
+    const btn = makeTpButton(city, dest);
+    if (btn) { btn.className = 'card-tp-btn'; btn.textContent = 'Найти билеты →'; footer.appendChild(btn); }
+  }
+
+  function renderPanelViews() {
+    viewOverview.style.display = panelView === 'overview' ? 'flex' : 'none';
+    viewList.style.display     = panelView === 'list'     ? 'flex' : 'none';
+    viewCard.style.display     = panelView === 'card'      ? 'flex' : 'none';
+    if (panelView === 'overview') renderOverviewList();
+    else if (panelView === 'list') renderListView();
+    else if (panelView === 'card') renderCardView();
+  }
+
+  function syncSheet() { panelEl.classList.toggle('sheet-full', sheet === 'full'); }
+  function toggleSheet() { sheet = sheet === 'full' ? 'peek' : 'full'; syncSheet(); }
+  window.toggleSheet = toggleSheet;
+
+  function goHome() {
+    panelView = 'overview'; selCity = null; selDest = null;
+    curFrom = null; curTo = null;
+    overviewQuery = ''; const oq = document.getElementById('overview-query'); if (oq) oq.value = '';
+    hideFullViews();
+    renderPanelViews();
+    updateMarkers(null, null); drawArcs();
+  }
+  window.goHome = goHome;
+
+  function openCity(city) {
+    panelView = 'list'; listMode = 'from-city';
+    selCity = city; selDest = null; listQuery = ''; listMonth = 'all';
+    curFrom = city; curTo = null; sheet = 'full';
+    hideFullViews();
+    renderPanelViews(); syncSheet();
+    updateMarkers(city, null); drawArcs();
+  }
+  window.openCity = openCity;
+
+  function openReverse(dest) {
+    panelView = 'list'; listMode = 'to-dest';
+    selDest = dest; selCity = null; listQuery = ''; listMonth = 'all';
+    curFrom = null; curTo = dest; sheet = 'full';
+    hideFullViews();
+    renderPanelViews(); syncSheet();
+    updateMarkers(null, dest); drawArcs();
+  }
+  window.openReverse = openReverse;
+
+  function openCard(city, dest) {
+    selCity = city; selDest = dest; panelView = 'card';
+    curFrom = city; curTo = dest; sheet = 'full';
+    hideFullViews();
+    renderPanelViews(); syncSheet();
+    updateMarkers(city, dest); drawArcs();
+  }
+  window.openCard = openCard;
+
+  function backToList() {
+    panelView = 'list';
+    if (listMode === 'from-city') { selDest = null; curFrom = selCity; curTo = null; }
+    else { selCity = null; curFrom = null; curTo = selDest; }
+    renderPanelViews();
+    updateMarkers(curFrom, curTo); drawArcs();
+  }
+  window.backToList = backToList;
+
+  function showFullView(name) {
+    document.getElementById('view-stats').style.display = name === 'stats' ? 'block' : 'none';
+    document.getElementById('view-about').style.display  = name === 'about' ? 'block' : 'none';
+    if (name === 'stats' && !statsRendered) { renderStats(); statsRendered = true; }
+    if (name === 'about') renderAbout();
+  }
+  window.showFullView = showFullView;
+
+  function hideFullViews() {
+    document.getElementById('view-stats').style.display = 'none';
+    document.getElementById('view-about').style.display = 'none';
+  }
+
+  function renderAbout() {
+    const box = document.getElementById('about-pane');
+    if (box.dataset.rendered) return;
+    box.dataset.rendered = '1';
+    box.innerHTML = `
+      <div class="panel-h1" style="font-size:22px;margin-top:14px;">О проекте</div>
+      <div class="panel-sub" style="margin-top:8px;font-size:13px;">Интерактивная карта прямых международных рейсов из городов России без пересадок.</div>
+      <div class="card-info-grid" style="margin-top:18px;grid-template-columns:1fr;">
+        <div class="card-info-cell"><div class="ci-label">ИСТОЧНИКИ ДАННЫХ</div><div class="ci-val" style="font-size:13px;font-weight:400;">AirLabs · AeroDataBox · OpenSky · Яндекс.Расписания</div></div>
+        <div class="card-info-cell"><div class="ci-label">ОБНОВЛЕНИЕ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Автоматически, несколько раз в месяц, без ручного вмешательства</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
+        <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather API, климатическая комфортность по месяцам</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v2.0 · 08.08.2026</div></div>
+      </div>
+      <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>
+    `;
+  }
+
   /* ── СТАТИСТИКА СЕТИ ──
      Данные — const STATS_DATA (см. scripts/gen_stats.py), рендерится один
-     раз при первом переключении на вкладку «Стата» (см. stab()). */
+     раз при первом открытии полноэкранного вида статистики (см. showFullView()). */
   const STATS_VISA_COLORS = { free:'#34d399', easy:'#fbbf24', visa:'#f87171' };
   const MONTH_FULL_RU = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
@@ -2540,25 +2905,7 @@ function initApp(data) {
     `;
   }
 
-  /* ── TABS ── */
-  let tab = 'ru';
   let statsRendered = false;
-  function stab(id) {
-    tab = id;
-    document.getElementById('tab-ru').style.color             = id==='ru'  ? '#f0b82a' : 'var(--rf-t3)';
-    document.getElementById('tab-ru').style.borderBottomColor = id==='ru'  ? '#f0b82a' : 'transparent';
-    document.getElementById('tab-dst').style.color             = id==='dst' ? 'var(--rf-accent)' : 'var(--rf-t3)';
-    document.getElementById('tab-dst').style.borderBottomColor = id==='dst' ? 'var(--rf-accent)' : 'transparent';
-    document.getElementById('tab-stats').style.color             = id==='stats' ? 'var(--rf-accent)' : 'var(--rf-t3)';
-    document.getElementById('tab-stats').style.borderBottomColor = id==='stats' ? 'var(--rf-accent)' : 'transparent';
-    ruList.style.display    = id==='ru'    ? 'block' : 'none';
-    dstList.style.display   = id==='dst'   ? 'block' : 'none';
-    statsPane.style.display = id==='stats' ? 'block' : 'none';
-    document.getElementById('visa-filter').style.display = id==='dst' ? 'flex' : 'none';
-    if (id === 'stats' && !statsRendered) { renderStats(); statsRendered = true; }
-  }
-  window.stab = stab;
-  stab('ru');
 
   /* ── MAP ── */
   const TILES = {
@@ -2570,7 +2917,10 @@ function initApp(data) {
               labelsUrl:'https://mt{s}.google.com/vt/lyrs=h&hl=ru&x={x}&y={y}&z={z}',     labelsOpts:{subdomains:'0123',maxZoom:19} },
     relief: { url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',                     opts:{subdomains:'abc',maxZoom:17} },
   };
-  const map = L.map('map', {center:[55,70], zoom:3, zoomControl:true, attributionControl:false, minZoom:2, maxZoom:12});
+  // zoomControl выключен: кнопки +/− раньше сидели в верхнем левом углу
+  // и перекрывались плавающей панелью, которая теперь занимает весь левый
+  // край. Зум колесом/пинчем/двойным кликом работает как обычно.
+  const map = L.map('map', {center:[55,70], zoom:3, zoomControl:false, attributionControl:false, minZoom:2, maxZoom:12});
   let tileLayer = L.tileLayer(TILES.gmap.url, TILES.gmap.opts).addTo(map);
   let labelsLayer = null;
 
@@ -2651,7 +3001,7 @@ function initApp(data) {
       radius:5, fillColor:dstColor(name), fillOpacity:0.9, color:'#fff', weight:1, opacity:0.5
     }).addTo(map);
     m.bindTooltip(`<b>${esc(name)}</b> · ${esc(meta.r)}`, {direction:'top', offset:[0,-4]});
-    m.on('click', () => { stab('dst'); tapDST(name); });
+    m.on('click', () => { openReverse(name); });
     dstMarkers[name] = m;
   }
 
@@ -2665,7 +3015,7 @@ function initApp(data) {
       radius:r, fillColor:'#f0b82a', fillOpacity:0.95, color:'#fff', weight:1.5, opacity:0.8
     }).addTo(map);
     m.bindTooltip(`<b>${esc(city)}</b> · ${cnt} направлений`, {direction:'top', offset:[0,-4]});
-    m.on('click', () => { stab('ru'); tapRU(city); });
+    m.on('click', () => { openCity(city); });
     ruMarkers[city] = {m, cnt, la: ru.la, lo: ru.lo};
   }
 
@@ -2717,49 +3067,9 @@ function initApp(data) {
   window.addEventListener('resize', drawArcs);
   setTimeout(drawArcs, 200);
 
-  /* ── STATE ── */
-  let aC = null, aD = null;
-
-  // detail-list — вертикальный список конкретных пар «откуда+куда» (замена
-  // старым горизонтальным чипам: там нельзя было прокрутить дальше 3-4
-  // из 75 элементов). На десктопе — вторая колонка рядом со списком
-  // городов/направлений (сайдбар раздвигается); на мобильном — подменяет
-  // текущую панель списка, с кнопкой «Назад».
-  function openDetail(items) {
-    detailList.innerHTML = '';
-    const mobile = window.innerWidth < 900;
-    if (mobile) {
-      const back = document.createElement('div');
-      back.className = 'list-row detail-back';
-      back.innerHTML = '<span class="row-name">← Назад к списку</span>';
-      back.addEventListener('click', closeDetail);
-      detailList.appendChild(back);
-    }
-    for (const it of items) {
-      const r = document.createElement('div'); r.className = 'list-row';
-      const dot = document.createElement('div'); dot.className = 'row-dot'; dot.style.background = it.color;
-      r.appendChild(dot);
-      const nameSpan = document.createElement('span'); nameSpan.className = 'row-name'; nameSpan.textContent = it.name;
-      r.appendChild(nameSpan);
-      if (it.region) {
-        const tag = document.createElement('span'); tag.className = 'row-tag'; tag.style.color = it.color; tag.textContent = it.region;
-        r.appendChild(tag);
-      }
-      const btn = makeTpButton(it.from, it.to);
-      if (btn) r.appendChild(btn);
-      detailList.appendChild(r);
-    }
-    detailList.style.display = 'block';
-    document.getElementById('sidebar-wrap').classList.add('has-detail');
-    if (mobile) { ruList.style.display = 'none'; dstList.style.display = 'none'; }
-  }
-
-  function closeDetail() {
-    detailList.style.display = 'none';
-    document.getElementById('sidebar-wrap').classList.remove('has-detail');
-    if (window.innerWidth < 900) stab(tab);
-  }
-
+  /* ── HIGHLIGHT — подсвечивает маркеры активного города/направления,
+     учитывая визовый и сезонный фильтры (curFrom/curTo задаются из
+     goHome/openCity/openReverse/openCard, см. блок «ПАНЕЛЬ» выше). */
   function updateMarkers(fC, tD) {
     for (const [n, m] of Object.entries(dstMarkers)) {
       const hl = visaMatches(n) && seasonMatches(n) && (!fC&&!tD || (fC&&(ROUTES[fC]||[]).includes(n)) || (tD&&n===tD));
@@ -2775,61 +3085,16 @@ function initApp(data) {
     }
   }
 
-  function reset() {
-    aC=null; aD=null; curFrom=null; curTo=null;
-    for (const e of Object.values(cEls))  { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
-    for (const e of Object.values(dEls))  { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
-    document.getElementById('info-bar').style.display = 'none';
-    closeDetail();
-    updateMarkers(null,null); drawArcs();
-  }
-  window.reset = reset;
-
-  function tapRU(name) {
-    if (aC===name && !aD) { reset(); return; }
-    aC=name; aD=null; curFrom=name; curTo=null;
-    for (const [cn,e] of Object.entries(cEls)) {
-      const a=cn===name; e.style.borderLeftColor=a?'#f0b82a':'transparent'; e.style.background=a?'rgba(240,184,42,.05)':'transparent';
-    }
-    for (const e of Object.values(dEls)) { e.style.borderLeftColor='transparent'; e.style.background='transparent'; }
-    const dests = ROUTES[name]||[];
-    const title = document.getElementById('info-title');
-    title.style.color='#f0b82a'; title.textContent=`✈ Из ${name} · ${dests.length} направлений`;
-    const items = dests.map(dn => {
-      const meta = DEST_META[dn]; if (!meta) return null;
-      return { name: dn, region: meta.r, color: REG[meta.r]?.c || '#888', from: name, to: dn };
-    }).filter(Boolean);
-    openDetail(items);
-    document.getElementById('info-bar').style.display='flex';
-    if (cEls[name] && window.innerWidth >= 900) cEls[name].scrollIntoView({block:'nearest',behavior:'smooth'});
-    updateMarkers(name,null); drawArcs();
-  }
-
-  function tapDST(name) {
-    if (aD===name && !aC) { reset(); return; }
-    aD=name; aC=null; curFrom=null; curTo=name;
-    const meta=DEST_META[name], color=REG[meta?.r]?.c||'#4a9eff', srcs=REVERSE[name]||[];
-    for (const [dn,e] of Object.entries(dEls)) {
-      const a=dn===name; e.style.borderLeftColor=a?color:'transparent'; e.style.background=a?color+'18':'transparent';
-    }
-    for (const [cn,e] of Object.entries(cEls)) {
-      const a=srcs.includes(cn); e.style.borderLeftColor=a?'#f0b82a':'transparent'; e.style.background=a?'rgba(240,184,42,.05)':'transparent';
-    }
-    const title=document.getElementById('info-title');
-    title.style.color=color; title.textContent=`📍 В ${name} · из ${srcs.length} городов РФ`;
-    const items = srcs.map(cn => ({ name: cn, region: null, color: '#f0b82a', from: cn, to: name }));
-    openDetail(items);
-    document.getElementById('info-bar').style.display='flex';
-    if (dEls[name] && window.innerWidth >= 900) dEls[name].scrollIntoView({block:'nearest',behavior:'smooth'});
-    updateMarkers(null,name); drawArcs();
-  }
-
-  map.on('click', e => { if (!e.originalEvent._fromMarker) reset(); });
+  map.on('click', e => { if (!e.originalEvent._fromMarker) goHome(); });
   for (const obj of Object.values(ruMarkers))  obj.m.on('click', e => { e.originalEvent._fromMarker=true; });
   for (const m   of Object.values(dstMarkers)) m.on('click',     e => { e.originalEvent._fromMarker=true; });
+
+  /* ── ИНИЦИАЛИЗАЦИЯ ПАНЕЛИ ── */
+  renderOverviewCells();
+  renderPanelViews();
+  syncSheet();
 }
 </script>
-</div><!-- /sidebar-wrap -->
 </div><!-- /body-wrap -->
 
 <!-- Текстовый снапшот маршрутов — для краулеров, которые не исполняют JS
