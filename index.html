@@ -378,7 +378,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="#" onclick="showFullView('about');return false;">О проекте</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v2.0</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v2.1</span>
         </div>
       </div>
     </div>
@@ -2791,7 +2791,7 @@ function initApp(data) {
     overviewQuery = ''; const oq = document.getElementById('overview-query'); if (oq) oq.value = '';
     hideFullViews();
     renderPanelViews();
-    updateMarkers(null, null); drawArcs();
+    updateMarkers(null, null); drawArcs(); focusMap(null, null);
   }
   window.goHome = goHome;
 
@@ -2801,7 +2801,7 @@ function initApp(data) {
     curFrom = city; curTo = null; sheet = 'full';
     hideFullViews();
     renderPanelViews(); syncSheet();
-    updateMarkers(city, null); drawArcs();
+    updateMarkers(city, null); drawArcs(); focusMap(city, null);
   }
   window.openCity = openCity;
 
@@ -2811,7 +2811,7 @@ function initApp(data) {
     curFrom = null; curTo = dest; sheet = 'full';
     hideFullViews();
     renderPanelViews(); syncSheet();
-    updateMarkers(null, dest); drawArcs();
+    updateMarkers(null, dest); drawArcs(); focusMap(null, dest);
   }
   window.openReverse = openReverse;
 
@@ -2820,7 +2820,7 @@ function initApp(data) {
     curFrom = city; curTo = dest; sheet = 'full';
     hideFullViews();
     renderPanelViews(); syncSheet();
-    updateMarkers(city, dest); drawArcs();
+    updateMarkers(city, dest); drawArcs(); focusMap(city, dest);
   }
   window.openCard = openCard;
 
@@ -2829,7 +2829,7 @@ function initApp(data) {
     if (listMode === 'from-city') { selDest = null; curFrom = selCity; curTo = null; }
     else { selCity = null; curFrom = null; curTo = selDest; }
     renderPanelViews();
-    updateMarkers(curFrom, curTo); drawArcs();
+    updateMarkers(curFrom, curTo); drawArcs(); focusMap(curFrom, curTo);
   }
   window.backToList = backToList;
 
@@ -2861,7 +2861,7 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ОБНОВЛЕНИЕ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Автоматически, несколько раз в месяц, без ручного вмешательства</div></div>
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather API, климатическая комфортность по месяцам</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v2.0 · 08.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v2.1 · 08.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>
     `;
@@ -3082,6 +3082,39 @@ function initApp(data) {
   // теперь плавающая панель).
   const map = L.map('map', {center:[55,70], zoom:3, zoomControl:true, attributionControl:false, minZoom:2, maxZoom:12});
   map.zoomControl.setPosition('bottomright');
+
+  /* ── ВЕРТИКАЛЬНОЕ ЗАПОЛНЕНИЕ ────────────────────────────────────────
+     Мировые тайлы на зуме z занимают ровно 256·2^z пикселей по высоте.
+     На высоком окне фиксированный зум 3 (2048 px) уже не покрывал
+     контейнер, и сверху/снизу оставались пустые полосы фона. Лечим двумя
+     ограничениями: нижний предел зума считаем от высоты карты, а центр
+     после каждого перемещения прижимаем так, чтобы край мира не заходил
+     внутрь вьюпорта. */
+  const WORLD_LAT = 85.05112878;
+  function syncMinZoom() {
+    const h = document.getElementById('map-wrap').clientHeight || 600;
+    const z = Math.max(2, Math.ceil(Math.log2(h / 256)));
+    if (z !== map.getMinZoom()) map.setMinZoom(z);
+  }
+  let clamping = false;
+  function clampVertical() {
+    if (clamping) return;
+    const z = map.getZoom();
+    const north = map.project([WORLD_LAT, 0], z).y;
+    const south = map.project([-WORLD_LAT, 0], z).y;
+    const half = map.getSize().y / 2;
+    if (south - north < half * 2) return;   // мир ниже контейнера — прижимать некуда
+    const c = map.project(map.getCenter(), z);
+    let dy = 0;
+    if (c.y - half < north)      dy = north - (c.y - half);
+    else if (c.y + half > south) dy = south - (c.y + half);
+    if (Math.abs(dy) < 0.5) return;
+    clamping = true;
+    map.panTo(map.unproject(L.point(c.x, c.y + dy), z), {animate:false});
+    clamping = false;
+  }
+  syncMinZoom();
+  map.on('moveend zoomend', clampVertical);
   function isLightTheme() { return document.documentElement.getAttribute('data-theme') === 'light'; }
   // .rf-lift (см. <style>) — фильтр яркости/контраста на схематичном тайле в
   // тёмной теме, как в макете (там это относится к CARTO dark_nolabels;
@@ -3271,18 +3304,26 @@ function initApp(data) {
   }
 
   map.on('move zoom viewreset resize', drawArcs);
-  window.addEventListener('resize', () => { map.invalidateSize(); drawArcs(); });
+  window.addEventListener('resize', () => { map.invalidateSize(); syncMinZoom(); clampVertical(); drawArcs(); });
   // Leaflet меряет размер #map в момент инициализации — если к этому
   // моменту веб-шрифты (IBM Plex) ещё не подгрузились, высота шапки может
   // чуть измениться после их применения, и карта останется прежнего
   // (неверного) размера с полосами сверху/снизу. invalidateSize() пересчитывает
   // размер контейнера — вызываем и сразу, и после window.load, и после
   // document.fonts.ready (какое сработает позже — то и досчитает верно).
+  // Пересчёт размера + повторная подгонка обзорного вида: пока пользователь
+  // ничего не выбрал, вид должен оставаться подогнанным под контейнер
+  // (после подгрузки шрифтов высота шапки, а с ней и карты, ещё меняется).
+  function resyncMap() {
+    map.invalidateSize(); syncMinZoom();
+    if (!curFrom && !curTo) focusMap(null, null); else clampVertical();
+    drawArcs();
+  }
   map.invalidateSize();
-  setTimeout(() => { map.invalidateSize(); drawArcs(); }, 200);
-  window.addEventListener('load', () => { map.invalidateSize(); drawArcs(); });
+  setTimeout(resyncMap, 200);
+  window.addEventListener('load', resyncMap);
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => { map.invalidateSize(); drawArcs(); });
+    document.fonts.ready.then(resyncMap);
   }
 
   /* ── HIGHLIGHT — подсвечивает маркеры активного города/направления,
@@ -3307,6 +3348,43 @@ function initApp(data) {
     }
   }
 
+  /* ── ФОКУСИРОВКА КАРТЫ ──────────────────────────────────────────────
+     В макете выбор города/направления не только подсвечивает маркеры, но и
+     подгоняет вид карты под выбранную сеть (map.fitBounds с отступами под
+     плавающую панель слева на desktop и под bottom sheet на мобильном).
+     Без этого «фокус» был только цветовой — что и выглядело как неработающая
+     фокусировка. */
+  const OVERVIEW_BOUNDS = [[-5, 15], [62, 150]];   // основной массив сети, как в макете
+  function fitOpts(maxZoom) {
+    const mob = window.innerWidth < 900;
+    // На мобильном bottom sheet в раскрытом состоянии занимает 74vh — но
+    // отступать на всю его высоту нельзя: под карту не остаётся места и
+    // fitBounds упирается в минимальный зум. Резервируем столько же, сколько
+    // в макете (~300 px), верхняя часть карты остаётся видимой над шторкой.
+    const bottom = mob ? (sheet === 'full' ? 300 : 170) : 60;
+    return {
+      maxZoom,
+      paddingTopLeft: L.point(mob ? 20 : 430, mob ? 20 : 80),
+      paddingBottomRight: L.point(30, bottom),
+      animate: true,
+    };
+  }
+  function focusMap(fC, tD) {
+    const ruPt = c => { const r = RU_COORDS[c]; return r ? [r.la, r.lo] : null; };
+    const dPt  = d => { const m = DEST_META[d]; return m ? [m.la, m.lo] : null; };
+    const pts = [];
+    const add = p => { if (p) pts.push(p); };
+
+    if (fC && tD)      { add(ruPt(fC)); add(dPt(tD)); }
+    else if (fC)       { add(ruPt(fC)); (ROUTES[fC] || []).forEach(d => { if (visaMatches(d) && seasonMatches(d)) add(dPt(d)); }); }
+    else if (tD)       { add(dPt(tD)); (REVERSE[tD] || []).forEach(c => add(ruPt(c))); }
+    else               { map.fitBounds(L.latLngBounds(OVERVIEW_BOUNDS), fitOpts(4)); return; }
+
+    if (!pts.length) return;
+    if (pts.length === 1) { map.setView(pts[0], Math.max(map.getMinZoom(), 5), {animate:true}); return; }
+    map.fitBounds(L.latLngBounds(pts), fitOpts(5));
+  }
+
   map.on('click', e => { if (!e.originalEvent._fromMarker) goHome(); });
   for (const obj of Object.values(ruMarkers))  obj.m.on('click', e => { e.originalEvent._fromMarker=true; });
   for (const m   of Object.values(dstMarkers)) m.on('click',     e => { e.originalEvent._fromMarker=true; });
@@ -3326,6 +3404,7 @@ function initApp(data) {
   renderPanelViews();
   renderLegend();
   syncSheet();
+  focusMap(null, null);
 }
 </script>
 </div><!-- /body-wrap -->
