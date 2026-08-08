@@ -103,7 +103,9 @@ body{display:flex;flex-direction:column;}
    стали (см. обсуждение с пользователем 08.08.2026), поэтому список плоский. */
 /* Как в макете: внешний контейнер несёт панель (фон/блюр/бордер/тень),
    сама кнопка внутри — прозрачная, только квадратная точка + текст + ▾. */
-#map-ctrl{position:absolute;top:14px;right:14px;z-index:700;background:var(--rf-panel);backdrop-filter:blur(14px);border:1px solid var(--rf-line);border-radius:9px;box-shadow:var(--rf-shadow);}
+/* z-index выше, чем у #season-switch (700), — иначе открытое выпадающее
+   меню типа карты частично уходит под соседнюю кнопку «Сезон». */
+#map-ctrl{position:absolute;top:14px;right:14px;z-index:710;background:var(--rf-panel);backdrop-filter:blur(14px);border:1px solid var(--rf-line);border-radius:9px;box-shadow:var(--rf-shadow);}
 .map-ctrl-btn{display:flex;align-items:center;gap:8px;padding:7px 11px;border:none;background:transparent;color:var(--rf-t2);font-family:var(--rf-font);font-size:12px;cursor:pointer;}
 .map-ctrl-dot{width:7px;height:7px;border-radius:2px;background:var(--rf-accent);flex:none;}
 .map-ctrl-caret{color:var(--rf-t5);font-size:10px;}
@@ -3108,7 +3110,7 @@ function initApp(data) {
 
   window.toggleMapMenu = function() {
     const menu = document.getElementById('map-menu');
-    menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
   };
   document.addEventListener('click', e => {
     const ctrl = document.getElementById('map-ctrl');
