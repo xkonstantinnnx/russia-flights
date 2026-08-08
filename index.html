@@ -61,10 +61,14 @@ body{display:flex;flex-direction:column;}
 .h-brand{display:flex;align-items:center;gap:10px;cursor:pointer;}
 .h-title{font-family:var(--rf-mono);font-size:12.5px;font-weight:600;letter-spacing:.2em;color:var(--rf-text);}
 .h-meta{font-family:var(--rf-mono);font-size:9px;letter-spacing:.16em;color:var(--rf-t4);margin-top:1px;}
-.h-badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.h-right{display:flex;align-items:center;gap:14px;}
+/* Как в макете: статистика в шапке — обычный текст, не бейджи с фоном,
+   и скрывается целиком на мобильном (там она есть в самом обзоре панели). */
+.h-badges{display:flex;align-items:center;gap:16px;font-family:var(--rf-mono);font-size:9.5px;letter-spacing:.1em;color:var(--rf-t4);}
+.h-stat{display:flex;align-items:baseline;gap:5px;cursor:pointer;}
+.h-stat b{font-size:13px;color:var(--rf-text);font-weight:600;}
+@media (max-width:899.98px){ .h-badges{display:none;} }
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
-.badge{font-size:10px;color:var(--rf-accent);background:var(--rf-chip);padding:2px 8px;border-radius:10px;border:1px solid var(--rf-line);cursor:pointer;}
-#badge-updated{font-size:10px;color:#34d39988;background:var(--rf-chip);padding:2px 8px;border-radius:10px;border:1px solid #34d39944;}
 #theme-toggle{font-size:12px;line-height:1;color:var(--rf-t2);background:var(--rf-chip);padding:4px 7px;border-radius:10px;border:1px solid var(--rf-line);cursor:pointer;}
 
 #body-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
@@ -72,6 +76,10 @@ body{display:flex;flex-direction:column;}
 #map{width:100%;height:100%;}
 #arc-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;}
 .leaflet-container{background:var(--rf-bg);}
+.leaflet-control-zoom{z-index:700;}
+.rf-lift{filter:brightness(1.55) saturate(1.15) contrast(.94);}
+.rf-arc{stroke-dasharray:5 7;animation:rfdash 1.6s linear infinite;}
+@keyframes rfdash{to{stroke-dashoffset:-24;}}
 .leaflet-control-zoom a{background:var(--rf-chip-solid)!important;color:var(--rf-accent)!important;border-color:var(--rf-line)!important;}
 .leaflet-control-zoom a:hover{background:var(--rf-hover-bg)!important;}
 .leaflet-control-attribution{display:none!important;}
@@ -93,7 +101,7 @@ body{display:flex;flex-direction:column;}
 .map-menu-item.on{background:var(--rf-accent-soft);color:var(--rf-accent);}
 
 #season-switch{position:absolute;top:52px;right:8px;z-index:700;display:flex;gap:4px;align-items:center;}
-#version-badge{position:absolute;bottom:6px;right:8px;z-index:700;font-size:9px;color:var(--rf-t2);background:var(--rf-bar);padding:2px 6px;border-radius:4px;pointer-events:none;}
+#version-badge{position:absolute;bottom:6px;left:8px;z-index:700;font-size:9px;color:var(--rf-t2);background:var(--rf-bar);padding:2px 6px;border-radius:4px;pointer-events:none;}
 .ts-btn{font-family:var(--rf-mono);font-size:10px;padding:3px 9px;border-radius:8px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-t2);cursor:pointer;backdrop-filter:blur(4px);}
 .ts-btn.on{background:var(--rf-accent-soft);color:var(--rf-accent);border-color:var(--rf-accent-border);}
 #season-month{font-size:10px;padding:2px 4px;border-radius:6px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-text);}
@@ -101,7 +109,13 @@ body{display:flex;flex-direction:column;}
 /* Легенда — плавающий чип-кластер на карте (не часть панели, видна всегда) */
 /* z-index ниже панели (600), чтобы на мобильном при развороте bottom-sheet
    до 74vh легенда уходила под панель, а не наплывала поверх списка. */
-#legend{position:absolute;z-index:550;display:flex;flex-wrap:wrap;gap:3px 9px;padding:7px 10px;background:var(--rf-chip-solid);border:1px solid var(--rf-line);border-radius:9px;backdrop-filter:blur(10px);box-shadow:var(--rf-shadow);}
+/* Легенда — визовый режим (как в макете), не регионы: цвета совпадают с
+   маркерами/дугами на карте. Кликабельна — фильтрует направления так же,
+   как чипы визы в списке (общий visaActive, см. toggleVisaFilter). */
+#legend{position:absolute;z-index:550;display:flex;align-items:center;gap:4px;padding:4px;background:var(--rf-panel);border:1px solid var(--rf-line);border-radius:9px;backdrop-filter:blur(12px);box-shadow:var(--rf-shadow);}
+.leg-btn{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;cursor:pointer;font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;border:1px solid transparent;background:transparent;color:var(--rf-t3);}
+.leg-btn.on{border-color:var(--rf-accent-border);background:var(--rf-accent-soft);color:var(--rf-text);}
+.leg-btn .leg-dot{width:8px;height:8px;border-radius:50%;flex:none;}
 .leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--rf-t2);}
 .leg-clickable{cursor:pointer;user-select:none;}
 .leg-clickable.leg-off{opacity:.35;}
@@ -190,6 +204,12 @@ body{display:flex;flex-direction:column;}
 /* ── ПОЛНОЭКРАННЫЕ ВИДЫ (Статистика / О проекте) — поверх карты ── */
 .full-view{position:absolute;inset:0;z-index:900;background:var(--rf-panel);overflow-y:auto;display:none;}
 .full-view-inner{max-width:760px;margin:0 auto;padding:16px 16px 60px;}
+.text-group{margin-top:26px;}
+.text-group-head{display:flex;align-items:baseline;gap:9px;padding-bottom:8px;border-bottom:1px solid var(--rf-line2);}
+.text-group-head .tg-name{font-size:16px;font-weight:600;color:var(--rf-text);}
+.text-group-head .tg-codes{font-family:var(--rf-mono);font-size:10px;letter-spacing:.1em;color:var(--rf-t4);}
+.text-group-head .tg-count{font-family:var(--rf-mono);font-size:11px;color:var(--rf-t3);}
+.text-group-body{margin-top:10px;font-size:13.5px;line-height:1.9;color:var(--rf-t2);}
 
 #loading{position:fixed;inset:0;background:var(--rf-panel);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:12px;}
 #loading-text{font-size:13px;color:var(--rf-accent);}
@@ -229,11 +249,11 @@ body{display:flex;flex-direction:column;}
 /* ── DESKTOP (≥ 900px): панель плавает поверх карты слева ─── */
 @media (min-width: 900px) {
   #panel { top: 14px; bottom: 14px; left: 14px; width: 396px; border-radius: 14px; }
-  #legend { bottom: 16px; right: 16px; }
+  /* right:56 (не 16) — оставляет место зум-контролу Leaflet в том же углу */
+  #legend { bottom: 16px; right: 56px; }
   #map-ctrl { top: 12px; right: 12px; }
   #season-switch { top: 56px; }
   .ts-btn { font-size: 11px; padding: 4px 11px; }
-  .badge, #badge-updated { font-size: 11px; }
 }
 
 /* ── MOBILE (< 900px): панель — bottom sheet (peek/full) ───── */
@@ -271,10 +291,12 @@ body{display:flex;flex-direction:column;}
       <div class="h-meta" id="h-meta">ПРЯМЫЕ МЕЖДУНАРОДНЫЕ</div>
     </div>
   </div>
-  <div class="h-badges">
-    <span class="badge" id="b-cities" onclick="showFullView('stats')">—</span>
-    <span class="badge" id="b-routes" onclick="showFullView('stats')">—</span>
-    <span id="badge-updated" style="display:none"></span>
+  <div class="h-right">
+    <div class="h-badges">
+      <span class="h-stat" onclick="showFullView('stats')"><b id="hs-routes">—</b>НАПРАВЛЕНИЙ</span>
+      <span class="h-stat" onclick="showFullView('stats')"><b id="hs-origins">—</b>ГОРОДОВ ВЫЛЕТА</span>
+      <span class="h-stat" onclick="showFullView('stats')"><b id="hs-countries">—</b>СТРАН</span>
+    </div>
     <button id="theme-toggle" onclick="toggleTheme()" title="Светлая/тёмная тема">🌙</button>
   </div>
 </div>
@@ -327,6 +349,10 @@ body{display:flex;flex-direction:column;}
         <div class="panel-section-label" id="overview-list-label">ГОРОДА ВЫЛЕТА</div>
         <div id="overview-list"></div>
         <div class="panel-footer-links">
+          <a href="#" onclick="showFullView('text');return false;">Список маршрутов текстом</a>
+          <span style="color:var(--rf-line);">·</span>
+          <a href="#" onclick="showFullView('stats');return false;">Статистика</a>
+          <span style="color:var(--rf-line);">·</span>
           <a href="#" onclick="showFullView('about');return false;">О проекте</a>
           <span style="flex:1;"></span>
           <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v2.0</span>
@@ -373,6 +399,13 @@ body{display:flex;flex-direction:column;}
   </div>
 </div>
 
+<div class="full-view" id="view-text">
+  <div class="full-view-inner" style="max-width:860px;">
+    <button class="panel-back" onclick="goHome()">‹ На карту</button>
+    <div id="text-pane"></div>
+  </div>
+</div>
+
 <div class="full-view" id="view-about">
   <div class="full-view-inner">
     <button class="panel-back" onclick="goHome()">‹ На карту</button>
@@ -396,6 +429,7 @@ function toggleTheme() {
   const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
   localStorage.setItem('rf-theme', next);
   applyTheme(next);
+  if (window.__onThemeChange) window.__onThemeChange();
 }
 window.toggleTheme = toggleTheme;
 applyTheme(localStorage.getItem('rf-theme') || 'dark');
@@ -424,6 +458,14 @@ const RU_AIRPORT_IATA = {
     "Ульяновск":"ULV","Уфа":"UFA","Хабаровск":"KHV","Ханты-Мансийск":"HMA","Чебоксары":"CSY","Челябинск":"CEK",
     "Череповец":"CEE","Чита":"HTA","Южно-Сахалинск":"UUS","Якутск":"YKS",
 };
+// Города с несколькими действующими коммерческими аэропортами (публичный
+// факт географии, не данные пайплайна — маршруты в routes.json/WEIGHTS
+// по-прежнему привязаны к городу целиком, не к конкретному аэропорту).
+// Как в макете Claude Design для Москвы (apts:['SVO','DME','VKO','ZIA']).
+const RU_MULTI_AIRPORT = { "Москва": ["SVO","DME","VKO","ZIA"] };
+function cityAirportCodes(city) {
+  return RU_MULTI_AIRPORT[city] || (RU_AIRPORT_IATA[city] ? [RU_AIRPORT_IATA[city]] : []);
+}
 const DEST_AIRPORT_IATA = {
     "Абу-Даби":"AUH","Аддис-Абеба":"ADD","Александрия":"HBE","Алжир":"ALG","Алматы":"ALA","Амман":"AMM",
     "Андижан":"AZN","Анталья":"AYT","Астана":"NQZ","Ашхабад":"ASB","Баку":"GYD","Бангкок":"BKK",
@@ -2251,18 +2293,17 @@ function initApp(data) {
     return 1;
   }
 
-  // Обновляем шапку
-  document.getElementById('b-cities').textContent = Object.keys(ROUTES).length + ' городов РФ';
-  document.getElementById('b-routes').textContent = totalRoutes + ' маршрутов';
+  // Обновляем шапку (стиль — как в макете: обычный моно-текст, не бейджи)
+  document.getElementById('hs-routes').textContent = totalRoutes;
+  document.getElementById('hs-origins').textContent = Object.keys(ROUTES).length;
+  document.getElementById('hs-countries').textContent = new Set(Object.values(DEST_META).map(m => m.c)).size;
+  let metaText = 'ПРЯМЫЕ МЕЖДУНАРОДНЫЕ';
   if (updatedStr) {
     const d = new Date(updatedStr);
     const label = d.toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'});
-    const badge = document.getElementById('badge-updated');
-    badge.textContent = (fromSeed ? '⚠ seed ' : '↻ ') + label;
-    badge.style.display = 'inline';
+    metaText = (fromSeed ? '⚠ Резервные данные · ' : 'Обновлено ') + label;
   }
-  document.getElementById('h-meta').textContent =
-    fromSeed ? 'Резервные данные · март 2026' : 'Обновлено автоматически';
+  document.getElementById('h-meta').textContent = metaText;
 
   /* ── СЕЗОННЫЙ СЛОЙ — состояние ──
      Выключен по умолчанию. seasonMonth: 0=январь..11=декабрь (индекс SEASON_DATA).
@@ -2280,9 +2321,11 @@ function initApp(data) {
   }
 
   /* ── LEGEND ──
-     Переключается между списком регионов (обычный режим, некликабельно) и
-     тремя пунктами сезонного слоя (кликабельно — фильтрует направления,
-     как visa-btn, см. applyDstFilters). */
+     Как в макете — визовый режим, не регионы: цвета == цвета маркеров/дуг
+     на карте (см. visaColorFor ниже). Кликабельна — переключает те же
+     visaActive/toggleVisaFilter, что и чипы в списке направлений. Пока
+     включён сезонный слой (наша функция, которой нет в макете) — легенда
+     временно показывает три категории комфортности вместо визы. */
   const lgBox = document.getElementById('legend');
   const SEASON_COLORS = { good: '#4ade80', bad: '#f87171', unknown: '#5a6b85' };
   const SEASON_LEGEND_ITEMS = [
@@ -2294,26 +2337,29 @@ function initApp(data) {
     lgBox.innerHTML = '';
     if (seasonActive) {
       for (const [label, key, color] of SEASON_LEGEND_ITEMS) {
-        const d = document.createElement('div');
-        d.className = 'leg leg-clickable' + (seasonFilterActive.has(key) ? '' : ' leg-off');
-        d.innerHTML = `<span class="leg-dot" style="background:${color}"></span>${label}`;
-        d.addEventListener('click', () => toggleSeasonFilter(key));
-        lgBox.appendChild(d);
+        const b = document.createElement('button');
+        b.className = 'leg-btn' + (seasonFilterActive.has(key) ? ' on' : '');
+        b.innerHTML = `<span class="leg-dot" style="background:${color}"></span>${label}`;
+        b.addEventListener('click', () => toggleSeasonFilter(key));
+        lgBox.appendChild(b);
       }
     } else {
-      for (const v of Object.values(REG)) {
-        const d = document.createElement('div'); d.className = 'leg';
-        d.innerHTML = `<span class="leg-dot" style="background:${v.c}"></span>${v.l}`;
-        lgBox.appendChild(d);
+      for (const key of ['free', 'easy', 'visa']) {
+        const b = document.createElement('button');
+        b.className = 'leg-btn' + (visaActive.has(key) ? ' on' : '');
+        b.title = 'Показать/скрыть «' + VISA_INFO[key].label + '»';
+        b.innerHTML = `<span class="leg-dot" style="background:${visaColorForCat(key)}"></span>${esc(VISA_INFO[key].legend)}`;
+        b.addEventListener('click', () => toggleVisaFilter(key));
+        lgBox.appendChild(b);
       }
     }
   }
-  renderLegend();
 
   function toggleSeasonFilter(key) {
     if (seasonFilterActive.has(key)) seasonFilterActive.delete(key); else seasonFilterActive.add(key);
     renderLegend();
-    applyDstFilters();
+    updateMarkers(curFrom, curTo);
+    drawArcs();
   }
 
   /* ── СЕЗОННЫЙ СЛОЙ — переключатель и выбор месяца ──
@@ -2392,16 +2438,32 @@ function initApp(data) {
     const cat = VISA_REGIMES[DEST_META[destName]?.c];
     return !cat || visaActive.has(cat); // нет данных по стране — не скрываем
   }
+  // Точные цвета/тексты из макета Claude Design (const VISA). color — светлая
+  // тема, colorDark — тёмная; bg/border — общие для обеих тем.
   const VISA_INFO = {
-    free: { label:'Без визы', color:'#34d399', note:'Въезд по загранпаспорту, виза не требуется' },
-    easy: { label:'Электронная виза / по прилёту', color:'#fbbf24', note:'Оформляется онлайн заранее или прямо в аэропорту' },
-    visa: { label:'Нужна виза заранее', color:'#f87171', note:'Требуется оформленная заранее виза' },
+    free: { label:'Без визы', legend:'БЕЗ ВИЗЫ', color:'#2FA36A', colorDark:'#3FBF7F',
+      bg:'rgba(63,191,127,.09)', border:'rgba(63,191,127,.3)', note:'Въезд по загранпаспорту, виза не требуется' },
+    easy: { label:'Электронная виза', legend:'E-VISA', color:'#B57F12', colorDark:'#E0A93B',
+      bg:'rgba(224,169,59,.1)', border:'rgba(224,169,59,.32)', note:'Оформляется онлайн до вылета, обычно 1–4 дня' },
+    visa: { label:'Нужна виза', legend:'ВИЗА', color:'#C4472F', colorDark:'#E2664F',
+      bg:'rgba(226,102,79,.1)', border:'rgba(226,102,79,.3)', note:'Требуется заранее оформленная виза или виза по прилёте' },
   };
+  function visaColorFor(destName) {
+    const cat = VISA_REGIMES[DEST_META[destName]?.c];
+    const v = VISA_INFO[cat];
+    if (!v) return isLightTheme() ? '#8A97A4' : '#5A6B7A'; // нет данных — нейтральный серый, как в макете
+    return isLightTheme() ? v.color : v.colorDark;
+  }
+  function visaColorForCat(cat) {
+    const v = VISA_INFO[cat];
+    return v ? (isLightTheme() ? v.color : v.colorDark) : '#888';
+  }
 
   function toggleVisaFilter(cat) {
     if (visaActive.has(cat)) visaActive.delete(cat); else visaActive.add(cat);
     const btn = document.querySelector(`#list-visa-chips .panel-chip[data-visa="${cat}"]`);
     if (btn) btn.classList.toggle('on', visaActive.has(cat));
+    renderLegend();
     if (panelView === 'list') renderListView();
     updateMarkers(curFrom, curTo);
     drawArcs();
@@ -2453,11 +2515,11 @@ function initApp(data) {
   function cityRowHtml(city) {
     const cnt = (ROUTES[city]||[]).length;
     const countries = new Set((ROUTES[city]||[]).map(d => DEST_META[d]?.c).filter(Boolean)).size;
-    const apt = RU_AIRPORT_IATA[city] || '';
+    const codes = cityAirportCodes(city).join(' · ');
     return `<div class="city-row" data-city="${esc(city)}">
       <div style="flex:1;min-width:0;">
         <div class="cr-name">${esc(city)}</div>
-        <div class="cr-meta">${esc(apt)}</div>
+        <div class="cr-meta">${esc(codes)}</div>
       </div>
       <div>
         <div class="cr-count">${cnt}</div>
@@ -2469,7 +2531,7 @@ function initApp(data) {
 
   function destSearchRowHtml(dest) {
     const meta = DEST_META[dest] || {};
-    const color = REG[meta.r]?.c || '#888';
+    const color = visaColorFor(dest);
     const cnt = (REVERSE[dest]||[]).length;
     return `<div class="dest-row" data-dest="${esc(dest)}">
       <span class="dr-dot" style="background:${color}"></span>
@@ -2534,7 +2596,7 @@ function initApp(data) {
 
   function destRowHtml(city, dest) {
     const meta = DEST_META[dest] || {};
-    const color = REG[meta.r]?.c || '#888';
+    const color = visaColorFor(dest);
     const w = WEIGHTS[city+'→'+dest];
     const visaCat = VISA_REGIMES[meta.c];
     const vi = VISA_INFO[visaCat];
@@ -2547,7 +2609,7 @@ function initApp(data) {
         <div><span class="dr-name">${esc(dest)}</span><span class="dr-country">${esc(meta.c||'')}</span></div>
         <div class="dr-meta">${esc(bits.join(' · '))}</div>
       </div>
-      ${vi ? `<span class="dr-visa" style="color:${vi.color}">${esc(vi.label.split(' ')[0].toUpperCase())}</span>` : ''}
+      ${vi ? `<span class="dr-visa" style="color:${color}">${esc(vi.legend)}</span>` : ''}
       <span class="cr-arrow">›</span>
     </div>`;
   }
@@ -2558,7 +2620,7 @@ function initApp(data) {
     const bits = [apt];
     if (w?.duration_min) bits.push(fmtDuration(w.duration_min));
     return `<div class="dest-row" data-city="${esc(city)}">
-      <span class="dr-dot" style="background:#f0b82a"></span>
+      <span class="dr-dot" style="background:${originColor(false)}"></span>
       <div class="dr-body">
         <div><span class="dr-name">${esc(city)}</span></div>
         <div class="dr-meta">${esc(bits.filter(Boolean).join(' · '))}</div>
@@ -2596,8 +2658,7 @@ function initApp(data) {
       const countries = new Set(all.map(d => DEST_META[d]?.c).filter(Boolean)).size;
       listTitleEl.textContent = city;
       listMetaEl.innerHTML = `<b>${shown.length}</b> из ${all.length} направлений · ${countries} стран`;
-      const apt = RU_AIRPORT_IATA[city];
-      listAirportsEl.innerHTML = apt ? `<span>${esc(apt)}</span>` : '';
+      listAirportsEl.innerHTML = cityAirportCodes(city).map(a => `<span>${esc(a)}</span>`).join('');
       renderMonthChips();
       listRowsEl.innerHTML = shown.length ? shown.map(d => destRowHtml(city, d)).join('') : '<div class="panel-empty">Под фильтры ничего не подошло</div>';
       listRowsEl.querySelectorAll('[data-dest]').forEach(el => bindTap(el, () => openCard(city, el.dataset.dest)));
@@ -2630,14 +2691,15 @@ function initApp(data) {
 
     const visaCat = VISA_REGIMES[meta.c];
     const vi = VISA_INFO[visaCat];
+    const viColor = vi ? (isLightTheme() ? vi.color : vi.colorDark) : null;
 
     let html = `<div style="padding:20px 18px 16px;">
       <div class="card-country">${esc(meta.c||'')}</div>
       <div class="card-city">${esc(dest)}</div>`;
     if (vi) {
-      html += `<div class="card-visa-box" style="border-color:${vi.color}55;background:${vi.color}18;">
-        <span class="card-visa-dot" style="background:${vi.color}"></span>
-        <div><div class="card-visa-label" style="color:${vi.color}">${esc(vi.label)}</div>
+      html += `<div class="card-visa-box" style="border-color:${vi.border};background:${vi.bg};">
+        <span class="card-visa-dot" style="background:${viColor}"></span>
+        <div><div class="card-visa-label" style="color:${viColor}">${esc(vi.label)}</div>
         <div class="card-visa-note">${esc(vi.note)}</div></div>
       </div>`;
     }
@@ -2749,14 +2811,17 @@ function initApp(data) {
   function showFullView(name) {
     document.getElementById('view-stats').style.display = name === 'stats' ? 'block' : 'none';
     document.getElementById('view-about').style.display  = name === 'about' ? 'block' : 'none';
+    document.getElementById('view-text').style.display   = name === 'text'  ? 'block' : 'none';
     if (name === 'stats' && !statsRendered) { renderStats(); statsRendered = true; }
     if (name === 'about') renderAbout();
+    if (name === 'text') renderText();
   }
   window.showFullView = showFullView;
 
   function hideFullViews() {
     document.getElementById('view-stats').style.display = 'none';
     document.getElementById('view-about').style.display = 'none';
+    document.getElementById('view-text').style.display = 'none';
   }
 
   function renderAbout() {
@@ -2777,10 +2842,41 @@ function initApp(data) {
     `;
   }
 
+  // Тот же контент, что в crawler-only <details id="static-routes-snapshot">
+  // (см. конец body), но для живых посетителей — оформлено как в макете
+  // (isText/textGroups), а не спрятано в <details>.
+  function renderText() {
+    const box = document.getElementById('text-pane');
+    if (box.dataset.rendered) return;
+    box.dataset.rendered = '1';
+    const countries = new Set(Object.values(DEST_META).map(m => m.c)).size;
+    const cities = Object.keys(ROUTES).sort((a,b) => (ROUTES[b]||[]).length - (ROUTES[a]||[]).length);
+    const groups = cities.map(city => {
+      const dests = ROUTES[city] || [];
+      const text = dests.map(d => {
+        const meta = DEST_META[d];
+        return meta ? `${d} (${meta.c})` : d;
+      }).join(', ');
+      return `<div class="text-group">
+        <div class="text-group-head">
+          <span class="tg-name">${esc(city)}</span>
+          <span class="tg-codes">${esc(cityAirportCodes(city).join(' · '))}</span>
+          <span style="flex:1;"></span>
+          <span class="tg-count">${dests.length} направлений</span>
+        </div>
+        <div class="text-group-body">${esc(text)}.</div>
+      </div>`;
+    }).join('');
+    box.innerHTML = `
+      <div class="panel-h1" style="font-size:24px;margin-top:14px;">Все прямые международные рейсы из России</div>
+      <div class="panel-sub" style="margin-top:6px;font-size:13px;">${totalRoutes} направлений · ${cities.length} городов вылета · ${countries} стран${updatedStr ? ' · обновлено ' + new Date(updatedStr).toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'}) : ''}</div>
+      ${groups}
+    `;
+  }
+
   /* ── СТАТИСТИКА СЕТИ ──
      Данные — const STATS_DATA (см. scripts/gen_stats.py), рендерится один
      раз при первом открытии полноэкранного вида статистики (см. showFullView()). */
-  const STATS_VISA_COLORS = { free:'#34d399', easy:'#fbbf24', visa:'#f87171' };
   const MONTH_FULL_RU = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
   function renderStats() {
@@ -2827,7 +2923,7 @@ function initApp(data) {
       </div>`).join('');
 
     const visaHtml = s.visa.rows.map(v => {
-      const color = STATS_VISA_COLORS[v.key] || 'var(--rf-accent)';
+      const color = visaColorForCat(v.key) || 'var(--rf-accent)';
       return `
       <div class="stat-visa-row">
         <div class="vr-top">
@@ -2849,7 +2945,7 @@ function initApp(data) {
       const len = C * frac;
       const offset = -acc;
       acc += len;
-      const color = STATS_VISA_COLORS[v.key] || 'var(--rf-accent)';
+      const color = visaColorForCat(v.key) || 'var(--rf-accent)';
       return `<circle cx="58" cy="58" r="${R}" fill="none" stroke="${color}" stroke-width="14" stroke-dasharray="${len.toFixed(1)} ${(C-len).toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" transform="rotate(-90 58 58)"/>`;
     }).join('');
 
@@ -2957,18 +3053,26 @@ function initApp(data) {
     relief: { url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',                     opts:{subdomains:'abc',maxZoom:17} },
   };
   // zoomControl выключен: кнопки +/− раньше сидели в верхнем левом углу
-  // и перекрывались плавающей панелью, которая теперь занимает весь левый
-  // край. Зум колесом/пинчем/двойным кликом работает как обычно.
-  const map = L.map('map', {center:[55,70], zoom:3, zoomControl:false, attributionControl:false, minZoom:2, maxZoom:12});
-  let tileLayer = L.tileLayer(TILES.gmap.url, TILES.gmap.opts).addTo(map);
+  // как в макете: зум-контрол в правом нижнем углу (не top-left — там
+  // теперь плавающая панель).
+  const map = L.map('map', {center:[55,70], zoom:3, zoomControl:true, attributionControl:false, minZoom:2, maxZoom:12});
+  map.zoomControl.setPosition('bottomright');
+  function isLightTheme() { return document.documentElement.getAttribute('data-theme') === 'light'; }
+  // .rf-lift (см. <style>) — фильтр яркости/контраста на схематичном тайле в
+  // тёмной теме, как в макете (там это относится к CARTO dark_nolabels;
+  // у нас нет этого источника, применяем к ближайшему аналогу — Google-схеме).
+  let currentTileKey = 'gmap';
+  let tileLayer = L.tileLayer(TILES.gmap.url, Object.assign({}, TILES.gmap.opts, { className: isLightTheme() ? '' : 'rf-lift' })).addTo(map);
   let labelsLayer = null;
 
   const TILE_LABELS = { gmap:'Google', yndx:'Яндекс', sat:'Спутник', hybrid:'Гибрид', relief:'Рельеф' };
   window.setTiles = function(key) {
+    currentTileKey = key;
     map.removeLayer(tileLayer);
     if (labelsLayer) { map.removeLayer(labelsLayer); labelsLayer = null; }
     const t = TILES[key];
-    tileLayer = L.tileLayer(t.url, t.opts).addTo(map);
+    const lift = key === 'gmap' && !isLightTheme();
+    tileLayer = L.tileLayer(t.url, Object.assign({}, t.opts, { className: lift ? 'rf-lift' : '' })).addTo(map);
     if (t.labelsUrl) labelsLayer = L.tileLayer(t.labelsUrl, t.labelsOpts).addTo(map);
     document.getElementById('map-ctrl-label').textContent = TILE_LABELS[key];
     document.querySelectorAll('.map-menu-item').forEach(b => b.classList.toggle('on', b.dataset.tile === key));
@@ -3033,22 +3137,30 @@ function initApp(data) {
   };
 
   /* ── MARKERS ──
-     Цвет dst-маркера: обычно по региону, а при включённом сезонном слое —
-     по климатической комфортности выбранного месяца (SEASON_DATA). */
+     Как в макете: маркеры полые (цветной контур + halo-заливка — белая в
+     светлой теме, почти чёрная в тёмной, а не сплошной цвет), направления
+     красятся по визовому режиму (visaColorFor), города вылета — фиксированным
+     бирюзовым акцентом. Включённый сезонный слой (наша функция) временно
+     подменяет цвет направлений климатической комфортностью месяца. */
+  function haloColor() { return isLightTheme() ? '#FFFFFF' : '#080B0F'; }
+  function originColor(active) {
+    if (active) return isLightTheme() ? '#0E7C90' : '#5FD4E4';
+    return isLightTheme() ? '#2C7F8E' : '#7FE3F0';
+  }
   function dstColor(name) {
     if (seasonActive) {
       const months = SEASON_DATA[name];
       const val = months ? months[seasonMonth] : undefined;
       return val === true ? SEASON_COLORS.good : val === false ? SEASON_COLORS.bad : SEASON_COLORS.unknown;
     }
-    return REG[DEST_META[name]?.r]?.c || '#888';
+    return visaColorFor(name);
   }
 
   const ruMarkers = {}, dstMarkers = {};
 
   for (const [name, meta] of Object.entries(DEST_META)) {
     const m = L.circleMarker([meta.la, meta.lo], {
-      radius:5, fillColor:dstColor(name), fillOpacity:0.9, color:'#fff', weight:1, opacity:0.5
+      radius:4, color:dstColor(name), weight:1.4, opacity:0.9, fillColor:haloColor(), fillOpacity:0.85
     }).addTo(map);
     m.bindTooltip(`<b>${esc(name)}</b> · ${esc(meta.r)}`, {direction:'top', offset:[0,-4]});
     m.on('click', () => { openReverse(name); });
@@ -3062,7 +3174,7 @@ function initApp(data) {
     if (!ru) continue;
     const r = 5 + Math.sqrt(cnt) * 1.1;
     const m = L.circleMarker([ru.la, ru.lo], {
-      radius:r, fillColor:'#f0b82a', fillOpacity:0.95, color:'#fff', weight:1.5, opacity:0.8
+      radius:r, color:originColor(false), weight:2, opacity:0.95, fillColor:haloColor(), fillOpacity:0.9
     }).addTo(map);
     m.bindTooltip(`<b>${esc(city)}</b> · ${cnt} направлений`, {direction:'top', offset:[0,-4]});
     m.on('click', () => { openCity(city); });
@@ -3073,42 +3185,62 @@ function initApp(data) {
     return RU_COORDS[city] || null;
   }
 
-  function hexA(a) {
-    return Math.round(Math.min(255,Math.max(0,a*255))).toString(16).padStart(2,'0');
-  }
-
+  /* ── ARCS — как в макете: неактивные маршруты тонкие и приглушённые,
+     у активных — светлая/тёмная halo-подложка под цветной дугой и
+     бегущий пунктир (.rf-arc, см. <style>). */
   function drawArcs() {
     const wrap = document.getElementById('map-wrap');
     const W = wrap.clientWidth, H = wrap.clientHeight;
     arcSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    arcSvg.innerHTML = `<defs>
-      <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    </defs>`;
+    arcSvg.innerHTML = '';
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
     arcSvg.appendChild(g);
+    const halo = haloColor();
+    const focused = !!(curFrom || curTo);
 
     for (const arc of allArcs) {
-      const fr   = RU_COORDS[arc.f];
-      const dt   = DEST_META[arc.t];
+      const fr = RU_COORDS[arc.f];
+      const dt = DEST_META[arc.t];
       if (!fr || !dt) continue;
-      const hl    = visaMatches(arc.t) && seasonMatches(arc.t) && (!curFrom && !curTo || (curFrom && arc.f===curFrom) || (curTo && arc.t===curTo));
-      const alpha = hl ? (curFrom||curTo ? 0.72 : 0.35) : 0.025;
-      const sw    = (hl ? (curFrom||curTo ? 2.0  : 1.0)  : 0.5) * carrierMul(arc.w);
-      const color = REG[dt.r]?.c || '#888';
-      const p1    = map.latLngToContainerPoint([fr.la, fr.lo]);
-      const p2    = map.latLngToContainerPoint([dt.la, dt.lo]);
-      const len   = Math.sqrt((p2.x-p1.x)**2+(p2.y-p1.y)**2);
+      const hl = visaMatches(arc.t) && seasonMatches(arc.t) && (!curFrom && !curTo || (curFrom && arc.f===curFrom) || (curTo && arc.t===curTo));
+      const color = dstColor(arc.t);
+      const p1 = map.latLngToContainerPoint([fr.la, fr.lo]);
+      const p2 = map.latLngToContainerPoint([dt.la, dt.lo]);
+      const len = Math.sqrt((p2.x-p1.x)**2+(p2.y-p1.y)**2);
       if (len < 4) continue;
-      const off   = Math.min(len*0.28, H*0.22);
-      const cx    = (p1.x+p2.x)/2, cy = (p1.y+p2.y)/2-off;
-      const path  = document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d', `M${p1.x.toFixed(1)},${p1.y.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`);
-      path.setAttribute('stroke', color + hexA(alpha));
-      path.setAttribute('stroke-width', sw);
+      const off = Math.min(len*0.28, H*0.22);
+      const cx = (p1.x+p2.x)/2, cy = (p1.y+p2.y)/2-off;
+      const d = `M${p1.x.toFixed(1)},${p1.y.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+
+      if (!hl) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', d);
+        path.setAttribute('stroke', color);
+        path.setAttribute('stroke-width', 0.5 * carrierMul(arc.w));
+        path.setAttribute('opacity', 0.025);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke-linecap', 'round');
+        g.appendChild(path);
+        continue;
+      }
+      if (focused) {
+        const glow = document.createElementNS('http://www.w3.org/2000/svg','path');
+        glow.setAttribute('d', d);
+        glow.setAttribute('stroke', halo);
+        glow.setAttribute('stroke-width', 4.5);
+        glow.setAttribute('opacity', isLightTheme() ? 0.55 : 0.5);
+        glow.setAttribute('fill', 'none');
+        glow.setAttribute('stroke-linecap', 'round');
+        g.appendChild(glow);
+      }
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', d);
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', (focused ? 1.8 : 1) * carrierMul(arc.w));
+      path.setAttribute('opacity', focused ? 0.85 : 0.32);
       path.setAttribute('fill', 'none');
       path.setAttribute('stroke-linecap', 'round');
-      if (hl && (curFrom||curTo)) path.setAttribute('filter','url(#glow)');
+      if (focused) path.setAttribute('class', 'rf-arc');
       g.appendChild(path);
     }
   }
@@ -3123,13 +3255,14 @@ function initApp(data) {
   function updateMarkers(fC, tD) {
     for (const [n, m] of Object.entries(dstMarkers)) {
       const hl = visaMatches(n) && seasonMatches(n) && (!fC&&!tD || (fC&&(ROUTES[fC]||[]).includes(n)) || (tD&&n===tD));
-      m.setStyle({fillColor: dstColor(n), fillOpacity: hl?0.9:0.06, opacity: hl?0.5:0.05, weight: n===tD?2:1});
-      m.setRadius(n===tD ? 7 : 5);
+      const active = n === tD;
+      m.setStyle({ color: dstColor(n), fillColor: haloColor(), opacity: hl ? (active?1:0.9) : 0.06, fillOpacity: hl ? 0.85 : 0.06, weight: active?2:1.4 });
+      m.setRadius(active ? 5.5 : 4);
     }
     for (const [n, obj] of Object.entries(ruMarkers)) {
       const dim = tD && !(REVERSE[tD]||[]).includes(n);
       const isA = n===fC;
-      obj.m.setStyle({fillOpacity: dim?0.22:0.95, opacity: dim?0.15:0.8, weight: isA?2.5:1.5});
+      obj.m.setStyle({ color: originColor(isA), fillColor: haloColor(), opacity: dim?0.15:(isA?1:0.8), fillOpacity: dim?0.22:0.9, weight: isA?2.5:1.5 });
       const r = (5+Math.sqrt(obj.cnt)*1.1)*(isA?1.25:1);
       obj.m.setRadius(r);
     }
@@ -3139,9 +3272,20 @@ function initApp(data) {
   for (const obj of Object.values(ruMarkers))  obj.m.on('click', e => { e.originalEvent._fromMarker=true; });
   for (const m   of Object.values(dstMarkers)) m.on('click',     e => { e.originalEvent._fromMarker=true; });
 
+  // Цвета маркеров/дуг/тайла зависят от темы — при переключении темы
+  // (см. toggleTheme в начале файла) пересчитываем всё заново.
+  window.__onThemeChange = () => {
+    for (const [name, m] of Object.entries(dstMarkers)) m.setStyle({ color: dstColor(name), fillColor: haloColor() });
+    for (const [name, obj] of Object.entries(ruMarkers)) obj.m.setStyle({ color: originColor(name===curFrom), fillColor: haloColor() });
+    setTiles(currentTileKey);
+    renderLegend();
+    drawArcs();
+  };
+
   /* ── ИНИЦИАЛИЗАЦИЯ ПАНЕЛИ ── */
   renderOverviewCells();
   renderPanelViews();
+  renderLegend();
   syncSheet();
 }
 </script>
