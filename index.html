@@ -117,7 +117,6 @@ body{display:flex;flex-direction:column;}
 .map-menu-note{margin-top:11px;padding-top:9px;border-top:1px solid var(--rf-line2);font-size:10.5px;line-height:1.45;color:var(--rf-t4);}
 
 #season-switch{position:absolute;top:52px;right:8px;z-index:700;display:flex;gap:4px;align-items:center;}
-#version-badge{position:absolute;bottom:6px;left:8px;z-index:700;font-size:9px;color:var(--rf-t2);background:var(--rf-bar);padding:2px 6px;border-radius:4px;pointer-events:none;}
 .ts-btn{font-family:var(--rf-mono);font-size:10px;line-height:1;padding:6px 9px;border-radius:8px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-t2);cursor:pointer;backdrop-filter:blur(4px);}
 .ts-btn.on{background:var(--rf-accent-soft);color:var(--rf-accent);border-color:var(--rf-accent-border);}
 /* Свой вид у <select> — без нативной OS-стрелки, чтобы не спорила с ▾
@@ -347,13 +346,10 @@ body{display:flex;flex-direction:column;}
     </div>
   </div>
   <div id="season-switch">
-    <button class="ts-btn" id="season-toggle" onclick="toggleSeason()">🌦 Сезон</button>
     <select id="season-month" style="visibility:hidden;" onchange="setSeasonMonth(this.value)"></select>
+    <button class="ts-btn" id="season-toggle" onclick="toggleSeason()">🌦 Сезон</button>
   </div>
   <div id="legend"></div>
-  <!-- Версия интерфейса — правится вручную при заметных изменениях index.html,
-       не привязана к обновлению routes.json (для этого есть бейдж в шапке). -->
-  <div id="version-badge">v2.0</div>
 
   <!-- Плавающая (desktop) / bottom-sheet (mobile) панель: drill-down
        обзор → список направлений города (или город прилёта → города-источники,
@@ -3275,8 +3271,19 @@ function initApp(data) {
   }
 
   map.on('move zoom viewreset resize', drawArcs);
-  window.addEventListener('resize', drawArcs);
-  setTimeout(drawArcs, 200);
+  window.addEventListener('resize', () => { map.invalidateSize(); drawArcs(); });
+  // Leaflet меряет размер #map в момент инициализации — если к этому
+  // моменту веб-шрифты (IBM Plex) ещё не подгрузились, высота шапки может
+  // чуть измениться после их применения, и карта останется прежнего
+  // (неверного) размера с полосами сверху/снизу. invalidateSize() пересчитывает
+  // размер контейнера — вызываем и сразу, и после window.load, и после
+  // document.fonts.ready (какое сработает позже — то и досчитает верно).
+  map.invalidateSize();
+  setTimeout(() => { map.invalidateSize(); drawArcs(); }, 200);
+  window.addEventListener('load', () => { map.invalidateSize(); drawArcs(); });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { map.invalidateSize(); drawArcs(); });
+  }
 
   /* ── HIGHLIGHT — подсвечивает маркеры активного города/направления,
      учитывая визовый и сезонный фильтры (curFrom/curTo задаются из
