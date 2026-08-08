@@ -10,11 +10,14 @@
 "виза требуется", хотя с 15.09.2025 действует пробный безвизовый режим
 для туристов РФ — статья это отражает, датасет нет).
 
-ВНИМАНИЕ: не часть автопайплайна (update.yml). Визовые режимы меняются
-редко и внезапно — запускать вручную раз в несколько месяцев, глазами
-сверяя вывод в stderr (особенно топ направления по числу маршрутов)
-перед тем как коммитить сгенерированный index.html.
+Запускается шагом пайплайна (update.yml) сразу после обновления маршрутов.
+Берётся отпатрулированная (стабильная) версия статьи, а не последняя: одна
+непроверенная правка не должна переехать на прод. Дополнительная страховка —
+порог --max-changes: если за один прогон меняется больше N стран, скрипт
+ничего не пишет и падает, потому что столько визовых режимов разом не
+меняется — это почти наверняка сломанный парсинг или вандализм в статье.
 """
+import argparse
 import json
 import re
 import sys
@@ -29,7 +32,9 @@ ROUTES_PATH = ROOT / "routes.json"
 INDEX_PATH = ROOT / "index.html"
 
 WIKI_TITLE = "Визовые_требования_для_граждан_России"
-WIKI_URL = f"https://ru.wikipedia.org/w/index.php?title={urllib.parse.quote(WIKI_TITLE)}&action=raw"
+WIKI_API = "https://ru.wikipedia.org/w/api.php"
+WIKI_RAW = "https://ru.wikipedia.org/w/index.php"
+USER_AGENT = "russia-flights-visa-script/1.0 (https://russia-flights.ru)"
 WIKI_ARTICLE_URL = "https://ru.wikipedia.org/wiki/Визовые_требования_для_граждан_России"
 
 # DEST_INFO.c (как в routes.json) -> название страны в статье (шаблон {{флаг|X}})
@@ -47,9 +52,12 @@ COUNTRY_TO_WIKI = {
     "Израиль": "Израиль",
     "Индия": "Индия",
     "Индонезия (Бали)": "Индонезия",
+    "Афганистан": "Афганистан",
     "Иордания": "Иордания",
+    "Ирак": "Ирак",
     "Иран": "Иран",
     "КНДР": "Северная Корея",
+    "Куба": "Куба",
     "Казахстан": "Казахстан",
     "Катар": "Катар",
     "Китай": "Китай",
@@ -132,10 +140,49 @@ FREE_HINTS = ["безвизов", "виза не требуется", "визы 
 EASY_HINTS = ["по прибытии", "по прилёте", "по прилете", "электронн", "e-visa", "evisa", "eta"]
 
 
-def fetch_wikitext() -> str:
-    req = urllib.request.Request(WIKI_URL, headers={"User-Agent": "russia-flights-visa-script/1.0"})
+def _get(url: str, params: dict) -> str:
+    req = urllib.request.Request(url + "?" + urllib.parse.urlencode(params),
+                                 headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=30) as r:
         return r.read().decode("utf-8")
+
+
+def stable_revision() -> tuple[int | None, str | None]:
+    """(id, дата) отпатрулированной версии статьи.
+
+    В русской Википедии статьи проходят патрулирование (FlaggedRevs):
+    анонимные правки видны в истории сразу, но «стабильной» версией
+    считается последняя проверенная редактором. Скрипт берёт именно её —
+    визовый режим слишком легко испортить одной непроверенной правкой,
+    а разница между стабильной и последней версией обычно в часы.
+    (None, None) = у статьи нет отметки — тогда берём текущую версию.
+    """
+    data = json.loads(_get(WIKI_API, {
+        "action": "query", "format": "json", "prop": "flagged|revisions",
+        "rvprop": "ids|timestamp", "titles": WIKI_TITLE.replace("_", " "),
+    }))
+    for page in (data.get("query", {}).get("pages") or {}).values():
+        revid = (page.get("flagged") or {}).get("stable_revid")
+        if not revid:
+            continue
+        date = None
+        for rev in page.get("revisions") or []:
+            if rev.get("revid") == revid:
+                date = (rev.get("timestamp") or "")[:10]
+        return revid, date
+    return None, None
+
+
+def fetch_wikitext() -> tuple[str, int | None, str | None]:
+    """Викитекст статьи + id/дата использованной ревизии."""
+    revid, date = stable_revision()
+    if revid:
+        print(f"  Отпатрулированная ревизия: {revid}"
+              f"{' от ' + date if date else ''}", file=sys.stderr, flush=True)
+        return _get(WIKI_RAW, {"oldid": revid, "action": "raw"}), revid, date
+    print("  У статьи нет отметки о патрулировании — берём текущую версию",
+          file=sys.stderr, flush=True)
+    return _get(WIKI_RAW, {"title": WIKI_TITLE, "action": "raw"}), None, None
 
 
 def extract_country_block(wikitext: str, country: str) -> str | None:
@@ -173,8 +220,8 @@ def classify(block: str) -> tuple[str, str]:
     return cat, f"[индикатор={indicator}] {detail_text[:150]}"
 
 
-def build_visa_regimes() -> dict:
-    wikitext = fetch_wikitext()
+def build_visa_regimes() -> tuple[dict, int | None, str | None]:
+    wikitext, revid, revdate = fetch_wikitext()
     result = {}
     for c_label, wiki_name in COUNTRY_TO_WIKI.items():
         if c_label in MANUAL_OVERRIDES:
@@ -189,7 +236,7 @@ def build_visa_regimes() -> dict:
         cat, why = classify(block)
         result[c_label] = cat
         print(f"{c_label:28s} -> {cat:5s} {why}", file=sys.stderr)
-    return result
+    return result, revid, revdate
 
 
 def replace_between(text: str, start_marker: str, end_marker: str, new_content: str) -> str:
@@ -200,16 +247,33 @@ def replace_between(text: str, start_marker: str, end_marker: str, new_content: 
     return pattern.sub(lambda _m: replacement, text, count=1)
 
 
-def build_js_block(regimes: dict) -> str:
+def build_js_block(regimes: dict, revid: int | None, revdate: str | None) -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    src = f"// Источник: {WIKI_ARTICLE_URL} (обновлено {now}"
+    if revid:
+        src += f", отпатрулированная ревизия {revid}"
+        if revdate:
+            src += f" от {revdate}"
+    src += ")."
     lines = [
         "// Визовый режим для граждан РФ: free = без визы, easy = e-виза/по прилёту,",
         "// visa = нужна виза заранее. Ключи — DEST_INFO.c из routes.json.",
-        f"// Источник: {WIKI_ARTICLE_URL} (сверено {now}). Не автообновляется —",
-        "// см. scripts/gen_visa_regimes.py, визовые правила меняются без предупреждения.",
+        src,
+        "// Пересобирается scripts/gen_visa_regimes.py шагом пайплайна (update.yml).",
         "const VISA_REGIMES = " + json.dumps(regimes, ensure_ascii=False, indent=2) + ";",
     ]
     return "\n".join(lines)
+
+
+def current_regimes(html: str) -> dict:
+    """Уже записанный в index.html блок — нужен для сравнения с новым."""
+    m = re.search(r"const VISA_REGIMES = (\{.*?\});", html, re.DOTALL)
+    if not m:
+        return {}
+    try:
+        return json.loads(m.group(1))
+    except json.JSONDecodeError:
+        return {}
 
 
 def main():
@@ -219,9 +283,26 @@ def main():
     if missing:
         raise SystemExit(f"В routes.json появились новые страны без маппинга: {missing}")
 
-    regimes = build_visa_regimes()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--max-changes", type=int, default=8,
+                        help="сколько стран может поменять режим за прогон (0 = без ограничений)")
+    args = parser.parse_args()
+
+    regimes, revid, revdate = build_visa_regimes()
     html = INDEX_PATH.read_text(encoding="utf-8")
-    html = replace_between(html, "// VISA_REGIMES_START", "// VISA_REGIMES_END", build_js_block(regimes))
+
+    before = current_regimes(html)
+    changed = {c: (before.get(c), regimes[c]) for c in regimes if before.get(c, regimes[c]) != regimes[c]}
+    if changed:
+        print("\nИзменения визового режима:", file=sys.stderr)
+        for c, (was, now_) in sorted(changed.items()):
+            print(f"  {c:28s} {was} -> {now_}", file=sys.stderr)
+    if args.max_changes and len(changed) > args.max_changes:
+        raise SystemExit(
+            f"\nОстановка: сменился режим у {len(changed)} стран (порог {args.max_changes}). "
+            f"index.html не тронут — проверьте статью и парсинг вручную.")
+    html = replace_between(html, "// VISA_REGIMES_START", "// VISA_REGIMES_END",
+                           build_js_block(regimes, revid, revdate))
     INDEX_PATH.write_text(html, encoding="utf-8")
     print(f"\nOK: index.html обновлён, {len(regimes)} стран", file=sys.stderr)
 

@@ -551,8 +551,41 @@ def summarize_route_weight(flights: list[dict]) -> dict:
     duration_min = durations[len(durations) // 2] if durations else None
     return {
         "carriers": len(carriers),
+        # Сами коды перевозчиков, а не только их количество: карточка
+        # маршрута показывает названия авиакомпаний (IATA→имя резолвится
+        # на фронте через AIRLINE_NAMES, см. scripts/gen_route_details.py).
+        "airlines": sorted(carriers) or None,
         "days_per_week": len(days) if days else None,
         "duration_min": duration_min,
+    }
+
+
+def merge_route_weight(old: dict | None, new: dict, apt_iata: str | None) -> dict:
+    """Склеивает сводки одного маршрута, найденные в разных аэропортах города.
+
+    У Москвы четыре аэропорта, и раньше каждый следующий просто затирал
+    сводку предыдущего — терялись и перевозчики, и частота. Теперь
+    перевозчики объединяются, частота берётся максимальная (рейс есть
+    столько дней в неделю, сколько даёт лучший из аэропортов), длительность —
+    минимальная, а список аэропортов вылета накапливается в "apts".
+    """
+    if old is None:
+        merged = dict(new)
+        merged["apts"] = [apt_iata] if apt_iata else None
+        return merged
+
+    airlines = sorted(set(old.get("airlines") or []) | set(new.get("airlines") or []))
+    days = [v for v in (old.get("days_per_week"), new.get("days_per_week")) if v]
+    durs = [v for v in (old.get("duration_min"), new.get("duration_min")) if v]
+    apts = list(old.get("apts") or [])
+    if apt_iata and apt_iata not in apts:
+        apts.append(apt_iata)
+    return {
+        "carriers": len(airlines) or max(old.get("carriers") or 0, new.get("carriers") or 0) or None,
+        "airlines": airlines or None,
+        "days_per_week": max(days) if days else None,
+        "duration_min": min(durs) if durs else None,
+        "apts": apts or None,
     }
 
 
@@ -598,12 +631,15 @@ def run_airlabs_primary(api_key: str,
             by_dest[f["arr_icao"].upper()].append(f)
 
         new_dests: set[str] = set()
+        apt_iata = RU_AIRPORT_IATA.get(icao)
         for arr_icao, dest_flights in by_dest.items():
             name = icao_to_dest_name(arr_icao)
             if not name:
                 continue
             new_dests.add(name)
-            route_weights[f"{city}→{name}"] = summarize_route_weight(dest_flights)
+            key = f"{city}→{name}"
+            route_weights[key] = merge_route_weight(
+                route_weights.get(key), summarize_route_weight(dest_flights), apt_iata)
 
         existing = confirmed.get(city, set())
         merged   = existing | new_dests
@@ -1186,12 +1222,15 @@ def run_jonty_supplement(
 
             key = f"{city}→{name}"
             if key not in result_weights:
-                carriers = len(route.get("carriers") or [])
+                carrier_list = route.get("carriers") or []
+                airlines = sorted({c["iata"] for c in carrier_list if c.get("iata")})
                 duration = route.get("min")
                 result_weights[key] = {
-                    "carriers":      carriers or None,
+                    "carriers":      len(carrier_list) or None,
+                    "airlines":      airlines or None,
                     "days_per_week": None,  # Jonty — снэпшот, без частоты
                     "duration_min":  duration if isinstance(duration, (int, float)) and duration > 0 else None,
+                    "apts":          [iata],
                 }
                 weight_added += 1
 
@@ -1264,6 +1303,36 @@ def main():
     confirmed, airlabs_queried, route_weights = run_airlabs_primary(AIRLABS_KEY, all_airports)
     if confirmed:
         sources_used.append("AirLabs")
+
+    # ── Защита от «тихой» деградации источника ───────────────────────────────
+    # Опрошенный город = разрешено удалять его маршруты. Но HTTP 200 с почти
+    # пустым ответом выглядит как авторитетное «рейсов больше нет», хотя на
+    # деле это сбой на стороне AirLabs. Именно так 07.08.2026 из routes.json
+    # вылетело 95 маршрутов: AirLabs отдал 163 маршрута вместо 492 при 200 OK
+    # по всем 75 городам, а остальные источники в тот прогон упёрлись в лимиты
+    # (AeroDataBox — units, OpenSky и Яндекс — HTTP 429) и не смогли добрать.
+    # Поэтому подозрительно резкое падение трактуем как «источник не в порядке»
+    # и просто не удаляем в этот прогон — данные подождут до следующего.
+    airlabs_total = sum(len(v) for v in confirmed.values())
+    if prev_total >= 50 and airlabs_total < prev_total * 0.6:
+        print(f"  ⚠ AirLabs нашёл {airlabs_total} маршрутов при {prev_total} в текущем "
+              f"routes.json (<60%) — считаем прогон источника неполноценным, "
+              f"удаление маршрутов отключено", flush=True)
+        airlabs_queried = set()
+    else:
+        # Точечный вариант того же: город, у которого AirLabs нашёл меньше
+        # 40% известных маршрутов (при пяти и более известных), почти наверняка
+        # недоопрошен — сезонные изменения расписания так резко не выглядят.
+        suspicious = {
+            city for city, dests in current_routes.items()
+            if city in airlabs_queried and len(dests) >= 5
+            and len(confirmed.get(city, set())) < len(dests) * 0.4
+        }
+        if suspicious:
+            print(f"  ⚠ Подозрительное падение у {len(suspicious)} городов "
+                  f"({', '.join(sorted(suspicious)[:8])}) — их маршруты сохраняем",
+                  flush=True)
+            airlabs_queried = airlabs_queried - suspicious
 
     # Защита от потери данных: город можно удалить из routes.json только если
     # AirLabs реально его опросил. Города, не опрошенные из-за лимита или
