@@ -215,6 +215,12 @@ body{display:flex;flex-direction:column;}
 .card-visa-note{margin-top:2px;font-size:11.5px;color:var(--rf-t3);}
 .card-section{padding:16px 18px 0;}
 .card-section-label{font-family:var(--rf-mono);font-size:10px;letter-spacing:.14em;color:var(--rf-t5);margin-bottom:9px;}
+.card-section-label-row{display:flex;align-items:center;gap:6px;position:relative;margin-bottom:9px;}
+.card-section-label-row .card-section-label{margin-bottom:0;}
+.info-btn{width:14px;height:14px;border-radius:50%;border:1px solid var(--rf-line);background:var(--rf-input);color:var(--rf-t4);font-size:9.5px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:var(--rf-font);padding:0;flex:none;}
+.info-btn:hover{color:var(--rf-t2);border-color:var(--rf-accent-border);}
+.info-pop{display:none;position:fixed;z-index:900;width:250px;max-width:calc(100vw - 24px);padding:11px 13px;background:var(--rf-panel);backdrop-filter:blur(16px);border:1px solid var(--rf-line);border-radius:10px;box-shadow:var(--rf-shadow);font-family:var(--rf-font);font-size:11.5px;line-height:1.5;letter-spacing:normal;color:var(--rf-t3);}
+.info-pop b{color:var(--rf-t2);}
 .card-chips{display:flex;flex-wrap:wrap;gap:6px;}
 .card-chip{padding:6px 10px;background:var(--rf-chip);border:1px solid var(--rf-line);border-radius:7px;font-size:12.5px;color:var(--rf-t2);}
 .card-note{margin-top:9px;font-size:12px;color:var(--rf-t3);}
@@ -402,7 +408,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="#" onclick="showFullView('about');return false;">О проекте</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v2.4</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v2.5</span>
         </div>
       </div>
     </div>
@@ -633,7 +639,7 @@ const VISA_REGIMES = {
 // Климатическая комфортность по месяцам для каждого направления.
 // Индекс массива 0 = январь ... 11 = декабрь. true = комфортно, false = не сезон.
 // Критерий: сред. дневной максимум t > 34°C или < 5°C,
-// либо сред. осадки за месяц > 200мм (муссон). Источник — Open-Meteo
+// либо сред. осадки за месяц > 100мм (муссон). Источник — Open-Meteo
 // Historical Weather API (5 лет истории). Не автообновляется —
 // см. scripts/gen_season_data.py.
 const SEASON_DATA = {
@@ -667,16 +673,16 @@ const SEASON_DATA = {
   ],
   "Маэ": [
     false,
-    true,
-    true,
+    false,
+    false,
+    false,
     false,
     true,
     true,
     true,
+    false,
     true,
-    true,
-    true,
-    true,
+    false,
     false
   ],
   "Касабланка": [
@@ -696,10 +702,10 @@ const SEASON_DATA = {
   "Аддис-Абеба": [
     true,
     true,
+    false,
     true,
     true,
-    true,
-    true,
+    false,
     false,
     false,
     false,
@@ -749,20 +755,6 @@ const SEASON_DATA = {
     true,
     true
   ],
-  "Эль-Аламейн": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
   "Шарм-эль-Шейх": [
     true,
     true,
@@ -777,35 +769,8 @@ const SEASON_DATA = {
     true,
     true
   ],
-  "Дар-эс-Салам": [
-    true,
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Занзибар": [
-    true,
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
   "Тель-Авив": [
+    false,
     true,
     true,
     true,
@@ -816,12 +781,11 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
-    true
+    false
   ],
   "Анталья": [
-    true,
-    true,
+    false,
+    false,
     true,
     true,
     true,
@@ -831,7 +795,7 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true
+    false
   ],
   "Стамбул": [
     true,
@@ -848,8 +812,8 @@ const SEASON_DATA = {
     true
   ],
   "Измир": [
-    true,
-    true,
+    false,
+    false,
     true,
     true,
     true,
@@ -858,25 +822,53 @@ const SEASON_DATA = {
     false,
     true,
     true,
-    true,
-    true
+    false,
+    false
   ],
   "Даламан": [
     false,
-    true,
+    false,
     true,
     true,
     true,
     false,
     false,
     false,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Белград": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
     true,
     true,
     true,
     true
   ],
-  "Белград": [
+  "Варадеро": [
     true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true
+  ],
+  "Кабул": [
+    false,
     true,
     true,
     true,
@@ -939,23 +931,9 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Эль-Кувейт": [
-    true,
-    true,
-    true,
-    true,
     false,
-    false,
-    false,
-    false,
-    false,
-    false,
+    true,
+    true,
     true,
     true
   ],
@@ -1026,6 +1004,20 @@ const SEASON_DATA = {
     false,
     false,
     true,
+    true,
+    true
+  ],
+  "Багдад": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
     true,
     true
   ],
@@ -1102,7 +1094,7 @@ const SEASON_DATA = {
   "Шымкент": [
     true,
     true,
-    true,
+    false,
     true,
     true,
     true,
@@ -1155,12 +1147,26 @@ const SEASON_DATA = {
     true,
     true
   ],
-  "Ереван": [
+  "Нахичевань": [
     false,
     true,
     true,
     true,
     true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Ереван": [
+    false,
+    true,
+    true,
+    true,
+    false,
     true,
     true,
     false,
@@ -1172,51 +1178,37 @@ const SEASON_DATA = {
   "Батуми": [
     false,
     false,
-    true,
-    true,
-    true,
-    true,
-    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "Сухум": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
     true,
     false,
     false,
     false,
     false
   ],
-  "Кутаиси": [
-    true,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    true,
-    true
-  ],
-  "Сухум": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    true,
-    true,
-    true
-  ],
   "Тбилиси": [
     true,
     true,
     true,
     true,
-    true,
+    false,
     true,
     true,
     true,
@@ -1232,7 +1224,7 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
+    false,
     true,
     true,
     true,
@@ -1256,24 +1248,10 @@ const SEASON_DATA = {
   "Душанбе": [
     true,
     true,
-    true,
-    true,
-    true,
-    true,
-    false,
     false,
     true,
     true,
     true,
-    true
-  ],
-  "Худжанд": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
     false,
     false,
     true,
@@ -1295,7 +1273,7 @@ const SEASON_DATA = {
     true,
     true
   ],
-  "Навои": [
+  "Худжанд": [
     true,
     true,
     true,
@@ -1365,6 +1343,20 @@ const SEASON_DATA = {
     true,
     false
   ],
+  "Навои": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true
+  ],
   "Бухара": [
     true,
     true,
@@ -1410,7 +1402,7 @@ const SEASON_DATA = {
   "Ташкент": [
     true,
     true,
-    true,
+    false,
     true,
     true,
     false,
@@ -1426,7 +1418,7 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
+    false,
     false,
     false,
     false,
@@ -1436,10 +1428,9 @@ const SEASON_DATA = {
     true
   ],
   "Коломбо": [
+    false,
     true,
     true,
-    true,
-    true,
     false,
     false,
     false,
@@ -1447,7 +1438,8 @@ const SEASON_DATA = {
     false,
     false,
     false,
-    true
+    false,
+    false
   ],
   "Гонконг": [
     true,
@@ -1459,8 +1451,8 @@ const SEASON_DATA = {
     false,
     false,
     false,
-    true,
-    true,
+    false,
+    false,
     true
   ],
   "Дели": [
@@ -1471,22 +1463,22 @@ const SEASON_DATA = {
     false,
     false,
     false,
-    true,
-    true,
+    false,
+    false,
     true,
     true,
     true
   ],
   "Мале": [
-    true,
-    true,
-    true,
-    true,
     false,
     true,
     true,
-    true,
-    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
     false,
     false,
     false
@@ -1497,27 +1489,27 @@ const SEASON_DATA = {
     false,
     false,
     false,
-    true,
     false,
     false,
     false,
     false,
-    true,
+    false,
+    false,
     true
   ],
   "Пхукет": [
     true,
     true,
     true,
-    true,
-    false,
-    false,
-    true,
     false,
     false,
     false,
     false,
-    true
+    false,
+    false,
+    false,
+    false,
+    false
   ],
   "Нячанг": [
     true,
@@ -1528,20 +1520,6 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
-    false,
-    false,
-    true
-  ],
-  "Дананг": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    true,
-    false,
     false,
     false,
     false,
@@ -1572,20 +1550,20 @@ const SEASON_DATA = {
     false,
     false,
     false,
-    true,
+    false,
     true
   ],
   "Денпасар": [
     false,
     false,
+    false,
+    false,
+    false,
     true,
     true,
     true,
-    true,
-    true,
-    true,
-    true,
-    true,
+    false,
+    false,
     false,
     false
   ],
@@ -1597,7 +1575,7 @@ const SEASON_DATA = {
     true,
     true,
     false,
-    true,
+    false,
     true,
     true,
     true,
@@ -1610,8 +1588,8 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
-    true,
+    false,
+    false,
     true,
     true,
     false,
@@ -1624,8 +1602,8 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
-    true,
+    false,
+    false,
     true,
     true,
     true,
@@ -1634,7 +1612,7 @@ const SEASON_DATA = {
   "Гуанчжоу": [
     true,
     true,
-    true,
+    false,
     false,
     false,
     false,
@@ -1665,10 +1643,10 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
     false,
     false,
-    true,
+    false,
+    false,
     true,
     true,
     false
@@ -1691,12 +1669,12 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
+    false,
     true,
     false,
     false,
-    true,
-    true,
+    false,
+    false,
     true,
     true,
     true
@@ -1707,10 +1685,10 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
     false,
     false,
-    true,
+    false,
+    false,
     true,
     true,
     true
@@ -1721,9 +1699,9 @@ const SEASON_DATA = {
     true,
     true,
     true,
-    true,
-    true,
-    true,
+    false,
+    false,
+    false,
     true,
     true,
     false,
@@ -1737,11 +1715,81 @@ const SEASON_DATA = {
     true,
     true,
     false,
-    true,
-    true,
+    false,
+    false,
     true,
     true,
     false
+  ],
+  "Занзибар": [
+    true,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Дар-эс-Салам": [
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false
+  ],
+  "Кутаиси": [
+    false,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  "Эль-Аламейн": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "Эль-Кувейт": [
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
   ]
 };
 // SEASON_DATA_END
@@ -2857,7 +2905,23 @@ function initApp(data) {
     const months = SEASON_DATA[dest];
     if (months) {
       html += `<div class="card-section">
-        <div class="card-section-label">СЕЗОННОСТЬ (климатический комфорт)</div>
+        <div class="card-section-label-row">
+          <div class="card-section-label">СЕЗОННОСТЬ (климатический комфорт)</div>
+          <button class="info-btn" type="button" onclick="event.stopPropagation(); toggleInfoPop(this)" aria-label="Как считается сезонность">?</button>
+          <div class="info-pop">
+            По координатам направления берём 5 лет истории погоды
+            (<b>Open-Meteo Historical Weather API</b>): дневной максимум температуры
+            и осадки, усреднённые по месяцам. Месяц отмечен красным («не сезон»),
+            если средний дневной максимум выше <b>34°C</b> или ниже <b>5°C</b>,
+            либо среднемесячные осадки выше <b>100мм</b>.<br><br>
+            Это климатический дискомфорт, а не туристическая загруженность или
+            цены — жара, холод и затяжные дожди, а не высокий сезон.<br><br>
+            Не пересчитывается автоматически при каждом обновлении рейсов —
+            климат стабилен год к году, актуализируется вручную. Если полоски
+            нет вовсе — по направлению пока нет данных (обычно значит: оно
+            появилось в маршрутах позже последнего пересчёта).
+          </div>
+        </div>
         <div class="card-season-strip">${months.map(v => `<div title="${v?'комфортно':'не сезон'}" style="background:${v?'#34d399':'#f87171'};opacity:${v?0.85:0.55}"></div>`).join('')}</div>
         <div class="card-season-labels"><span>ЯНВ</span><span>АПР</span><span>ИЮЛ</span><span>ОКТ</span><span>ДЕК</span></div>
       </div>`;
@@ -3017,7 +3081,7 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ОБНОВЛЕНИЕ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Автоматически, несколько раз в месяц, без ручного вмешательства</div></div>
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather API, климатическая комфортность по месяцам</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v2.4 · 09.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v2.5 · 09.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>
     `;
@@ -3319,6 +3383,31 @@ function initApp(data) {
     const ctrl = document.getElementById('map-ctrl');
     if (ctrl && !ctrl.contains(e.target)) document.getElementById('map-menu').style.display = 'none';
   });
+
+  // Всплывающая методическая подсказка по клику на «?» (сейчас — только у
+  // «СЕЗОННОСТЬ» в карточке направления, разметка общая для будущих подсказок).
+  // position:fixed + расчёт координат в JS, а не CSS top/left от кнопки: сама
+  // подсказка лежит внутри прокручиваемой панели (#panel c overflow:hidden,
+  // .panel-scroll c overflow-y:auto) — при position:absolute её обрезало бы.
+  function closeInfoPops() { document.querySelectorAll('.info-pop').forEach(p => p.style.display = 'none'); }
+  window.toggleInfoPop = function(btn) {
+    const pop = btn.nextElementSibling;
+    const willOpen = pop.style.display !== 'block';
+    closeInfoPops();
+    if (!willOpen) return;
+    pop.style.display = 'block';
+    const r = btn.getBoundingClientRect();
+    const pw = pop.offsetWidth, ph = pop.offsetHeight;
+    let top = r.bottom + 6;
+    if (top + ph > innerHeight - 12) top = Math.max(12, r.top - ph - 6);
+    pop.style.top = top + 'px';
+    pop.style.left = Math.max(12, Math.min(r.left, innerWidth - pw - 12)) + 'px';
+  };
+  document.addEventListener('click', e => { if (!e.target.closest('.info-btn')) closeInfoPops(); });
+  // capture:true — иначе scroll внутри .panel-scroll до document не долетит
+  // (scroll не всплывает, но capture-фаза всё равно проходит вниз по дереву).
+  document.addEventListener('scroll', closeInfoPops, true);
+  window.addEventListener('resize', closeInfoPops);
 
   /* ── ARCS ── */
   const arcSvg  = document.getElementById('arc-svg');
