@@ -160,7 +160,7 @@ def build_seasonality(edges: list, season_data: dict) -> dict:
     considered = [d for _, d in edges if d in season_data]
     month_counts = []
     for i in range(12):
-        n = sum(1 for d in considered if season_data[d][i])
+        n = sum(1 for d in considered if season_data[d][i].get("c") != "n")
         month_counts.append(n)
     return {
         "months": [{"label": MONTH_SHORT[i], "value": month_counts[i]} for i in range(12)],

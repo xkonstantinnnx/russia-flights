@@ -164,8 +164,9 @@ body{display:flex;flex-direction:column;}
 .stat-cell{padding:10px 6px;background:var(--rf-tile);cursor:pointer;border:none;font-family:var(--rf-font);text-align:left;}
 .stat-cell b{display:block;font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--rf-text);}
 .stat-cell span{display:block;margin-top:2px;font-family:var(--rf-mono);font-size:7.5px;letter-spacing:.05em;line-height:1.3;color:var(--rf-t4);}
-.panel-more-link{margin-top:9px;text-align:right;font-size:11.5px;}
-.panel-more-link a{color:var(--rf-accent);text-decoration:none;}
+.panel-more-link{margin-top:9px;text-align:right;}
+.panel-more-link a{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;color:var(--rf-accent);text-decoration:none;font-size:15px;font-weight:600;transition:background .15s;}
+.panel-more-link a:hover{background:var(--rf-accent-soft);}
 
 .panel-search{padding:11px 16px;border-bottom:1px solid var(--rf-line2);display:flex;flex-direction:column;gap:9px;flex:none;}
 .panel-search input{width:100%;padding:8px 10px 8px 26px;background:var(--rf-input);border:1px solid var(--rf-line);border-radius:7px;color:var(--rf-text);font-size:13px;font-family:var(--rf-font);}
@@ -202,6 +203,9 @@ body{display:flex;flex-direction:column;}
 .plh-meta b{color:var(--rf-text);font-size:13px;font-weight:600;}
 .panel-airports{margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;}
 .panel-airports span{font-family:var(--rf-mono);font-size:10px;letter-spacing:.08em;padding:3px 7px;border-radius:5px;background:var(--rf-chip);border:1px solid var(--rf-line);color:var(--rf-t3);}
+.airport-chip{font-family:var(--rf-mono);font-size:10px;letter-spacing:.08em;padding:3px 7px;border-radius:5px;background:var(--rf-chip);border:1px solid var(--rf-line);color:var(--rf-t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;}
+.airport-chip:hover{border-color:var(--rf-t4);color:var(--rf-t2);}
+.airport-chip.on{border-color:var(--rf-accent-border);background:var(--rf-accent-soft);color:var(--rf-accent);}
 
 .panel-back{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;background:var(--rf-chip);border:1px solid var(--rf-line);border-radius:7px;color:var(--rf-t2);font-size:12px;cursor:pointer;font-family:var(--rf-font);}
 .panel-card-head{flex:none;display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--rf-line2);}
@@ -225,7 +229,14 @@ body{display:flex;flex-direction:column;}
 .card-chip{padding:6px 10px;background:var(--rf-chip);border:1px solid var(--rf-line);border-radius:7px;font-size:12.5px;color:var(--rf-t2);}
 .card-note{margin-top:9px;font-size:12px;color:var(--rf-t3);}
 .card-season-strip{display:flex;gap:3px;}
-.card-season-strip div{flex:1;height:20px;border-radius:3px;}
+.season-cell{flex:1;height:34px;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:var(--rf-mono);line-height:1;}
+.season-cell .sc-t{font-size:10px;color:#fff;opacity:.95;}
+.season-cell .sc-s{font-size:8px;color:#fff;opacity:.72;}
+.season-cell.sc-none{background:#f87171;opacity:.55;}
+.season-cell.sc-excursion{background:#5FD4E4;}
+.season-cell.sc-beach{background:#34d399;}
+.card-season-legend{margin-top:6px;display:flex;gap:12px;font-family:var(--rf-mono);font-size:9px;letter-spacing:.04em;color:var(--rf-t4);}
+.card-season-legend .sc-dot{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:4px;vertical-align:middle;}
 .card-season-labels{margin-top:6px;display:flex;justify-content:space-between;font-family:var(--rf-mono);font-size:9px;letter-spacing:.06em;color:var(--rf-t5);}
 .card-info-grid{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rf-line2);border:1px solid var(--rf-line2);border-radius:9px;overflow:hidden;}
 .card-info-cell{padding:11px 12px;background:var(--rf-tile);}
@@ -394,7 +405,7 @@ body{display:flex;flex-direction:column;}
           <div class="panel-h1">Куда можно улететь напрямую из России</div>
           <div class="panel-sub">Вся сеть прямых международных рейсов на карте. Выберите город вылета или направление.</div>
           <div class="stat-cells" id="overview-cells"></div>
-          <div class="panel-more-link"><a href="#" onclick="showFullView('stats');return false;">Вся статистика сети →</a></div>
+          <div class="panel-more-link"><a href="#" onclick="showFullView('stats');return false;" title="Вся статистика сети" aria-label="Вся статистика сети">»</a></div>
         </div>
         <div class="panel-search">
           <div class="search-wrap"><span class="search-ico">⌕</span><input id="overview-query" placeholder="Город вылета, город назначения или страна" oninput="onOverviewQuery(this.value)"></div>
@@ -408,7 +419,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="#" onclick="showFullView('about');return false;">О проекте</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v2.5</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v2.6</span>
         </div>
       </div>
     </div>
@@ -429,7 +440,6 @@ body{display:flex;flex-direction:column;}
           <button class="panel-chip on" data-visa="easy" onclick="toggleVisaFilter('easy')">E-виза/по прилёту</button>
           <button class="panel-chip on" data-visa="visa" onclick="toggleVisaFilter('visa')">Виза</button>
         </div>
-        <div class="panel-chips" id="list-month-chips"></div>
       </div>
       <div class="panel-scroll" id="list-rows"></div>
     </div>
@@ -636,1161 +646,97 @@ const VISA_REGIMES = {
    СЕЗОННОСТЬ — см. scripts/gen_season_data.py
 ══════════════════════════════════════════════════════ */
 // SEASON_DATA_START
-// Климатическая комфортность по месяцам для каждого направления.
-// Индекс массива 0 = январь ... 11 = декабрь. true = комфортно, false = не сезон.
-// Критерий: сред. дневной максимум t > 34°C или < 5°C,
-// либо сред. осадки за месяц > 100мм (муссон). Источник — Open-Meteo
-// Historical Weather API (5 лет истории). Не автообновляется —
-// см. scripts/gen_season_data.py.
+// Климатический комфорт по месяцам для каждого направления, три категории.
+// Индекс массива 0 = январь ... 11 = декабрь.
+// c: "n" не сезон | "e" экскурсионный сезон | "b" пляжный сезон.
+// t: средний дневной максимум температуры воздуха, °C (округлено).
+// s: средняя температура воды, °C (округлено) — только для направлений у моря.
+// Пороги: HOT=34°C (экскурсия) / 38°C (пляж),
+// COLD=5°C, WET=100мм, CLOUD=76%, SEA=20°C.
+// Источник — Open-Meteo Historical Weather + Marine API (5 лет истории). Не автообновляется — см. scripts/gen_season_data.py.
 const SEASON_DATA = {
-  "Алжир": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Монастир": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Маэ": [
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    false,
-    true,
-    false,
-    false
-  ],
-  "Касабланка": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Аддис-Абеба": [
-    true,
-    true,
-    false,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Александрия": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Каир": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Хургада": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Шарм-эль-Шейх": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Тель-Авив": [
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false
-  ],
-  "Анталья": [
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    false
-  ],
-  "Стамбул": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Измир": [
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Даламан": [
-    false,
-    false,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Белград": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Варадеро": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Кабул": [
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Манама": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Эр-Рияд": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Тегеран": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Амман": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Абу-Даби": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Дубай": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Рас-эль-Хайма": [
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Шарджа": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Маскат": [
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Багдад": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Доха": [
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Алматы": [
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false
-  ],
-  "Астана": [
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Бишкек": [
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false
-  ],
-  "Ош": [
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Шымкент": [
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Усть-Каменогорск": [
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Баку": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Гянджа": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Нахичевань": [
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Ереван": [
-    false,
-    true,
-    true,
-    true,
-    false,
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Батуми": [
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
-  ],
-  "Сухум": [
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    false,
-    false,
-    false,
-    false
-  ],
-  "Тбилиси": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Минск": [
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Ашхабад": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Душанбе": [
-    true,
-    true,
-    false,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Куляб": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Худжанд": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Наманган": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Андижан": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Фергана": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Ургенч": [
-    false,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    false
-  ],
-  "Навои": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Бухара": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Карши": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Самарканд": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Ташкент": [
-    true,
-    true,
-    false,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Гоа": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Коломбо": [
-    false,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
-  ],
-  "Гонконг": [
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true
-  ],
-  "Дели": [
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Мале": [
-    false,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
-  ],
-  "Бангкок": [
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true
-  ],
-  "Пхукет": [
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
-  ],
-  "Нячанг": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false
-  ],
-  "Ханой": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Хошимин": [
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true
-  ],
-  "Денпасар": [
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false
-  ],
-  "Пекин": [
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    false
-  ],
-  "Хайлар": [
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Тайюань": [
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    false
-  ],
-  "Гуанчжоу": [
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Санья": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ],
-  "Пхеньян": [
-    false,
-    false,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    false
-  ],
-  "Улан-Батор": [
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Шанхай": [
-    true,
-    true,
-    true,
-    false,
-    true,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Чэнду": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true
-  ],
-  "Харбин": [
-    false,
-    false,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Далянь": [
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    false
-  ],
-  "Занзибар": [
-    true,
-    true,
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Дар-эс-Салам": [
-    true,
-    true,
-    false,
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-    false
-  ],
-  "Кутаиси": [
-    false,
-    false,
-    false,
-    true,
-    false,
-    false,
-    false,
-    true,
-    false,
-    false,
-    false,
-    false
-  ],
-  "Эль-Аламейн": [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true
-  ],
-  "Эль-Кувейт": [
-    true,
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true,
-    true
-  ]
+  "Алжир": [{"c":"e","t":17,"s":16},{"c":"e","t":17,"s":16},{"c":"e","t":20,"s":16},{"c":"e","t":21,"s":18},{"c":"e","t":24,"s":19},{"c":"b","t":28,"s":23},{"c":"b","t":32,"s":26},{"c":"b","t":32,"s":26},{"c":"b","t":30,"s":25},{"c":"b","t":27,"s":23},{"c":"b","t":21,"s":21},{"c":"e","t":18,"s":18}],
+  "Монастир": [{"c":"e","t":17,"s":17},{"c":"e","t":18,"s":16},{"c":"e","t":20,"s":16},{"c":"e","t":21,"s":17},{"c":"b","t":25,"s":20},{"c":"b","t":30,"s":24},{"c":"b","t":34,"s":27},{"c":"b","t":33,"s":28},{"c":"b","t":31,"s":27},{"c":"b","t":27,"s":25},{"c":"b","t":22,"s":22},{"c":"e","t":19,"s":19}],
+  "Маэ": [{"c":"n","t":28,"s":29},{"c":"b","t":28,"s":29},{"c":"b","t":28,"s":30},{"c":"b","t":29,"s":31},{"c":"b","t":28,"s":30},{"c":"b","t":27,"s":28},{"c":"b","t":26,"s":27},{"c":"b","t":26,"s":26},{"c":"b","t":27,"s":27},{"c":"b","t":27,"s":28},{"c":"b","t":28,"s":29},{"c":"b","t":28,"s":29}],
+  "Касабланка": [{"c":"e","t":19,"s":17},{"c":"e","t":19,"s":17},{"c":"e","t":19,"s":18},{"c":"e","t":21,"s":19},{"c":"b","t":23,"s":20},{"c":"b","t":25,"s":23},{"c":"b","t":27,"s":23},{"c":"b","t":28,"s":24},{"c":"b","t":26,"s":23},{"c":"b","t":25,"s":22},{"c":"b","t":22,"s":20},{"c":"e","t":19,"s":18}],
+  "Аддис-Абеба": [{"c":"e","t":22,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":22,"s":null},{"c":"n","t":19,"s":null},{"c":"n","t":19,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":20,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":22,"s":null}],
+  "Александрия": [{"c":"e","t":19,"s":18},{"c":"e","t":18,"s":17},{"c":"e","t":22,"s":18},{"c":"b","t":26,"s":20},{"c":"b","t":29,"s":22},{"c":"b","t":31,"s":26},{"c":"b","t":33,"s":29},{"c":"b","t":33,"s":30},{"c":"b","t":31,"s":29},{"c":"b","t":28,"s":26},{"c":"b","t":25,"s":23},{"c":"e","t":21,"s":20}],
+  "Каир": [{"c":"e","t":21,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":31,"s":null},{"c":"n","t":35,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":40,"s":null},{"c":"n","t":39,"s":null},{"c":"n","t":37,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":28,"s":null},{"c":"e","t":23,"s":null}],
+  "Хургада": [{"c":"b","t":22,"s":21},{"c":"e","t":21,"s":19},{"c":"b","t":24,"s":21},{"c":"b","t":28,"s":23},{"c":"b","t":31,"s":24},{"c":"b","t":34,"s":26},{"c":"b","t":35,"s":29},{"c":"b","t":36,"s":29},{"c":"b","t":34,"s":28},{"c":"b","t":30,"s":26},{"c":"b","t":27,"s":24},{"c":"b","t":23,"s":22}],
+  "Шарм-эль-Шейх": [{"c":"b","t":23,"s":24},{"c":"b","t":23,"s":23},{"c":"b","t":27,"s":23},{"c":"b","t":32,"s":24},{"c":"b","t":35,"s":25},{"c":"n","t":39,"s":28},{"c":"n","t":40,"s":30},{"c":"n","t":40,"s":30},{"c":"b","t":37,"s":29},{"c":"b","t":33,"s":28},{"c":"b","t":29,"s":27},{"c":"b","t":24,"s":25}],
+  "Тель-Авив": [{"c":"e","t":18,"s":19},{"c":"e","t":18,"s":17},{"c":"e","t":20,"s":18},{"c":"b","t":24,"s":21},{"c":"b","t":27,"s":23},{"c":"b","t":29,"s":27},{"c":"b","t":31,"s":29},{"c":"b","t":32,"s":30},{"c":"b","t":31,"s":29},{"c":"b","t":28,"s":27},{"c":"b","t":25,"s":24},{"c":"b","t":20,"s":21}],
+  "Анталья": [{"c":"e","t":15,"s":20},{"c":"e","t":16,"s":18},{"c":"e","t":18,"s":18},{"c":"e","t":23,"s":19},{"c":"b","t":27,"s":22},{"c":"b","t":33,"s":26},{"c":"b","t":37,"s":29},{"c":"b","t":35,"s":31},{"c":"b","t":33,"s":29},{"c":"b","t":27,"s":26},{"c":"b","t":22,"s":24},{"c":"b","t":17,"s":21}],
+  "Стамбул": [{"c":"e","t":10,"s":10},{"c":"e","t":10,"s":9},{"c":"e","t":12,"s":9},{"c":"e","t":17,"s":11},{"c":"e","t":21,"s":15},{"c":"b","t":27,"s":21},{"c":"b","t":30,"s":25},{"c":"b","t":30,"s":25},{"c":"b","t":25,"s":24},{"c":"b","t":20,"s":20},{"c":"e","t":17,"s":17},{"c":"e","t":12,"s":13}],
+  "Измир": [{"c":"e","t":13,"s":14},{"c":"e","t":13,"s":13},{"c":"e","t":16,"s":15},{"c":"e","t":21,"s":17},{"c":"e","t":27,"s":20},{"c":"b","t":33,"s":24},{"c":"b","t":37,"s":26},{"c":"b","t":36,"s":27},{"c":"b","t":31,"s":25},{"c":"b","t":25,"s":22},{"c":"e","t":20,"s":19},{"c":"e","t":14,"s":17}],
+  "Даламан": [{"c":"e","t":16,"s":20},{"c":"e","t":16,"s":18},{"c":"e","t":19,"s":18},{"c":"e","t":23,"s":19},{"c":"b","t":28,"s":21},{"c":"b","t":34,"s":25},{"c":"b","t":38,"s":28},{"c":"b","t":36,"s":29},{"c":"b","t":33,"s":28},{"c":"b","t":27,"s":26},{"c":"b","t":22,"s":23},{"c":"b","t":17,"s":21}],
+  "Белград": [{"c":"e","t":7,"s":null},{"c":"e","t":10,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":28,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":12,"s":null},{"c":"e","t":8,"s":null}],
+  "Варадеро": [{"c":"b","t":26,"s":26},{"c":"b","t":28,"s":26},{"c":"b","t":30,"s":26},{"c":"b","t":30,"s":27},{"c":"b","t":32,"s":28},{"c":"b","t":31,"s":29},{"c":"b","t":32,"s":30},{"c":"b","t":32,"s":30},{"c":"b","t":31,"s":30},{"c":"b","t":30,"s":29},{"c":"b","t":28,"s":28},{"c":"b","t":27,"s":27}],
+  "Кабул": [{"c":"e","t":5,"s":null},{"c":"e","t":8,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":20,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":10,"s":null}],
+  "Манама": [{"c":"e","t":20,"s":18},{"c":"e","t":22,"s":19},{"c":"b","t":26,"s":21},{"c":"b","t":31,"s":25},{"c":"b","t":35,"s":29},{"c":"n","t":38,"s":32},{"c":"n","t":40,"s":33},{"c":"n","t":40,"s":35},{"c":"b","t":38,"s":33},{"c":"b","t":34,"s":30},{"c":"b","t":28,"s":26},{"c":"b","t":23,"s":21}],
+  "Эр-Рияд": [{"c":"e","t":20,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":33,"s":null},{"c":"n","t":39,"s":null},{"c":"n","t":43,"s":null},{"c":"n","t":43,"s":null},{"c":"n","t":43,"s":null},{"c":"n","t":40,"s":null},{"c":"n","t":35,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":23,"s":null}],
+  "Тегеран": [{"c":"e","t":10,"s":null},{"c":"e","t":12,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":30,"s":null},{"c":"n","t":36,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":37,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":11,"s":null}],
+  "Амман": [{"c":"e","t":14,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":34,"s":null},{"c":"n","t":34,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":16,"s":null}],
+  "Абу-Даби": [{"c":"b","t":23,"s":22},{"c":"b","t":25,"s":21},{"c":"b","t":28,"s":23},{"c":"b","t":32,"s":26},{"c":"b","t":36,"s":30},{"c":"n","t":38,"s":33},{"c":"n","t":40,"s":34},{"c":"n","t":41,"s":35},{"c":"n","t":38,"s":34},{"c":"b","t":34,"s":32},{"c":"b","t":30,"s":28},{"c":"b","t":26,"s":24}],
+  "Дубай": [{"c":"b","t":24,"s":22},{"c":"b","t":25,"s":22},{"c":"b","t":29,"s":24},{"c":"b","t":32,"s":26},{"c":"b","t":36,"s":30},{"c":"n","t":39,"s":33},{"c":"n","t":41,"s":34},{"c":"n","t":41,"s":34},{"c":"n","t":39,"s":34},{"c":"b","t":35,"s":32},{"c":"b","t":31,"s":28},{"c":"b","t":27,"s":24}],
+  "Рас-эль-Хайма": [{"c":"b","t":25,"s":22},{"c":"b","t":28,"s":22},{"c":"b","t":32,"s":24},{"c":"b","t":36,"s":27},{"c":"n","t":41,"s":30},{"c":"n","t":44,"s":33},{"c":"n","t":43,"s":35},{"c":"n","t":43,"s":35},{"c":"n","t":41,"s":34},{"c":"b","t":38,"s":32},{"c":"b","t":33,"s":28},{"c":"b","t":28,"s":25}],
+  "Шарджа": [{"c":"b","t":25,"s":22},{"c":"b","t":26,"s":22},{"c":"b","t":31,"s":24},{"c":"b","t":35,"s":26},{"c":"n","t":39,"s":30},{"c":"n","t":42,"s":33},{"c":"n","t":43,"s":34},{"c":"n","t":43,"s":34},{"c":"n","t":41,"s":34},{"c":"b","t":37,"s":32},{"c":"b","t":32,"s":28},{"c":"b","t":27,"s":25}],
+  "Маскат": [{"c":"b","t":25,"s":24},{"c":"b","t":26,"s":24},{"c":"b","t":30,"s":25},{"c":"b","t":34,"s":28},{"c":"n","t":39,"s":31},{"c":"n","t":39,"s":33},{"c":"n","t":38,"s":32},{"c":"b","t":37,"s":31},{"c":"b","t":36,"s":31},{"c":"b","t":34,"s":31},{"c":"b","t":30,"s":29},{"c":"b","t":27,"s":26}],
+  "Багдад": [{"c":"e","t":18,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":32,"s":null},{"c":"n","t":37,"s":null},{"c":"n","t":43,"s":null},{"c":"n","t":45,"s":null},{"c":"n","t":45,"s":null},{"c":"n","t":41,"s":null},{"c":"n","t":34,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":19,"s":null}],
+  "Доха": [{"c":"e","t":23,"s":20},{"c":"e","t":25,"s":20},{"c":"b","t":30,"s":22},{"c":"b","t":35,"s":25},{"c":"n","t":41,"s":29},{"c":"n","t":44,"s":32},{"c":"n","t":44,"s":33},{"c":"n","t":44,"s":35},{"c":"n","t":41,"s":34},{"c":"b","t":37,"s":31},{"c":"b","t":31,"s":27},{"c":"b","t":26,"s":22}],
+  "Алматы": [{"c":"n","t":0,"s":null},{"c":"n","t":2,"s":null},{"c":"e","t":10,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":16,"s":null},{"c":"e","t":8,"s":null},{"c":"n","t":1,"s":null}],
+  "Астана": [{"c":"n","t":-10,"s":null},{"c":"n","t":-8,"s":null},{"c":"n","t":-2,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":9,"s":null},{"c":"n","t":0,"s":null},{"c":"n","t":-7,"s":null}],
+  "Бишкек": [{"c":"n","t":2,"s":null},{"c":"e","t":5,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":20,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":11,"s":null},{"c":"n","t":4,"s":null}],
+  "Ош": [{"c":"n","t":5,"s":null},{"c":"e","t":7,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":12,"s":null},{"c":"e","t":6,"s":null}],
+  "Шымкент": [{"c":"e","t":6,"s":null},{"c":"e","t":9,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":33,"s":null},{"c":"n","t":35,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":28,"s":null},{"c":"e","t":20,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":6,"s":null}],
+  "Усть-Каменогорск": [{"c":"n","t":-9,"s":null},{"c":"n","t":-7,"s":null},{"c":"n","t":2,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":28,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":11,"s":null},{"c":"n","t":1,"s":null},{"c":"n","t":-7,"s":null}],
+  "Баку": [{"c":"e","t":8,"s":null},{"c":"e","t":8,"s":null},{"c":"e","t":11,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":22,"s":null},{"c":"b","t":29,"s":22},{"c":"b","t":31,"s":25},{"c":"b","t":32,"s":26},{"c":"b","t":26,"s":24},{"c":"e","t":20,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":10,"s":null}],
+  "Гянджа": [{"c":"e","t":8,"s":null},{"c":"e","t":9,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":9,"s":null}],
+  "Нахичевань": [{"c":"n","t":5,"s":null},{"c":"e","t":8,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":33,"s":null},{"c":"n","t":35,"s":null},{"c":"n","t":36,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":7,"s":null}],
+  "Ереван": [{"c":"n","t":4,"s":null},{"c":"e","t":6,"s":null},{"c":"e","t":11,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":33,"s":null},{"c":"n","t":34,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":12,"s":null},{"c":"e","t":6,"s":null}],
+  "Батуми": [{"c":"e","t":12,"s":11},{"c":"e","t":11,"s":10},{"c":"e","t":13,"s":11},{"c":"e","t":19,"s":13},{"c":"e","t":20,"s":17},{"c":"b","t":24,"s":23},{"c":"b","t":26,"s":26},{"c":"b","t":27,"s":28},{"c":"b","t":24,"s":26},{"c":"b","t":20,"s":21},{"c":"e","t":18,"s":17},{"c":"e","t":14,"s":14}],
+  "Сухум": [{"c":"e","t":10,"s":11},{"c":"e","t":9,"s":11},{"c":"e","t":12,"s":11},{"c":"e","t":17,"s":13},{"c":"e","t":19,"s":17},{"c":"b","t":24,"s":23},{"c":"b","t":27,"s":27},{"c":"b","t":29,"s":28},{"c":"b","t":24,"s":26},{"c":"b","t":19,"s":21},{"c":"e","t":16,"s":17},{"c":"e","t":12,"s":14}],
+  "Тбилиси": [{"c":"e","t":8,"s":null},{"c":"e","t":9,"s":null},{"c":"e","t":12,"s":null},{"c":"e","t":20,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":28,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":9,"s":null}],
+  "Минск": [{"c":"n","t":-1,"s":null},{"c":"n","t":-1,"s":null},{"c":"e","t":6,"s":null},{"c":"e","t":12,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":11,"s":null},{"c":"n","t":4,"s":null},{"c":"n","t":0,"s":null}],
+  "Ашхабад": [{"c":"e","t":9,"s":null},{"c":"e","t":12,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":31,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":39,"s":null},{"c":"n","t":37,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":11,"s":null}],
+  "Душанбе": [{"c":"e","t":8,"s":null},{"c":"e","t":11,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":33,"s":null},{"c":"n","t":36,"s":null},{"c":"n","t":34,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":9,"s":null}],
+  "Куляб": [{"c":"e","t":10,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":29,"s":null},{"c":"n","t":35,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":35,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":12,"s":null}],
+  "Худжанд": [{"c":"e","t":6,"s":null},{"c":"e","t":9,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":29,"s":null},{"c":"n","t":35,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":36,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":7,"s":null}],
+  "Наманган": [{"c":"e","t":6,"s":null},{"c":"e","t":10,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":30,"s":null},{"c":"n","t":36,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":37,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":6,"s":null}],
+  "Андижан": [{"c":"e","t":7,"s":null},{"c":"e","t":10,"s":null},{"c":"e","t":16,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":29,"s":null},{"c":"n","t":35,"s":null},{"c":"n","t":37,"s":null},{"c":"n","t":36,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":7,"s":null}],
+  "Фергана": [{"c":"e","t":7,"s":null},{"c":"e","t":10,"s":null},{"c":"e","t":16,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":30,"s":null},{"c":"n","t":35,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":36,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":7,"s":null}],
+  "Ургенч": [{"c":"n","t":4,"s":null},{"c":"e","t":8,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":30,"s":null},{"c":"n","t":37,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":36,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":20,"s":null},{"c":"e","t":13,"s":null},{"c":"n","t":4,"s":null}],
+  "Навои": [{"c":"e","t":8,"s":null},{"c":"e","t":11,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":31,"s":null},{"c":"n","t":37,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":36,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":16,"s":null},{"c":"e","t":9,"s":null}],
+  "Бухара": [{"c":"e","t":8,"s":null},{"c":"e","t":12,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":32,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":40,"s":null},{"c":"n","t":37,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":16,"s":null},{"c":"e","t":9,"s":null}],
+  "Карши": [{"c":"e","t":9,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":19,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":31,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":40,"s":null},{"c":"n","t":38,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":11,"s":null}],
+  "Самарканд": [{"c":"e","t":8,"s":null},{"c":"e","t":11,"s":null},{"c":"e","t":16,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":28,"s":null},{"c":"n","t":35,"s":null},{"c":"n","t":37,"s":null},{"c":"n","t":35,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":9,"s":null}],
+  "Ташкент": [{"c":"e","t":6,"s":null},{"c":"e","t":10,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":29,"s":null},{"c":"n","t":35,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":35,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":7,"s":null}],
+  "Гоа": [{"c":"b","t":32,"s":28},{"c":"b","t":33,"s":29},{"c":"b","t":34,"s":29},{"c":"b","t":33,"s":31},{"c":"b","t":32,"s":31},{"c":"n","t":29,"s":30},{"c":"n","t":27,"s":28},{"c":"n","t":28,"s":27},{"c":"n","t":28,"s":28},{"c":"b","t":30,"s":29},{"c":"b","t":32,"s":29},{"c":"b","t":33,"s":28}],
+  "Коломбо": [{"c":"b","t":30,"s":28},{"c":"b","t":31,"s":29},{"c":"b","t":31,"s":30},{"c":"b","t":31,"s":31},{"c":"n","t":30,"s":30},{"c":"n","t":29,"s":29},{"c":"n","t":29,"s":29},{"c":"n","t":29,"s":29},{"c":"n","t":29,"s":29},{"c":"n","t":29,"s":29},{"c":"n","t":29,"s":29},{"c":"b","t":30,"s":29}],
+  "Гонконг": [{"c":"e","t":19,"s":18},{"c":"e","t":20,"s":19},{"c":"b","t":23,"s":20},{"c":"b","t":26,"s":24},{"c":"n","t":28,"s":26},{"c":"n","t":29,"s":28},{"c":"b","t":31,"s":29},{"c":"n","t":30,"s":28},{"c":"b","t":30,"s":28},{"c":"b","t":28,"s":28},{"c":"b","t":25,"s":25},{"c":"b","t":21,"s":21}],
+  "Дели": [{"c":"e","t":19,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":31,"s":null},{"c":"n","t":37,"s":null},{"c":"n","t":38,"s":null},{"c":"n","t":38,"s":null},{"c":"e","t":34,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":22,"s":null}],
+  "Мале": [{"c":"b","t":28,"s":28},{"c":"b","t":28,"s":29},{"c":"b","t":29,"s":30},{"c":"b","t":29,"s":31},{"c":"n","t":29,"s":30},{"c":"b","t":29,"s":30},{"c":"n","t":29,"s":30},{"c":"n","t":29,"s":30},{"c":"b","t":29,"s":30},{"c":"n","t":29,"s":29},{"c":"b","t":28,"s":30},{"c":"b","t":28,"s":29}],
+  "Бангкок": [{"c":"b","t":32,"s":28},{"c":"b","t":33,"s":29},{"c":"b","t":34,"s":30},{"c":"b","t":34,"s":31},{"c":"n","t":33,"s":32},{"c":"n","t":33,"s":31},{"c":"n","t":32,"s":30},{"c":"n","t":32,"s":31},{"c":"n","t":31,"s":31},{"c":"n","t":31,"s":31},{"c":"b","t":31,"s":30},{"c":"b","t":31,"s":28}],
+  "Пхукет": [{"c":"b","t":30,"s":29},{"c":"b","t":32,"s":30},{"c":"b","t":32,"s":30},{"c":"b","t":32,"s":31},{"c":"e","t":31,"s":31},{"c":"e","t":30,"s":30},{"c":"e","t":30,"s":30},{"c":"e","t":30,"s":30},{"c":"e","t":29,"s":30},{"c":"e","t":29,"s":30},{"c":"b","t":29,"s":30},{"c":"b","t":30,"s":29}],
+  "Нячанг": [{"c":"b","t":26,"s":25},{"c":"b","t":27,"s":25},{"c":"b","t":29,"s":26},{"c":"b","t":31,"s":28},{"c":"b","t":32,"s":30},{"c":"b","t":34,"s":30},{"c":"b","t":33,"s":29},{"c":"b","t":33,"s":29},{"c":"n","t":31,"s":30},{"c":"n","t":30,"s":29},{"c":"n","t":28,"s":28},{"c":"n","t":27,"s":26}],
+  "Ханой": [{"c":"e","t":21,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":31,"s":null},{"c":"n","t":33,"s":null},{"c":"n","t":33,"s":null},{"c":"n","t":32,"s":null},{"c":"n","t":31,"s":null},{"c":"e","t":28,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":22,"s":null}],
+  "Хошимин": [{"c":"e","t":32,"s":28},{"c":"e","t":34,"s":28},{"c":"e","t":35,"s":28},{"c":"e","t":34,"s":31},{"c":"e","t":33,"s":32},{"c":"e","t":32,"s":31},{"c":"e","t":31,"s":30},{"c":"e","t":31,"s":31},{"c":"e","t":31,"s":30},{"c":"e","t":31,"s":31},{"c":"e","t":31,"s":30},{"c":"e","t":31,"s":29}],
+  "Денпасар": [{"c":"n","t":29,"s":29},{"c":"n","t":29,"s":30},{"c":"n","t":30,"s":30},{"c":"b","t":29,"s":29},{"c":"b","t":29,"s":29},{"c":"b","t":28,"s":29},{"c":"b","t":27,"s":28},{"c":"b","t":28,"s":28},{"c":"b","t":28,"s":28},{"c":"b","t":30,"s":29},{"c":"n","t":30,"s":30},{"c":"n","t":30,"s":30}],
+  "Пекин": [{"c":"n","t":2,"s":null},{"c":"e","t":6,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":11,"s":null},{"c":"n","t":3,"s":null}],
+  "Хайлар": [{"c":"n","t":-17,"s":null},{"c":"n","t":-12,"s":null},{"c":"n","t":-1,"s":null},{"c":"e","t":9,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":7,"s":null},{"c":"n","t":-5,"s":null},{"c":"n","t":-16,"s":null}],
+  "Тайюань": [{"c":"n","t":4,"s":null},{"c":"e","t":7,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":11,"s":null},{"c":"n","t":3,"s":null}],
+  "Гуанчжоу": [{"c":"e","t":19,"s":null},{"c":"e","t":20,"s":null},{"c":"e","t":24,"s":null},{"c":"e","t":27,"s":null},{"c":"n","t":29,"s":null},{"c":"n","t":31,"s":null},{"c":"e","t":33,"s":null},{"c":"n","t":31,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":28,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":20,"s":null}],
+  "Санья": [{"c":"b","t":25,"s":24},{"c":"b","t":27,"s":24},{"c":"b","t":29,"s":25},{"c":"b","t":30,"s":28},{"c":"b","t":31,"s":30},{"c":"n","t":31,"s":31},{"c":"n","t":31,"s":30},{"c":"n","t":31,"s":29},{"c":"b","t":30,"s":30},{"c":"b","t":29,"s":29},{"c":"b","t":28,"s":27},{"c":"b","t":26,"s":26}],
+  "Пхеньян": [{"c":"n","t":0,"s":null},{"c":"n","t":4,"s":null},{"c":"e","t":12,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":18,"s":null},{"c":"e","t":11,"s":null},{"c":"n","t":1,"s":null}],
+  "Улан-Батор": [{"c":"n","t":-13,"s":null},{"c":"n","t":-9,"s":null},{"c":"n","t":2,"s":null},{"c":"e","t":9,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":6,"s":null},{"c":"n","t":-4,"s":null},{"c":"n","t":-13,"s":null}],
+  "Шанхай": [{"c":"e","t":10,"s":7},{"c":"e","t":11,"s":7},{"c":"e","t":17,"s":10},{"c":"e","t":21,"s":16},{"c":"b","t":25,"s":21},{"c":"n","t":28,"s":26},{"c":"b","t":33,"s":30},{"c":"b","t":34,"s":32},{"c":"b","t":30,"s":29},{"c":"b","t":24,"s":24},{"c":"e","t":18,"s":17},{"c":"e","t":11,"s":11}],
+  "Чэнду": [{"c":"e","t":12,"s":null},{"c":"e","t":13,"s":null},{"c":"e","t":20,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":28,"s":null},{"c":"e","t":31,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":33,"s":null},{"c":"e","t":29,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":12,"s":null}],
+  "Харбин": [{"c":"n","t":-12,"s":null},{"c":"n","t":-6,"s":null},{"c":"e","t":5,"s":null},{"c":"e","t":15,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":25,"s":null},{"c":"e","t":28,"s":null},{"c":"e","t":26,"s":null},{"c":"e","t":22,"s":null},{"c":"e","t":12,"s":null},{"c":"n","t":0,"s":null},{"c":"n","t":-10,"s":null}],
+  "Далянь": [{"c":"n","t":1,"s":5},{"c":"n","t":2,"s":3},{"c":"e","t":9,"s":4},{"c":"e","t":15,"s":8},{"c":"e","t":20,"s":13},{"c":"e","t":24,"s":19},{"c":"b","t":27,"s":25},{"c":"b","t":28,"s":28},{"c":"b","t":25,"s":25},{"c":"e","t":18,"s":19},{"c":"e","t":11,"s":14},{"c":"n","t":3,"s":10}],
+  "Занзибар": [{"c":"b","t":32,"s":30},{"c":"b","t":33,"s":30},{"c":"b","t":32,"s":30},{"c":"n","t":28,"s":29},{"c":"b","t":28,"s":28},{"c":"b","t":28,"s":28},{"c":"b","t":27,"s":26},{"c":"b","t":28,"s":26},{"c":"b","t":29,"s":26},{"c":"b","t":30,"s":27},{"c":"b","t":30,"s":28},{"c":"b","t":31,"s":30}],
+  "Дар-эс-Салам": [{"c":"b","t":31,"s":29},{"c":"b","t":32,"s":30},{"c":"b","t":32,"s":30},{"c":"n","t":29,"s":29},{"c":"b","t":29,"s":28},{"c":"b","t":29,"s":28},{"c":"b","t":28,"s":27},{"c":"b","t":29,"s":26},{"c":"b","t":30,"s":27},{"c":"b","t":31,"s":28},{"c":"b","t":31,"s":29},{"c":"b","t":31,"s":30}],
+  "Кутаиси": [{"c":"e","t":11,"s":null},{"c":"e","t":10,"s":null},{"c":"e","t":14,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":23,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":30,"s":null},{"c":"e","t":32,"s":null},{"c":"e","t":27,"s":null},{"c":"e","t":21,"s":null},{"c":"e","t":17,"s":null},{"c":"e","t":12,"s":null}],
+  "Эль-Аламейн": [{"c":"e","t":18,"s":19},{"c":"e","t":18,"s":17},{"c":"e","t":21,"s":18},{"c":"e","t":25,"s":20},{"c":"b","t":28,"s":22},{"c":"b","t":30,"s":25},{"c":"b","t":32,"s":28},{"c":"b","t":33,"s":29},{"c":"b","t":31,"s":28},{"c":"b","t":27,"s":26},{"c":"b","t":24,"s":24},{"c":"b","t":20,"s":21}],
+  "Эль-Кувейт": [{"c":"e","t":19,"s":16},{"c":"e","t":21,"s":16},{"c":"e","t":25,"s":18},{"c":"b","t":32,"s":23},{"c":"n","t":38,"s":27},{"c":"n","t":44,"s":29},{"c":"n","t":45,"s":31},{"c":"n","t":44,"s":32},{"c":"n","t":41,"s":31},{"c":"b","t":35,"s":27},{"c":"b","t":27,"s":23},{"c":"e","t":21,"s":19}]
 };
 // SEASON_DATA_END
 
@@ -2179,54 +1125,54 @@ const STATS_DATA = {
     "months": [
       {
         "label": "янв",
-        "value": 335
+        "value": 358
       },
       {
         "label": "фев",
-        "value": 403
+        "value": 425
       },
       {
         "label": "мар",
-        "value": 453
+        "value": 465
       },
       {
         "label": "апр",
-        "value": 448
+        "value": 474
       },
       {
         "label": "май",
-        "value": 383
+        "value": 442
       },
       {
         "label": "июн",
-        "value": 292
+        "value": 300
       },
       {
         "label": "июл",
-        "value": 207
+        "value": 294
       },
       {
         "label": "авг",
-        "value": 212
+        "value": 275
       },
       {
         "label": "сен",
-        "value": 354
+        "value": 414
       },
       {
         "label": "окт",
-        "value": 374
+        "value": 448
       },
       {
         "label": "ноя",
-        "value": 392
+        "value": 422
       },
       {
         "label": "дек",
-        "value": 369
+        "value": 376
       }
     ],
-    "covered": 474,
+    "covered": 478,
     "total": 478
   },
   "trend": {
@@ -2463,8 +1409,8 @@ function initApp(data) {
   function seasonMatches(destName) {
     if (!seasonActive) return true;
     const months = SEASON_DATA[destName];
-    const val = months ? months[seasonMonth] : undefined;
-    const key = val === true ? 'good' : val === false ? 'bad' : 'unknown';
+    const m = months ? months[seasonMonth] : undefined;
+    const key = !m ? 'unknown' : m.c === 'n' ? 'bad' : 'good';
     return seasonFilterActive.has(key);
   }
 
@@ -2639,14 +1585,13 @@ function initApp(data) {
   const listRowsEl   = document.getElementById('list-rows');
   const cardBodyEl   = document.getElementById('card-body');
   const cardRouteCodeEl = document.getElementById('card-route-code');
-  const MONTH_SHORT_RU = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 
   let panelView = 'overview';
   let listMode = 'from-city';
   let selCity = null, selDest = null;
   let overviewQuery = '';
   let listQuery = '';
-  let listMonth = 'all';
+  let selAirport = null;
   let sheet = 'peek';
 
   function renderOverviewCells() {
@@ -2720,16 +1665,17 @@ function initApp(data) {
   }
   window.onOverviewQuery = onOverviewQuery;
 
-  function monthMatches(dest) {
-    if (listMonth === 'all') return true;
-    const months = SEASON_DATA[dest];
-    return months ? months[listMonth] === true : false;
+  function airportMatches(dest) {
+    if (!selAirport) return true;
+    const ri = routeInfo(selCity, dest);
+    if (!ri.apts.length) return true; // нет данных по аэропорту у маршрута — не скрываем
+    return ri.apts.includes(selAirport);
   }
 
   function filteredFromCity() {
     const q = listQuery;
     return (ROUTES[selCity]||[]).filter(d => {
-      if (!visaMatches(d) || !monthMatches(d)) return false;
+      if (!visaMatches(d) || !airportMatches(d)) return false;
       if (q) {
         const meta = DEST_META[d] || {};
         if (!(d + ' ' + (meta.c||'')).toLowerCase().includes(q)) return false;
@@ -2808,20 +1754,16 @@ function initApp(data) {
     </div>`;
   }
 
-  function renderMonthChips() {
-    const box = document.getElementById('list-month-chips');
-    if (listMode !== 'from-city') { box.innerHTML = ''; return; }
-    let html = `<button class="panel-chip${listMonth==='all'?' on':''}" onclick="setListMonth('all')">Весь год</button>`;
-    MONTH_SHORT_RU.forEach((m,i) => {
-      html += `<button class="panel-chip${listMonth===i?' on':''}" onclick="setListMonth(${i})">${m}</button>`;
-    });
-    box.innerHTML = html;
+  function airportChipsHtml(codes) {
+    return codes.map(a =>
+      `<button class="airport-chip${selAirport===a?' on':''}" onclick="setAirportFilter('${esc(a)}')">${esc(a)}</button>`
+    ).join('');
   }
-  function setListMonth(v) {
-    listMonth = v === 'all' ? 'all' : parseInt(v, 10);
+  function setAirportFilter(code) {
+    selAirport = selAirport === code ? null : code;
     renderListView();
   }
-  window.setListMonth = setListMonth;
+  window.setAirportFilter = setAirportFilter;
 
   function renderListView() {
     const filtersRow = document.getElementById('list-visa-chips');
@@ -2837,8 +1779,7 @@ function initApp(data) {
       const countries = new Set(all.map(d => DEST_META[d]?.c).filter(Boolean)).size;
       listTitleEl.textContent = city;
       listMetaEl.innerHTML = `<b>${shown.length}</b> из ${all.length} направлений · ${countries} стран`;
-      listAirportsEl.innerHTML = cityAirportCodes(city).map(a => `<span>${esc(a)}</span>`).join('');
-      renderMonthChips();
+      listAirportsEl.innerHTML = airportChipsHtml(cityAirportCodes(city));
       listRowsEl.innerHTML = shown.length ? shown.map(d => destRowHtml(city, d)).join('') : '<div class="panel-empty">Под фильтры ничего не подошло</div>';
       listRowsEl.querySelectorAll('[data-dest]').forEach(el => bindTap(el, () => openCard(city, el.dataset.dest)));
     } else {
@@ -2850,7 +1791,6 @@ function initApp(data) {
       listMetaEl.innerHTML = `<b>${shown.length}</b> из ${all.length} городов России`;
       const daPt = DEST_AIRPORT_IATA[dest];
       listAirportsEl.innerHTML = daPt ? `<span>${esc(daPt)}</span>` : '';
-      renderMonthChips();
       listRowsEl.innerHTML = shown.length ? shown.map(c => cityReverseRowHtml(c, dest)).join('') : '<div class="panel-empty">Под фильтры ничего не подошло</div>';
       listRowsEl.querySelectorAll('[data-city]').forEach(el => bindTap(el, () => openCard(el.dataset.city, dest)));
     }
@@ -2904,25 +1844,50 @@ function initApp(data) {
 
     const months = SEASON_DATA[dest];
     if (months) {
+      const SEASON_CAT_LABEL = { n: 'не сезон', e: 'экскурсионный сезон', b: 'пляжный сезон' };
+      const SEASON_CAT_CLASS = { n: 'sc-none', e: 'sc-excursion', b: 'sc-beach' };
+      const cellsHtml = months.map(m => {
+        const title = SEASON_CAT_LABEL[m.c] + (m.t != null ? `, ${m.t}°C` : '') + (m.c === 'b' && m.s != null ? `, вода ${m.s}°C` : '');
+        return `<div class="season-cell ${SEASON_CAT_CLASS[m.c]}" title="${esc(title)}">
+          ${m.t != null ? `<span class="sc-t">${m.t}°</span>` : ''}
+          ${m.c === 'b' && m.s != null ? `<span class="sc-s">${m.s}°</span>` : ''}
+        </div>`;
+      }).join('');
       html += `<div class="card-section">
         <div class="card-section-label-row">
           <div class="card-section-label">СЕЗОННОСТЬ (климатический комфорт)</div>
           <button class="info-btn" type="button" onclick="event.stopPropagation(); toggleInfoPop(this)" aria-label="Как считается сезонность">?</button>
           <div class="info-pop">
             По координатам направления берём 5 лет истории погоды
-            (<b>Open-Meteo Historical Weather API</b>): дневной максимум температуры
-            и осадки, усреднённые по месяцам. Месяц отмечен красным («не сезон»),
-            если средний дневной максимум выше <b>34°C</b> или ниже <b>5°C</b>,
-            либо среднемесячные осадки выше <b>100мм</b>.<br><br>
-            Это климатический дискомфорт, а не туристическая загруженность или
-            цены — жара, холод и затяжные дожди, а не высокий сезон.<br><br>
+            (<b>Open-Meteo Historical Weather API и Marine API</b>): дневной
+            максимум температуры, осадки и облачность, усреднённые по месяцам,
+            а для направлений у моря — ещё и температуру воды.<br><br>
+            Месяц отмечен красным («не сезон»), если средний дневной максимум
+            выше <b>34°C</b> или ниже <b>5°C</b>, либо если одновременно много
+            осадков (>100мм) и стоит плотная облачность (>76%) — короткий
+            сильный ливень при в основном ясном небе комфорту не мешает, а
+            вот затяжная морось под сплошными тучами — да.<br><br>
+            Остальные месяцы делятся на два вида: <b>пляжный сезон</b> (море
+            теплее 20°C, можно купаться — верхний порог температуры воздуха
+            для него мягче, 38°C, жара сама по себе пляжу не помеха) и
+            <b>экскурсионный</b> (климат комфортный, но для купания рано или
+            направление не у моря).<br><br>
+            Это климатический комфорт, а не туристическая загруженность или
+            цены. Для нескольких направлений с особенностями климата (муссоны,
+            закрытые моря без данных о температуре воды) сезонность
+            скорректирована вручную.<br><br>
             Не пересчитывается автоматически при каждом обновлении рейсов —
             климат стабилен год к году, актуализируется вручную. Если полоски
             нет вовсе — по направлению пока нет данных (обычно значит: оно
             появилось в маршрутах позже последнего пересчёта).
           </div>
         </div>
-        <div class="card-season-strip">${months.map(v => `<div title="${v?'комфортно':'не сезон'}" style="background:${v?'#34d399':'#f87171'};opacity:${v?0.85:0.55}"></div>`).join('')}</div>
+        <div class="card-season-strip">${cellsHtml}</div>
+        <div class="card-season-legend">
+          <span><i class="sc-dot sc-beach"></i>пляжный</span>
+          <span><i class="sc-dot sc-excursion"></i>экскурсионный</span>
+          <span><i class="sc-dot sc-none"></i>не сезон</span>
+        </div>
         <div class="card-season-labels"><span>ЯНВ</span><span>АПР</span><span>ИЮЛ</span><span>ОКТ</span><span>ДЕК</span></div>
       </div>`;
     }
@@ -3017,7 +1982,7 @@ function initApp(data) {
 
   function openCity(city) {
     panelView = 'list'; listMode = 'from-city';
-    selCity = city; selDest = null; listQuery = ''; listMonth = 'all';
+    selCity = city; selDest = null; listQuery = ''; selAirport = null;
     curFrom = city; curTo = null; sheet = 'full';
     hideFullViews();
     renderPanelViews(); syncSheet();
@@ -3027,7 +1992,7 @@ function initApp(data) {
 
   function openReverse(dest) {
     panelView = 'list'; listMode = 'to-dest';
-    selDest = dest; selCity = null; listQuery = ''; listMonth = 'all';
+    selDest = dest; selCity = null; listQuery = ''; selAirport = null;
     curFrom = null; curTo = dest; sheet = 'full';
     hideFullViews();
     renderPanelViews(); syncSheet();
@@ -3080,8 +2045,8 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ИСТОЧНИКИ ДАННЫХ</div><div class="ci-val" style="font-size:13px;font-weight:400;">AirLabs · AeroDataBox · OpenSky · Яндекс.Расписания</div></div>
         <div class="card-info-cell"><div class="ci-label">ОБНОВЛЕНИЕ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Автоматически, несколько раз в месяц, без ручного вмешательства</div></div>
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
-        <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather API, климатическая комфортность по месяцам</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v2.5 · 09.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v2.6 · 12.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>
     `;
@@ -3471,8 +2436,8 @@ function initApp(data) {
   function dstColor(name) {
     if (seasonActive) {
       const months = SEASON_DATA[name];
-      const val = months ? months[seasonMonth] : undefined;
-      return val === true ? SEASON_COLORS.good : val === false ? SEASON_COLORS.bad : SEASON_COLORS.unknown;
+      const m = months ? months[seasonMonth] : undefined;
+      return !m ? SEASON_COLORS.unknown : m.c === 'n' ? SEASON_COLORS.bad : SEASON_COLORS.good;
     }
     return visaColorFor(name);
   }
