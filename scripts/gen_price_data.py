@@ -122,8 +122,8 @@ def js_block(price_data: dict) -> str:
     lines = [
         "// Диапазон цен по маршрутам (min/max среди закэшированных на момент",
         "// запуска цен: прямой рейс/1-2 пересадки, обычно 1-3 варианта).",
-        "// Источник — Travelpayouts Data API (/v1/prices/cheap), кэш, не live-поиск.",
-        "// n: число найденных вариантов, d: дата прогона (YYYY-MM-DD).",
+        "// Источник — Travelpayouts (/v1/prices/cheap), не поиск в реальном времени.",
+        "// d: дата прогона (YYYY-MM-DD).",
         "// Пересчитывается полностью на каждый прогон пайплайна — см. scripts/gen_price_data.py.",
         "const PRICE_DATA = {",
     ]
@@ -131,7 +131,7 @@ def js_block(price_data: dict) -> str:
     for pair, v in price_data.items():
         entries.append(
             f'  {json.dumps(pair, ensure_ascii=False)}: '
-            f'{{"min":{v["min"]},"max":{v["max"]},"n":{v["n"]},"d":{json.dumps(v["d"])}}}'
+            f'{{"min":{v["min"]},"max":{v["max"]},"d":{json.dumps(v["d"])}}}'
         )
     lines.append(",\n".join(entries))
     lines.append("};")
@@ -189,7 +189,7 @@ def main() -> None:
         if not prices:
             print(f"[{i}/{total}] {pair:40s} -> нет цен в кэше", file=sys.stderr)
         else:
-            price_data[pair] = {"min": min(prices), "max": max(prices), "n": len(prices), "d": today}
+            price_data[pair] = {"min": min(prices), "max": max(prices), "d": today}
             print(f"[{i}/{total}] {pair:40s} -> {min(prices)}-{max(prices)} ({len(prices)})", file=sys.stderr)
         time.sleep(PAUSE_BETWEEN_REQUESTS)
 
