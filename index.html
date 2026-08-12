@@ -229,6 +229,7 @@ body{display:flex;flex-direction:column;}
 .card-note{margin-top:9px;font-size:12px;color:var(--rf-t3);}
 .card-season-strip{display:flex;gap:3px;}
 .season-cell{flex:1;height:34px;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:var(--rf-mono);line-height:1;}
+.season-cell.sc-current{outline:2px solid var(--rf-accent);outline-offset:-2px;}
 .season-cell .sc-t{font-size:10px;color:#fff;opacity:.95;}
 .season-cell .sc-s{font-size:7.5px;color:#fff;opacity:.75;}
 .sc-none{background:#f87171;}
@@ -1473,6 +1474,16 @@ function initApp(data) {
     seasonMonthSel.appendChild(opt);
   });
 
+  // Подсветка месяца в полоске сезонности открытой карточки — синхронизирована
+  // с выбором на карте (seasonActive/seasonMonth), а не только со временем
+  // открытия карточки: если поменять месяц/слой, не закрывая карточку,
+  // рамка должна переехать сама.
+  function syncSeasonCardHighlight() {
+    document.querySelectorAll('.season-cell').forEach(el => {
+      el.classList.toggle('sc-current', seasonActive && parseInt(el.dataset.month, 10) === seasonMonth);
+    });
+  }
+
   function toggleSeason() {
     seasonActive = !seasonActive;
     document.getElementById('season-toggle').classList.toggle('on', seasonActive);
@@ -1482,6 +1493,7 @@ function initApp(data) {
     renderLegend();
     updateMarkers(curFrom, curTo);
     drawArcs();
+    syncSeasonCardHighlight();
   }
   window.toggleSeason = toggleSeason;
 
@@ -1489,6 +1501,7 @@ function initApp(data) {
     seasonMonth = parseInt(v, 10);
     updateMarkers(curFrom, curTo);
     drawArcs();
+    syncSeasonCardHighlight();
   }
   window.setSeasonMonth = setSeasonMonth;
 
@@ -1852,9 +1865,10 @@ function initApp(data) {
     if (months) {
       const SEASON_CAT_LABEL = { n: 'не сезон', e: 'экскурсионный сезон', b: 'пляжный сезон' };
       const SEASON_CAT_CLASS = { n: 'sc-none', e: 'sc-excursion', b: 'sc-beach' };
-      const cellsHtml = months.map(m => {
+      const cellsHtml = months.map((m, i) => {
         const title = SEASON_CAT_LABEL[m.c] + (m.t != null ? `, ${m.t}°C` : '') + (m.c === 'b' && m.s != null ? `, вода ${m.s}°C` : '');
-        return `<div class="season-cell ${SEASON_CAT_CLASS[m.c]}" title="${esc(title)}">
+        const cur = seasonActive && i === seasonMonth ? ' sc-current' : '';
+        return `<div class="season-cell ${SEASON_CAT_CLASS[m.c]}${cur}" data-month="${i}" title="${esc(title)}">
           ${m.t != null ? `<span class="sc-t">${m.t}°</span>` : ''}
           ${m.c === 'b' && m.s != null ? `<span class="sc-s">≋${m.s}°</span>` : ''}
         </div>`;
@@ -1964,6 +1978,18 @@ function initApp(data) {
     if (btn) { btn.className = 'card-tp-btn'; btn.textContent = 'Найти билеты →'; footer.appendChild(btn); }
   }
 
+  // На мобильной шторка карточки направления — на всю ширину экрана и в
+  // развёрнутом состоянии наезжает на зум-контрол Leaflet (он всегда в
+  // правом нижнем углу карты). На десктопе панель узкая и слева — там зум
+  // не трогаем. Прячем зум только пока открыта именно карточка направления,
+  // на обзоре и в списке городов масштабирование доступно как обычно.
+  function updateZoomVisibility() {
+    const zoomEl = document.querySelector('.leaflet-control-zoom');
+    if (!zoomEl) return;
+    zoomEl.style.display = (panelView === 'card' && window.innerWidth < 900) ? 'none' : '';
+  }
+  window.addEventListener('resize', updateZoomVisibility);
+
   function renderPanelViews() {
     viewOverview.style.display = panelView === 'overview' ? 'flex' : 'none';
     viewList.style.display     = panelView === 'list'     ? 'flex' : 'none';
@@ -1971,6 +1997,7 @@ function initApp(data) {
     if (panelView === 'overview') renderOverviewList();
     else if (panelView === 'list') renderListView();
     else if (panelView === 'card') renderCardView();
+    updateZoomVisibility();
   }
 
   function syncSheet() { panelEl.classList.toggle('sheet-full', sheet === 'full'); }
