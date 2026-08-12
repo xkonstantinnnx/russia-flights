@@ -160,13 +160,12 @@ body{display:flex;flex-direction:column;}
 .panel-hero{padding:16px 16px 14px;border-bottom:1px solid var(--rf-line2);}
 .panel-h1{font-size:16px;font-weight:600;letter-spacing:-.015em;color:var(--rf-text);}
 .panel-sub{margin-top:5px;font-size:12.5px;line-height:1.5;color:var(--rf-t3);}
-.stat-cells{margin-top:13px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rf-line2);border:1px solid var(--rf-line2);border-radius:9px;overflow:hidden;}
+.stat-cells{margin-top:13px;display:grid;grid-template-columns:repeat(4,1fr) 34px;gap:1px;background:var(--rf-line2);border:1px solid var(--rf-line2);border-radius:9px;overflow:hidden;}
+.stat-cell-more{display:flex;align-items:center;justify-content:center;background:var(--rf-tile);border:none;color:var(--rf-accent);font-size:15px;font-weight:600;cursor:pointer;padding:0;transition:background .15s;}
+.stat-cell-more:hover{background:var(--rf-accent-soft);}
 .stat-cell{padding:10px 6px;background:var(--rf-tile);cursor:pointer;border:none;font-family:var(--rf-font);text-align:left;}
 .stat-cell b{display:block;font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--rf-text);}
 .stat-cell span{display:block;margin-top:2px;font-family:var(--rf-mono);font-size:7.5px;letter-spacing:.05em;line-height:1.3;color:var(--rf-t4);}
-.panel-more-link{margin-top:9px;text-align:right;}
-.panel-more-link a{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;color:var(--rf-accent);text-decoration:none;font-size:15px;font-weight:600;transition:background .15s;}
-.panel-more-link a:hover{background:var(--rf-accent-soft);}
 
 .panel-search{padding:11px 16px;border-bottom:1px solid var(--rf-line2);display:flex;flex-direction:column;gap:9px;flex:none;}
 .panel-search input{width:100%;padding:8px 10px 8px 26px;background:var(--rf-input);border:1px solid var(--rf-line);border-radius:7px;color:var(--rf-text);font-size:13px;font-family:var(--rf-font);}
@@ -405,7 +404,6 @@ body{display:flex;flex-direction:column;}
           <div class="panel-h1">Куда можно улететь напрямую из России</div>
           <div class="panel-sub">Вся сеть прямых международных рейсов на карте. Выберите город вылета или направление.</div>
           <div class="stat-cells" id="overview-cells"></div>
-          <div class="panel-more-link"><a href="#" onclick="showFullView('stats');return false;" title="Вся статистика сети" aria-label="Вся статистика сети">»</a></div>
         </div>
         <div class="panel-search">
           <div class="search-wrap"><span class="search-ico">⌕</span><input id="overview-query" placeholder="Город вылета, город назначения или страна" oninput="onOverviewQuery(this.value)"></div>
@@ -1422,10 +1420,15 @@ function initApp(data) {
      временно показывает три категории комфортности вместо визы. */
   const lgBox = document.getElementById('legend');
   const SEASON_COLORS = { good: '#4ade80', bad: '#f87171', unknown: '#5a6b85' };
+  // «Нет данных» — направление есть в маршрутах, но ещё не попало в SEASON_DATA
+  // (gen_season_data.py не автоматический, отстаёт от пайплайна между ручными
+  // прогонами, см. TODO.md). Пункт в легенде показываем, только пока такие
+  // направления реально есть — иначе это фильтр на заведомо пустое множество.
+  const hasUnknownSeasonDest = Object.keys(DEST_META).some(d => !SEASON_DATA[d]);
   const SEASON_LEGEND_ITEMS = [
     ['Комфортный сезон', 'good', SEASON_COLORS.good],
     ['Не сезон', 'bad', SEASON_COLORS.bad],
-    ['Нет данных', 'unknown', SEASON_COLORS.unknown],
+    ...(hasUnknownSeasonDest ? [['Нет данных', 'unknown', SEASON_COLORS.unknown]] : []),
   ];
   function renderLegend() {
     lgBox.innerHTML = '';
@@ -1604,7 +1607,7 @@ function initApp(data) {
     ];
     overviewCellsEl.innerHTML = cells.map(c =>
       `<button class="stat-cell" onclick="showFullView('stats')"><b>${c.value}</b><span>${esc(c.label)}</span></button>`
-    ).join('');
+    ).join('') + `<button class="stat-cell-more" onclick="showFullView('stats')" title="Вся статистика сети" aria-label="Вся статистика сети">»</button>`;
   }
 
   function cityRowHtml(city) {
