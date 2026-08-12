@@ -33,7 +33,6 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -123,7 +122,6 @@ def js_block(price_data: dict) -> str:
         "// Диапазон цен по маршрутам (min/max среди закэшированных на момент",
         "// запуска цен: прямой рейс/1-2 пересадки, обычно 1-3 варианта).",
         "// Источник — Travelpayouts (/v1/prices/cheap), не поиск в реальном времени.",
-        "// d: дата прогона (YYYY-MM-DD).",
         "// Пересчитывается полностью на каждый прогон пайплайна — см. scripts/gen_price_data.py.",
         "const PRICE_DATA = {",
     ]
@@ -131,7 +129,7 @@ def js_block(price_data: dict) -> str:
     for pair, v in price_data.items():
         entries.append(
             f'  {json.dumps(pair, ensure_ascii=False)}: '
-            f'{{"min":{v["min"]},"max":{v["max"]},"d":{json.dumps(v["d"])}}}'
+            f'{{"min":{v["min"]},"max":{v["max"]}}}'
         )
     lines.append(",\n".join(entries))
     lines.append("};")
@@ -171,7 +169,6 @@ def main() -> None:
     total = len(pairs)
 
     price_data = {}
-    today = date.today().isoformat()
     for i, pair in enumerate(pairs, 1):
         city, dest = pair.split("→", 1)
         o = city_iata.get(city) or ru_iata.get(city)
@@ -189,7 +186,7 @@ def main() -> None:
         if not prices:
             print(f"[{i}/{total}] {pair:40s} -> нет цен в кэше", file=sys.stderr)
         else:
-            price_data[pair] = {"min": min(prices), "max": max(prices), "d": today}
+            price_data[pair] = {"min": min(prices), "max": max(prices)}
             print(f"[{i}/{total}] {pair:40s} -> {min(prices)}-{max(prices)} ({len(prices)})", file=sys.stderr)
         time.sleep(PAUSE_BETWEEN_REQUESTS)
 
