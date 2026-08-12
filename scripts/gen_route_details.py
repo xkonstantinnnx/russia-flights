@@ -68,6 +68,17 @@ AIRLINE_RU = {
 # для них не выводим — название страны в интерфейсе и так есть.
 CC_SKIP = {"Сухум"}
 
+# Ручные исключения для аэропорта вылета — маршруты, которых нет в снэпшоте
+# Jonty (обычно новые/чартерные направления), но аэропорт вылета известен из
+# независимого подтверждения (не выдумано). Перекрывает то, что нашёл бы
+# автоматический разбор снэпшота, если бы там была запись.
+MANUAL_APT_OVERRIDE = {
+    # Air Tanzania, рейс из Внуково — подтверждено вручную 09.08.2026
+    # (см. TODO.md, «Ручные маршруты не переживают пайплайн»), в снэпшоте
+    # Jonty маршрута нет вовсе.
+    "Москва→Занзибар": ["VKO"],
+}
+
 
 def load_jonty(path: str | None) -> dict:
     if path:
@@ -161,6 +172,11 @@ def build(routes_data: dict, jonty: dict, html: str) -> tuple[dict, dict, dict, 
                 entry["apt"] = from_apts
                 stats["with_apts"] += 1
             details[f"{city}→{dest}"] = entry
+
+    for key, apts in MANUAL_APT_OVERRIDE.items():
+        if key not in details:
+            stats["with_apts"] += 1
+        details.setdefault(key, {})["apt"] = apts
 
     names = {code: AIRLINE_RU.get(code, name) for code, name in airlines_seen.items()}
     return details, names, dest_cc, stats
