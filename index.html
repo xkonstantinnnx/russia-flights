@@ -222,7 +222,7 @@ body{display:flex;flex-direction:column;}
 .card-section-label-row .card-section-label{margin-bottom:0;}
 .info-btn{width:14px;height:14px;border-radius:50%;border:1px solid var(--rf-line);background:var(--rf-input);color:var(--rf-t4);font-size:9.5px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:var(--rf-font);padding:0;flex:none;}
 .info-btn:hover{color:var(--rf-t2);border-color:var(--rf-accent-border);}
-.info-pop{display:none;position:fixed;z-index:900;width:250px;max-width:calc(100vw - 24px);padding:11px 13px;background:var(--rf-panel);backdrop-filter:blur(16px);border:1px solid var(--rf-line);border-radius:10px;box-shadow:var(--rf-shadow);font-family:var(--rf-font);font-size:11.5px;line-height:1.5;letter-spacing:normal;color:var(--rf-t3);}
+.info-pop{display:none;position:fixed;z-index:900;width:250px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain;padding:11px 13px;background:var(--rf-panel);backdrop-filter:blur(16px);border:1px solid var(--rf-line);border-radius:10px;box-shadow:var(--rf-shadow);font-family:var(--rf-font);font-size:11.5px;line-height:1.5;letter-spacing:normal;color:var(--rf-t3);}
 .info-pop b{color:var(--rf-t2);}
 .card-chips{display:flex;flex-wrap:wrap;gap:6px;}
 .card-chip{padding:6px 10px;background:var(--rf-chip);border:1px solid var(--rf-line);border-radius:7px;font-size:12.5px;color:var(--rf-t2);}
@@ -2378,7 +2378,12 @@ function initApp(data) {
   document.addEventListener('click', e => { if (!e.target.closest('.info-btn')) closeInfoPops(); });
   // capture:true — иначе scroll внутри .panel-scroll до document не долетит
   // (scroll не всплывает, но capture-фаза всё равно проходит вниз по дереву).
-  document.addEventListener('scroll', closeInfoPops, true);
+  // Скролл ВНУТРИ самой подсказки (она теперь тоже скроллится, если текст не
+  // влезает по высоте) закрывать не должен — иначе долистать текст нельзя.
+  document.addEventListener('scroll', e => {
+    if (e.target && e.target.closest && e.target.closest('.info-pop')) return;
+    closeInfoPops();
+  }, true);
   window.addEventListener('resize', closeInfoPops);
 
   /* ── ARCS ── */
