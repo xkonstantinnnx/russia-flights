@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Генерирует PRICE_DATA для index.html — диапазон цен по каждой паре
-РФ-город→направление из routes.json → weights, через Travelpayouts Data API
+РФ-город→направление из routes.json → routes, через Travelpayouts Data API
 (/v1/prices/cheap, тот же провайдер, что и партнёрские ссылки «Найти билеты»,
 но отдельный токен — не affiliate marker).
 
@@ -161,7 +161,11 @@ def main() -> None:
     dest_iata = extract_js_map(html, "DEST_AIRPORT_IATA")
     city_iata = extract_js_map(html, "CITY_IATA")
 
-    pairs = list(routes_data["weights"].keys())
+    # Источник пар — routes (реальный состав маршрутов на карте), а не weights:
+    # weights заполняют только AirLabs/OpenSky/Jonty (см. update_routes.py),
+    # маршруты от AeroDataBox и Яндекс.Расписаний (в т.ч. вручную добавленные,
+    # например Занзибар) в weights не попадают, хотя реально существуют.
+    pairs = [f"{city}→{dest}" for city, dests in routes_data["routes"].items() for dest in dests]
     if args.limit:
         pairs = pairs[:args.limit]
     total = len(pairs)
