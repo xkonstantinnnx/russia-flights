@@ -59,6 +59,18 @@ jobs:
         continue-on-error: true
         run: python scripts/gen_route_details.py
 
+      - name: Досчитать сезонность для новых направлений (Open-Meteo)
+        # По умолчанию считает ТОЛЬКО направления, которых ещё нет в SEASON_DATA
+        # в index.html — климат стабилен год к году, пересчитывать весь список
+        # на каждый прогон незачем. Направление, для которого Open-Meteo не
+        # ответил, в SEASON_DATA не попадает и будет повторено в следующий
+        # прогон (см. scripts/gen_season_data.py). timeout — чтобы зависшие
+        # ретраи не съели бюджет джобы; continue-on-error — чтобы не блокировать
+        # остальной пайплайн.
+        if: always()
+        continue-on-error: true
+        run: timeout 600 python scripts/gen_season_data.py
+
       - name: Обновить текстовый снапшот для краулеров (index.html, sitemap.xml)
         # routes.json сохраняется инкрементально по источникам (см. комментарий
         # ниже), поэтому валиден даже при частичном падении update_routes.py —

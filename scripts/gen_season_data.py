@@ -53,10 +53,18 @@ MANUAL_EXCEPTIONS — точечные переопределения там, г
     разделяющего эти два климата, не существует, поэтому точечное
     исключение одного месяца чище, чем сдвиг общего порога.
 
-ВНИМАНИЕ: не часть автопайплайна (update.yml). Климат стабилен год к
-году — запускать вручную раз в несколько месяцев/лет, при появлении
-новых направлений в routes.json или просто для актуализации.
+Часть автопайплайна (update.yml), но по умолчанию считает ТОЛЬКО направления,
+которых ещё нет в SEASON_DATA в index.html (сверяется по имени) — климат
+стабилен год к году, пересчитывать существующие направления на каждый прогон
+незачем. Направление, для которого Open-Meteo не ответил, в SEASON_DATA не
+попадает и будет повторено на следующем прогоне (та же защитная логика, что
+у остального пайплайна — не писать фиктивные данные вместо повтора).
+
+Флаг --all форсирует полный пересчёт всех направлений — для ручной
+актуализации (пороги, MANUAL_EXCEPTIONS, устаревшие климатические данные):
+    python scripts/gen_season_data.py --all
 """
+import argparse
 import json
 import re
 import sys
@@ -261,8 +269,8 @@ def build_season_data(destinations: dict) -> dict:
         try:
             weather = fetch_weather_months(la, lo)
         except Exception as e:
-            print(f"[{i}/{total}] {name:28s} -> ОШИБКА погоды ({e}), все месяцы = экскурсия", file=sys.stderr)
-            weather = {m: {"t_max": None, "p_mm": None, "cloud": None} for m in range(1, 13)}
+            print(f"[{i}/{total}] {name:28s} -> ОШИБКА погоды ({e}), пропуск (повторится в следующем запуске)", file=sys.stderr)
+            continue
         try:
             sea = fetch_sea_months(la, lo)
         except Exception as e:
@@ -278,6 +286,20 @@ def build_season_data(destinations: dict) -> dict:
         n_none = sum(1 for x in months if x["c"] == "none")
         print(f"[{i}/{total}] {name:28s} -> пляж={n_beach} экскурсия={n_exc} не сезон={n_none}", file=sys.stderr)
     return result
+
+
+def read_existing_season_data(html: str) -> dict:
+    """SEASON_DATA — валидный JSON внутри JS-объявления, парсим прямо оттуда."""
+    block_match = re.search(
+        re.escape("// SEASON_DATA_START") + r"(.*?)" + re.escape("// SEASON_DATA_END"),
+        html, re.DOTALL,
+    )
+    if not block_match:
+        return {}
+    obj_match = re.search(r"const SEASON_DATA = (\{.*\});", block_match.group(1), re.DOTALL)
+    if not obj_match:
+        return {}
+    return json.loads(obj_match.group(1))
 
 
 def replace_between(text: str, start_marker: str, end_marker: str, new_content: str) -> str:
@@ -317,14 +339,33 @@ def build_js_block(season_data: dict) -> str:
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--all", action="store_true",
+                         help="пересчитать все направления, а не только новые (актуализация)")
+    args = parser.parse_args()
+
     routes_data = json.loads(ROUTES_PATH.read_text(encoding="utf-8"))
     destinations = routes_data["destinations"]
 
-    season_data = build_season_data(destinations)
     html = INDEX_PATH.read_text(encoding="utf-8")
-    html = replace_between(html, "// SEASON_DATA_START", "// SEASON_DATA_END", build_js_block(season_data))
+    existing = read_existing_season_data(html)
+
+    if args.all:
+        targets = destinations
+    else:
+        targets = {name: meta for name, meta in destinations.items() if name not in existing}
+
+    if not targets:
+        print("Новых направлений без сезонности нет — пропуск, 0 запросов к Open-Meteo", file=sys.stderr)
+        return
+
+    computed = build_season_data(targets)
+    merged = {**existing, **computed}
+
+    html = replace_between(html, "// SEASON_DATA_START", "// SEASON_DATA_END", build_js_block(merged))
     INDEX_PATH.write_text(html, encoding="utf-8")
-    print(f"\nOK: index.html обновлён, {len(season_data)} направлений", file=sys.stderr)
+    print(f"\nOK: index.html обновлён, посчитано {len(computed)}/{len(targets)}, всего в SEASON_DATA {len(merged)}",
+          file=sys.stderr)
 
 
 if __name__ == "__main__":
