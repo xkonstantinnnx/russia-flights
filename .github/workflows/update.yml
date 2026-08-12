@@ -59,6 +59,20 @@ jobs:
         continue-on-error: true
         run: python scripts/gen_route_details.py
 
+      - name: Обновить диапазон цен (Travelpayouts Data API)
+        # Полный пересчёт на каждый прогон (в отличие от сезонности — цены
+        # обязаны быть свежими, а не только у новых направлений). Пара
+        # город→направление, для которой запрос не удался или в кэше
+        # Travelpayouts нет цены, просто не попадает в PRICE_DATA и будет
+        # предпринята заново через 2 недели (см. scripts/gen_price_data.py).
+        # Без секрета TRAVELPAYOUTS_TOKEN скрипт молча пропускает шаг —
+        # пайплайн не краснеет, пока пользователь не добавил токен.
+        if: always()
+        continue-on-error: true
+        env:
+          TRAVELPAYOUTS_TOKEN: ${{ secrets.TRAVELPAYOUTS_TOKEN }}
+        run: timeout 900 python scripts/gen_price_data.py
+
       - name: Досчитать сезонность для новых направлений (Open-Meteo)
         # По умолчанию считает ТОЛЬКО направления, которых ещё нет в SEASON_DATA
         # в index.html — климат стабилен год к году, пересчитывать весь список
