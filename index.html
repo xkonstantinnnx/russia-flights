@@ -230,13 +230,15 @@ body{display:flex;flex-direction:column;}
 .card-season-strip{display:flex;gap:3px;}
 .season-cell{flex:1;height:34px;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:var(--rf-mono);line-height:1;}
 .season-cell .sc-t{font-size:10px;color:#fff;opacity:.95;}
-.season-cell .sc-s{font-size:8px;color:#fff;opacity:.72;}
-.season-cell.sc-none{background:#f87171;opacity:.55;}
-.season-cell.sc-excursion{background:#5FD4E4;}
-.season-cell.sc-beach{background:#34d399;}
-.card-season-legend{margin-top:6px;display:flex;gap:12px;font-family:var(--rf-mono);font-size:9px;letter-spacing:.04em;color:var(--rf-t4);}
+.season-cell .sc-s{font-size:7.5px;color:#fff;opacity:.75;}
+.sc-none{background:#f87171;}
+.sc-excursion{background:#5FD4E4;}
+.sc-beach{background:#34d399;}
+.season-cell.sc-none{opacity:.55;}
+.card-season-labels{margin-top:5px;display:flex;gap:3px;font-family:var(--rf-mono);font-size:7px;letter-spacing:.02em;color:var(--rf-t5);}
+.card-season-labels span{flex:1;text-align:center;}
+.card-season-legend{margin-top:8px;display:flex;gap:12px;font-family:var(--rf-mono);font-size:9px;letter-spacing:.04em;color:var(--rf-t4);}
 .card-season-legend .sc-dot{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:4px;vertical-align:middle;}
-.card-season-labels{margin-top:6px;display:flex;justify-content:space-between;font-family:var(--rf-mono);font-size:9px;letter-spacing:.06em;color:var(--rf-t5);}
 .card-info-grid{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rf-line2);border:1px solid var(--rf-line2);border-radius:9px;overflow:hidden;}
 .card-info-cell{padding:11px 12px;background:var(--rf-tile);}
 .card-info-cell .ci-label{font-family:var(--rf-mono);font-size:9px;letter-spacing:.08em;color:var(--rf-t5);}
@@ -1462,6 +1464,7 @@ function initApp(data) {
   /* ── СЕЗОННЫЙ СЛОЙ — переключатель и выбор месяца ──
      Дуги маршрутов слой не красит (см. план) — меняется только dstColor(). */
   const MONTH_NAMES = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  const MONTH_SHORT_RU = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
   const seasonMonthSel = document.getElementById('season-month');
   MONTH_NAMES.forEach((label, i) => {
     const opt = document.createElement('option');
@@ -1853,9 +1856,10 @@ function initApp(data) {
         const title = SEASON_CAT_LABEL[m.c] + (m.t != null ? `, ${m.t}°C` : '') + (m.c === 'b' && m.s != null ? `, вода ${m.s}°C` : '');
         return `<div class="season-cell ${SEASON_CAT_CLASS[m.c]}" title="${esc(title)}">
           ${m.t != null ? `<span class="sc-t">${m.t}°</span>` : ''}
-          ${m.c === 'b' && m.s != null ? `<span class="sc-s">${m.s}°</span>` : ''}
+          ${m.c === 'b' && m.s != null ? `<span class="sc-s">≋${m.s}°</span>` : ''}
         </div>`;
       }).join('');
+      const monthLabelsHtml = MONTH_SHORT_RU.map(m => `<span>${m}</span>`).join('');
       html += `<div class="card-section">
         <div class="card-section-label-row">
           <div class="card-section-label">СЕЗОННОСТЬ (климатический комфорт)</div>
@@ -1886,12 +1890,12 @@ function initApp(data) {
           </div>
         </div>
         <div class="card-season-strip">${cellsHtml}</div>
+        <div class="card-season-labels">${monthLabelsHtml}</div>
         <div class="card-season-legend">
           <span><i class="sc-dot sc-beach"></i>пляжный</span>
           <span><i class="sc-dot sc-excursion"></i>экскурсионный</span>
           <span><i class="sc-dot sc-none"></i>не сезон</span>
         </div>
-        <div class="card-season-labels"><span>ЯНВ</span><span>АПР</span><span>ИЮЛ</span><span>ОКТ</span><span>ДЕК</span></div>
       </div>`;
     }
 
