@@ -434,7 +434,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="privacy.html">Конфиденциальность</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.2</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.3</span>
         </div>
       </div>
     </div>
@@ -1841,9 +1841,16 @@ async function loadRoutes() {
 ══════════════════════════════════════════════════════ */
 loadRoutes().then(data => {
   document.getElementById('loading').style.display = 'none';
-  const routeCount = Object.keys(data.routes || {}).length;
-  if (routeCount === 0) {
-    console.warn('routes.json пуст, используем seed-данные');
+  // Валидный JSON с мусорной структурой (routes не объект, направления не
+  // массивы, нет destinations) раньше ронял initApp белым экраном — битый
+  // cron-pull должен откатывать на SEED так же, как битый JSON.
+  const shapeOk = data && typeof data === 'object'
+    && data.routes && typeof data.routes === 'object'
+    && Object.keys(data.routes).length > 0
+    && Object.values(data.routes).every(Array.isArray)
+    && data.destinations && typeof data.destinations === 'object';
+  if (!shapeOk) {
+    console.warn('routes.json пуст или повреждён, используем seed-данные');
     initApp(SEED);
   } else {
     initApp(data);
@@ -2641,7 +2648,7 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
         <div class="card-info-cell"><div class="ci-label">ЦЕНЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Travelpayouts/Aviasales, диапазон недавно найденных цен по маршруту</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.2 · 14.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.3 · 14.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
     `;

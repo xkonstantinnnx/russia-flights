@@ -181,7 +181,10 @@ def main() -> None:
         try:
             prices = fetch_cheap_prices(o, d, token)
         except Exception as e:
-            print(f"[{i}/{total}] {pair:40s} -> ОШИБКА ({e}), пропуск (повторится в следующем запуске)",
+            # token уходит query-параметром — если текст ошибки процитирует URL,
+            # маскируем (логи Actions публичного репозитория видны всем)
+            msg = re.sub(r"token=[^&\s')]+", "token=***", str(e))
+            print(f"[{i}/{total}] {pair:40s} -> ОШИБКА ({msg}), пропуск (повторится в следующем запуске)",
                   file=sys.stderr)
             time.sleep(PAUSE_BETWEEN_REQUESTS)
             continue

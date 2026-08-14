@@ -58,6 +58,17 @@ AIRLABS_KEY           = os.environ.get("AIRLABS_KEY", "")
 AERODATABOX_KEY       = os.environ.get("AERODATABOX_KEY", "")
 YANDEX_RASP_KEY       = os.environ.get("YANDEX_RASP_KEY", "")
 
+
+def safe_err(e: Exception) -> str:
+    """Текст исключения без секретов из query-string.
+
+    AirLabs и Яндекс.Расписания принимают ключ только query-параметром, а
+    requests в тексте ConnectionError/Timeout приводит полный URL вместе с
+    query. Логи Actions публичного репозитория видны всем; маскировка секретов
+    GitHub'ом — последняя линия, не единственная.
+    """
+    return re.sub(r"(api_key|apikey|token)=[^&\s')]+", r"\1=***", str(e))
+
 TOKEN_URL = (
     "https://auth.opensky-network.org"
     "/auth/realms/opensky-network"
@@ -530,7 +541,7 @@ def fetch_airlabs_routes(icao: str, api_key: str):
             print(f"    AirLabs HTTP {r.status_code}", flush=True)
             return AIRLABS_ERROR
     except Exception as e:
-        print(f"    AirLabs ошибка: {e}", flush=True)
+        print(f"    AirLabs ошибка: {safe_err(e)}", flush=True)
         return AIRLABS_ERROR
 
 
@@ -1043,7 +1054,7 @@ def _yandex_fetch_page(iata: str, offset: int) -> tuple[list, int] | None:
             print(f"    [yandex] HTTP {r.status_code} ({iata})", flush=True)
             return [], 0
     except Exception as e:
-        print(f"    [yandex] Ошибка ({iata}): {e}", flush=True)
+        print(f"    [yandex] Ошибка ({iata}): {safe_err(e)}", flush=True)
         return [], 0
 
 
