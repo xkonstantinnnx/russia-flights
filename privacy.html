@@ -48,7 +48,10 @@ a{color:var(--rf-accent);}
 </head>
 <body>
 <main>
-  <div class="crumb"><a href="/">← К карте рейсов</a></div>
+  <!-- Ссылка относительная: на проде сайт лежит в корне, а на превью
+       GitHub Pages — в подкаталоге /russia-flights/, где "/" увело бы
+       на корень github.io. -->
+  <div class="crumb"><a href="./">← К карте рейсов</a></div>
   <h1>Конфиденциальность</h1>
   <div class="updated">Обновлено 14.08.2026</div>
 
