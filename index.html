@@ -10,6 +10,13 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://russia-flights.ru/">
 <meta property="og:locale" content="ru_RU">
+<meta property="og:image" content="https://russia-flights.ru/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Прямые рейсы из России · 2026">
+<meta name="twitter:description" content="Интерактивная карта прямых международных рейсов из городов России без пересадок. Обновляется автоматически.">
+<meta name="twitter:image" content="https://russia-flights.ru/og-image.png">
 <link rel="canonical" href="https://russia-flights.ru/">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -424,8 +431,10 @@ body{display:flex;flex-direction:column;}
           <a href="#" onclick="showFullView('stats');return false;">Статистика</a>
           <span style="color:var(--rf-line);">·</span>
           <a href="#" onclick="showFullView('about');return false;">О проекте</a>
+          <span style="color:var(--rf-line);">·</span>
+          <a href="privacy.html">Конфиденциальность</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.0</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.1</span>
         </div>
       </div>
     </div>
@@ -2269,14 +2278,20 @@ function initApp(data) {
 
   function airportChipsHtml(codes) {
     return codes.map(a =>
-      `<button class="airport-chip${selAirport===a?' on':''}" onclick="setAirportFilter('${esc(a)}')">${esc(a)}</button>`
+      `<button class="airport-chip${selAirport===a?' on':''}" data-code="${esc(a)}">${esc(a)}</button>`
     ).join('');
   }
   function setAirportFilter(code) {
     selAirport = selAirport === code ? null : code;
     renderListView();
   }
-  window.setAirportFilter = setAirportFilter;
+  // Делегированный обработчик вместо inline-onclick: esc() экранирует HTML,
+  // но не JS-строку внутри атрибута (браузер декодирует &#39; обратно в
+  // кавычку до парсинга JS) — data-атрибут закрывает этот канал целиком.
+  listAirportsEl.addEventListener('click', e => {
+    const chip = e.target.closest('.airport-chip');
+    if (chip) setAirportFilter(chip.dataset.code);
+  });
 
   function renderListView() {
     const filtersRow = document.getElementById('list-visa-chips');
@@ -2618,9 +2633,9 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
         <div class="card-info-cell"><div class="ci-label">ЦЕНЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Travelpayouts/Aviasales, диапазон недавно найденных цен по маршруту</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.0 · 12.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.1 · 14.08.2026</div></div>
       </div>
-      <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>
+      <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
     `;
   }
 

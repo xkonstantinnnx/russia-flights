@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Конфиденциальность · Прямые рейсы из России</title>
+<meta name="description" content="Какие данные собирает сайт russia-flights.ru, зачем, и как от этого отказаться.">
+<link rel="canonical" href="https://russia-flights.ru/privacy.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+  // До рендеринга: та же тема, что выбрана на карте (ключ rf-theme, тёмная по умолчанию)
+  try {
+    if (localStorage.getItem('rf-theme') === 'light')
+      document.documentElement.setAttribute('data-theme','light');
+  } catch(e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Токены — те же, что в index.html (тёмная тема по умолчанию) */
+:root{
+  --rf-bg:#0A0F15; --rf-panel:#0A0E14;
+  --rf-line:#1A242F; --rf-line2:#161F29;
+  --rf-text:#E6EDF3; --rf-t2:#A8B6C4; --rf-t3:#7B8A99; --rf-t5:#4A5764;
+  --rf-accent:#5FD4E4;
+  --rf-font:'IBM Plex Sans',-apple-system,'Segoe UI',Arial,sans-serif;
+  --rf-mono:'IBM Plex Mono',monospace;
+}
+:root[data-theme="light"]{
+  --rf-bg:#E8ECF0; --rf-panel:#FFFFFF;
+  --rf-line:#D8DFE6; --rf-line2:#E4EAEF;
+  --rf-text:#0F1720; --rf-t2:#3D4A57; --rf-t3:#5E6C7A; --rf-t5:#98A5B2;
+  --rf-accent:#0E7C90;
+}
+body{margin:0;background:var(--rf-bg);color:var(--rf-text);font-family:var(--rf-font);line-height:1.6;}
+main{max-width:680px;margin:0 auto;padding:40px 20px 80px;}
+.crumb{font-family:var(--rf-mono);font-size:12px;letter-spacing:.08em;}
+.crumb a{color:var(--rf-accent);text-decoration:none;}
+h1{font-size:26px;margin:18px 0 4px;letter-spacing:-.01em;}
+.updated{font-family:var(--rf-mono);font-size:11px;letter-spacing:.06em;color:var(--rf-t5);margin-bottom:28px;}
+h2{font-size:16px;margin:32px 0 8px;}
+p,li{font-size:14px;color:var(--rf-t2);margin:8px 0;}
+ul{padding-left:20px;}
+a{color:var(--rf-accent);}
+.sec{border-top:1px solid var(--rf-line2);padding-top:8px;}
+</style>
+</head>
+<body>
+<main>
+  <div class="crumb"><a href="/">← К карте рейсов</a></div>
+  <h1>Конфиденциальность</h1>
+  <div class="updated">Обновлено 14.08.2026</div>
+
+  <p>russia-flights.ru — некоммерческая интерактивная карта прямых международных
+  рейсов из городов России. На сайте нет регистрации, личных кабинетов и форм:
+  мы не просим и не храним ваши имя, телефон или адрес почты. Ниже — полный
+  список того, что сайт всё-таки собирает, и как от этого отказаться.</p>
+
+  <div class="sec">
+  <h2>Статистика посещений — Яндекс.Метрика</h2>
+  <p>Сайт использует счётчик Яндекс.Метрики (№ 111249573) для обезличенной
+  статистики: сколько людей заходит, с каких устройств, какие города и маршруты
+  смотрят. Метрика устанавливает cookie (например, <span style="font-family:var(--rf-mono);font-size:12px;">_ym_uid</span>)
+  и получает технические данные: IP-адрес, тип браузера, просмотренные страницы.</p>
+  <p>Включён Вебвизор — инструмент Метрики, записывающий действия на странице:
+  движения мыши, клики, прокрутку и текст, вводимый в строку поиска по карте.
+  Записи обезличены и используются только чтобы понимать, чем неудобен интерфейс.</p>
+  <p>Данные Метрики обрабатывает ООО «Яндекс» на серверах в России в соответствии
+  со своими <a href="https://yandex.ru/legal/confidential/" rel="noopener">условиями</a>.</p>
+  <p><b>Как отказаться:</b> установить <a href="https://yandex.ru/support/metrica/general/opt-out.html" rel="noopener">блокировщик Метрики от Яндекса</a>,
+  любой блокировщик трекеров, либо запретить cookie для этого сайта в настройках браузера —
+  карта полностью работает и без Метрики.</p>
+  </div>
+
+  <div class="sec">
+  <h2>Партнёрские ссылки</h2>
+  <p>Кнопки «✈ Билеты» ведут на поиск Aviasales через партнёрскую сеть
+  Travelpayouts (tp.media). В ссылке передаётся только партнёрская метка сайта и
+  выбранный маршрут — никаких данных о вас. Если вы купите билет после перехода,
+  сайт получит комиссию от Aviasales; цена для вас не меняется. Что вы делаете
+  на сайте Aviasales, мы не видим.</p>
+  </div>
+
+  <div class="sec">
+  <h2>Что хранится в вашем браузере</h2>
+  <p>Выбранная тема оформления (светлая/тёмная) сохраняется в localStorage вашего
+  браузера и никуда не передаётся.</p>
+  </div>
+
+  <div class="sec">
+  <h2>Чего сайт не делает</h2>
+  <ul>
+    <li>Не собирает имена, телефоны, адреса, платёжные данные — таких полей просто нет.</li>
+    <li>Не передаёт и не продаёт данные третьим лицам, кроме описанной выше работы Метрики и партнёрских переходов.</li>
+    <li>Не показывает рекламу и не использует рекламные трекеры.</li>
+  </ul>
+  </div>
+
+  <div class="sec">
+  <h2>Вопросы</h2>
+  <p>По любым вопросам о данных: <a href="mailto:xkonstantinnnxkz@gmail.com">xkonstantinnnxkz@gmail.com</a>.
+  Если что-то из собранного Метрикой нужно удалить — напишите, разберёмся.</p>
+  </div>
+</main>
+</body>
+</html>

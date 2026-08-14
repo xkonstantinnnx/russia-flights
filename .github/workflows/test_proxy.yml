@@ -10,12 +10,12 @@ jobs:
 
     steps:
       - name: Checkout код
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: 1. Plain FTP (порт 21)
         id: ftp_plain
         continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@8e83cea8672e3fbcbb9fdafff34debf6ae4c5f65 # v4.3.5
         with:
           server:     ${{ secrets.FTP_HOST }}
           username:   ${{ secrets.FTP_USER }}
@@ -36,7 +36,7 @@ jobs:
       - name: 2. FTPS Explicit (порт 21 + TLS)
         id: ftps_explicit
         continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@8e83cea8672e3fbcbb9fdafff34debf6ae4c5f65 # v4.3.5
         with:
           server:     ${{ secrets.FTP_HOST }}
           username:   ${{ secrets.FTP_USER }}
@@ -59,7 +59,7 @@ jobs:
       - name: 3. FTPS Implicit (порт 990)
         id: ftps_implicit
         continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@8e83cea8672e3fbcbb9fdafff34debf6ae4c5f65 # v4.3.5
         with:
           server:     ${{ secrets.FTP_HOST }}
           username:   ${{ secrets.FTP_USER }}
@@ -81,7 +81,7 @@ jobs:
       - name: 4. SFTP (порт 22) — appleboy/scp-action
         id: sftp
         continue-on-error: true
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
         with:
           host:       ${{ secrets.FTP_HOST }}
           username:   ${{ secrets.FTP_USER }}
@@ -99,7 +99,7 @@ jobs:
         id: rsync
         if: steps.sftp.outcome == 'success'
         continue-on-error: true
-        uses: Burnett01/rsync-deployments@5.2
+        uses: Burnett01/rsync-deployments@0dc935cdecc5f5e571865e60d2a6cdc673704823 # 5.2
         with:
           switches: -avzr --delete --exclude='/.git' --exclude='/.github' --exclude='/.claude' --exclude='CLAUDE.md' --exclude='update_routes.py' --exclude='README.md'
           remote_path: /russia-flights/public_html/

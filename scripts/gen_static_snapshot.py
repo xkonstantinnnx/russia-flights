@@ -168,6 +168,11 @@ def build_sitemap(updated: str) -> str:
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+  <url>
+    <loc>https://russia-flights.ru/privacy.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.1</priority>
+  </url>
 </urlset>
 """
 

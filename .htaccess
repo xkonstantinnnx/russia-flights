@@ -51,7 +51,7 @@
     # переименовать в Content-Security-Policy.
     # Источники: jsdelivr (Leaflet, с SRI), mc.yandex.ru (Метрика),
     # Google Fonts, тайлы mt0-3.google.com и Яндекса.
-    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://mc.yandex.ru; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.google.com https://core-renderer-tiles.maps.yandex.net https://mc.yandex.ru; connect-src 'self' https://mc.yandex.ru; frame-src https://mc.yandex.ru; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://mc.yandex.ru; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.google.com https://core-renderer-tiles.maps.yandex.net https://mc.yandex.ru; connect-src 'self' https://mc.yandex.ru wss://mc.yandex.ru; frame-src https://mc.yandex.ru; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
 
     # HTML и routes.json: кэшировать можно, но перепроверять по ETag —
     # свежесть после ежечасного cron-pull гарантирована, 304 дешёвые.
