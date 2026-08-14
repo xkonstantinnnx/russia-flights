@@ -27,6 +27,8 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+from _js_embed import json_for_script  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ROUTES_PATH = ROOT / "routes.json"
 INDEX_PATH = ROOT / "index.html"
@@ -266,7 +268,7 @@ def build_js_block(regimes: dict, revid: int | None, revdate: str | None) -> str
         "// visa = нужна виза заранее. Ключи — DEST_INFO.c из routes.json.",
         src,
         "// Пересобирается scripts/gen_visa_regimes.py шагом пайплайна (update.yml).",
-        "const VISA_REGIMES = " + json.dumps(regimes, ensure_ascii=False, indent=2) + ";",
+        "const VISA_REGIMES = " + json_for_script(regimes, indent=2) + ";",
     ]
     return "\n".join(lines)
 

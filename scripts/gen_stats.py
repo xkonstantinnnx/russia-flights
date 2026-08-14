@@ -16,6 +16,8 @@ import re
 import statistics
 from pathlib import Path
 
+from _js_embed import json_for_script  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ROUTES_PATH = ROOT / "routes.json"
 INDEX_PATH = ROOT / "index.html"
@@ -191,7 +193,7 @@ def build_js_block(stats: dict) -> str:
     lines = [
         "// Агрегаты для страницы статистики. Пересчитывается из routes.json,",
         "// VISA_REGIMES, SEASON_DATA и network_trend.json — см. scripts/gen_stats.py.",
-        "const STATS_DATA = " + json.dumps(stats, ensure_ascii=False, indent=2) + ";",
+        "const STATS_DATA = " + json_for_script(stats, indent=2) + ";",
     ]
     return "\n".join(lines)
 

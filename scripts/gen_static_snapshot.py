@@ -18,6 +18,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from _js_embed import json_for_script  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ROUTES_PATH = ROOT / "routes.json"
 INDEX_PATH = ROOT / "index.html"
@@ -147,7 +149,7 @@ def build_jsonld(data: dict, faqs: list[tuple[str, str]]) -> str:
     }
 
     graph = {"@context": "https://schema.org", "@graph": [dataset, faqpage]}
-    return json.dumps(graph, ensure_ascii=False, indent=2)
+    return json_for_script(graph, indent=2)
 
 
 def replace_between(text: str, start_marker: str, end_marker: str, new_content: str) -> str:

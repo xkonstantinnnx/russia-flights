@@ -24,6 +24,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from _js_embed import json_for_script  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ROUTES_PATH = ROOT / "routes.json"
 INDEX_PATH = ROOT / "index.html"
@@ -245,7 +247,7 @@ def main() -> None:
     block = "\n".join([
         "// Страницы городов на Туристер.Ру для ссылки в карточке направления.",
         "// Пересобирается скриптом scripts/gen_tourister_links.py — не править вручную.",
-        "const TOURISTER = " + json.dumps(result, ensure_ascii=False, sort_keys=True) + ";",
+        "const TOURISTER = " + json_for_script(result, sort_keys=True) + ";",
     ])
     html = replace_between(html, "// TOURISTER_START", "// TOURISTER_END", block)
     INDEX_PATH.write_text(html, encoding="utf-8")

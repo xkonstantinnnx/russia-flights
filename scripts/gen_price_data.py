@@ -35,6 +35,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from _js_embed import json_for_script  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ROUTES_PATH = ROOT / "routes.json"
 INDEX_PATH = ROOT / "index.html"
@@ -128,7 +130,7 @@ def js_block(price_data: dict) -> str:
     entries = []
     for pair, v in price_data.items():
         entries.append(
-            f'  {json.dumps(pair, ensure_ascii=False)}: '
+            f'  {json_for_script(pair)}: '
             f'{{"min":{v["min"]},"max":{v["max"]}}}'
         )
     lines.append(",\n".join(entries))

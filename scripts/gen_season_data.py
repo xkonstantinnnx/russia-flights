@@ -77,6 +77,8 @@ from collections import defaultdict
 from datetime import date, timedelta
 from pathlib import Path
 
+from _js_embed import json_for_script  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ROUTES_PATH = ROOT / "routes.json"
 INDEX_PATH = ROOT / "index.html"
@@ -338,7 +340,7 @@ def build_js_block(season_data: dict) -> str:
     dest_lines = []
     for name, months in season_data.items():
         months_js = ",".join(month_json(m) for m in months)
-        dest_lines.append(f'  {json.dumps(name, ensure_ascii=False)}: [{months_js}]')
+        dest_lines.append(f'  {json_for_script(name)}: [{months_js}]')
     lines.append(",\n".join(dest_lines))
     lines.append("};")
     return "\n".join(lines)

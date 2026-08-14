@@ -670,6 +670,12 @@ def fetch_aerodatabox_routes(icao: str, api_key: str) -> list | None:
     None = ошибка или лимит. [] = нет данных.
     Tier 3 = 6 units за запрос.
     """
+    # Код уходит в путь URL: пускаем только настоящие ICAO, чтобы значение
+    # из данных не могло увести запрос на другой путь/хост.
+    if not re.fullmatch(r"[A-Z]{4}", (icao or "").upper()):
+        print(f"    AeroDataBox: некорректный ICAO {icao!r} — пропуск", flush=True)
+        return None
+    icao = icao.upper()
     try:
         r = requests.get(
             f"https://aerodatabox.p.rapidapi.com/airports/icao/{icao}/stats/routes/daily",

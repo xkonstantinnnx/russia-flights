@@ -29,6 +29,8 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 from datetime import datetime
 
+from _js_embed import json_for_script  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ROUTES_PATH = ROOT / "routes.json"
 INDEX_PATH = ROOT / "index.html"
@@ -260,7 +262,7 @@ def main() -> None:
         "// Карточки городов назначения: Wikidata (Q-id, население),",
         "// ru.wikipedia (описание), часовой пояс — из IANA-зоны аэропорта.",
         "// Пересобирается скриптом scripts/gen_city_info.py — не править вручную.",
-        "const CITY_INFO = " + json.dumps(result, ensure_ascii=False, sort_keys=True) + ";",
+        "const CITY_INFO = " + json_for_script(result, sort_keys=True) + ";",
     ])
     html = replace_between(html, "// CITY_INFO_START", "// CITY_INFO_END", block)
     INDEX_PATH.write_text(html, encoding="utf-8")

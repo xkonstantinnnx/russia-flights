@@ -24,6 +24,8 @@ import sys
 import urllib.request
 from pathlib import Path
 
+from _js_embed import json_for_script  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 ROUTES_PATH = ROOT / "routes.json"
 INDEX_PATH = ROOT / "index.html"
@@ -184,7 +186,7 @@ def build(routes_data: dict, jonty: dict, html: str) -> tuple[dict, dict, dict, 
 
 def js_block(details: dict, names: dict, dest_cc: dict) -> str:
     def dump(obj):
-        return json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        return json_for_script(obj, sort_keys=True, separators=(",", ":"))
 
     return "\n".join([
         "// Источник: снэпшот Jonty/airline-route-data (MIT). Пересобирается",

@@ -434,7 +434,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="privacy.html">Конфиденциальность</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.1</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.2</span>
         </div>
       </div>
     </div>
@@ -499,9 +499,12 @@ body{display:flex;flex-direction:column;}
    ТЕМА — светлая/тёмная, до загрузки данных (чтобы не мигало на loading-экране)
 ══════════════════════════════════════════════════════ */
 function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
+  // Значение приходит из localStorage — сводим к двум известным, чтобы в
+  // data-theme не попадало произвольное содержимое хранилища.
+  const t = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('theme-toggle');
-  if (btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+  if (btn) btn.textContent = t === 'light' ? '☀️' : '🌙';
 }
 function toggleTheme() {
   const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
@@ -2010,6 +2013,11 @@ function initApp(data) {
   // источник пропустит сырое название — это не должно стать XSS
   const esc = s => String(s).replace(/[&<>"']/g,
     ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+  // Ссылки в карточке приходят из сгенерированных блоков (TOURISTER —
+  // скрапер tourister.ru): esc() закрывает выход из атрибута, а проверка
+  // схемы — javascript:/data: в href. Всё, что не https, отбрасываем.
+  const safeUrl = u => /^https:\/\//i.test(String(u)) ? String(u) : '#';
   const statsPane  = document.getElementById('stats-pane');
 
   // touchend раньше вызывал handler всегда, включая отпускание пальца
@@ -2507,7 +2515,7 @@ function initApp(data) {
         <span class="cl-arrow">↗</span>
       </a>
       <div class="card-mini-links">
-        ${miniLinks.map(([l, u]) => `<a href="${u}" target="_blank" rel="noopener">${l}<span style="font-size:10px;color:var(--rf-t5);">↗</span></a>`).join('')}
+        ${miniLinks.map(([l, u]) => `<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener">${esc(l)}<span style="font-size:10px;color:var(--rf-t5);">↗</span></a>`).join('')}
       </div>
       ${ci.q ? '<div class="card-source">ДАННЫЕ: WIKIDATA · WIKIPEDIA</div>' : ''}
     </div>`;
@@ -2633,7 +2641,7 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
         <div class="card-info-cell"><div class="ci-label">ЦЕНЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Travelpayouts/Aviasales, диапазон недавно найденных цен по маршруту</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.1 · 14.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.2 · 14.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
     `;
