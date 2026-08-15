@@ -45,6 +45,11 @@ a:hover{color:var(--rf-accent-hi);}
 /* Палитра — точные значения из макета Claude Design (untitled/project/
    "Russia Flights - Карта прямых рейсов.dc.html"), не старая палитра сайта. */
 :root{
+  /* Обводка выбранного месяца в сезонности и логотип Яндекса — своя пара
+     значений на тему: на тёмном фоне тёмная обводка не видна, а логотип
+     нужен белый (официальный вариант из пакета Яндекса). */
+  --rf-season-ring:rgba(255,255,255,.92);
+  --rf-ylogo:url('vendor/yndex_logo_ru_white.png');
   --rf-bg:#0A0F15; --rf-panel:rgba(10,14,20,.94); --rf-panel-flat:#0A0E14; --rf-tile:#0B1118;
   --rf-bar:rgba(9,13,18,.92); --rf-chip:#0E141B; --rf-chip-solid:#0E141B; --rf-input:#0C1219; --rf-hover-bg:#0E151D;
   --rf-line:#1A242F; --rf-line2:#161F29; --rf-line3:#10171F;
@@ -55,6 +60,8 @@ a:hover{color:var(--rf-accent-hi);}
   --rf-mono:'IBM Plex Mono',monospace;
 }
 :root[data-theme="light"]{
+  --rf-season-ring:rgba(6,10,14,.85);
+  --rf-ylogo:url('vendor/yndex_logo_ru.png');
   --rf-bg:#E8ECF0; --rf-panel:rgba(255,255,255,.96); --rf-panel-flat:#FFFFFF; --rf-tile:#F7F9FB;
   --rf-bar:rgba(255,255,255,.93); --rf-chip:#F2F5F8; --rf-chip-solid:#F2F5F8; --rf-input:#F4F6F9; --rf-hover-bg:#EDF2F6;
   --rf-line:#D8DFE6; --rf-line2:#E4EAEF; --rf-line3:#EDF1F5;
@@ -81,6 +88,12 @@ body{display:flex;flex-direction:column;}
 #body-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
 #map-wrap{position:absolute;inset:0;}
 #map{width:100%;height:100%;}
+/* Логотип Яндекса — обязательное условие Tiles API: официальное изображение
+   в углу карты, гиперссылка на Яндекс Карты. Показывается только когда
+   активен слой Яндекса (см. setTiles). Отступы уже заложены внутрь файла,
+   поэтому свои минимальные. Лежит поверх тайлов, но вне слоя — CSS-фильтр
+   тёмной темы его не трогает. */
+#ymaps-logo{position:absolute;left:6px;bottom:4px;z-index:500;display:none;width:92px;height:50px;background:var(--rf-ylogo) left bottom/contain no-repeat;}
 #arc-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;}
 .leaflet-container{background:var(--rf-bg);}
 .leaflet-control-zoom{z-index:700;}
@@ -178,7 +191,7 @@ body{display:flex;flex-direction:column;}
 .stat-cells{margin-top:13px;display:grid;grid-template-columns:repeat(4,1fr) 34px;gap:1px;background:var(--rf-line2);border:1px solid var(--rf-line2);border-radius:9px;overflow:hidden;}
 .stat-cell-more{display:flex;align-items:center;justify-content:center;background:var(--rf-tile);border:none;color:var(--rf-accent);font-size:15px;font-weight:600;cursor:pointer;padding:0;transition:background .15s;}
 .stat-cell-more:hover{background:var(--rf-accent-soft);}
-.stat-cell{padding:10px 6px;background:var(--rf-tile);cursor:pointer;border:none;font-family:var(--rf-font);text-align:left;}
+.stat-cell{padding:10px 6px;background:var(--rf-tile);cursor:pointer;border:none;font-family:var(--rf-font);text-align:center;}
 .stat-cell b{display:block;font-size:16px;font-weight:600;letter-spacing:-.02em;color:var(--rf-text);}
 .stat-cell span{display:block;margin-top:2px;font-family:var(--rf-mono);font-size:7.5px;letter-spacing:.05em;line-height:1.3;color:var(--rf-t4);}
 
@@ -239,6 +252,18 @@ body{display:flex;flex-direction:column;}
 .card-visa-label{font-size:13.5px;font-weight:600;}
 .card-visa-note{margin-top:2px;font-size:11.5px;color:var(--rf-t3);}
 .card-section{padding:16px 18px 0;}
+/* Рейсы слева тянутся, цены прижаты вправо — см. renderCard. Горизонтальные
+   отступы переезжают на строку, у секций внутри остаётся только верхний.
+   На узком экране раскладываем обратно вертикально. */
+.card-section-row{display:flex;align-items:flex-start;gap:16px;padding:0 18px;}
+.card-section-row > .card-section{padding-left:0;padding-right:0;flex:1 1 auto;min-width:0;}
+.card-section-row > .card-section + .card-section{flex:0 0 auto;text-align:right;}
+.card-section-row > .card-section + .card-section .card-section-label-row{justify-content:flex-end;}
+@media (max-width:560px){
+  .card-section-row{display:block;}
+  .card-section-row > .card-section + .card-section{text-align:left;}
+  .card-section-row > .card-section + .card-section .card-section-label-row{justify-content:flex-start;}
+}
 .card-section-label{font-family:var(--rf-mono);font-size:10px;letter-spacing:.14em;color:var(--rf-t5);margin-bottom:9px;}
 .card-section-label-row{display:flex;align-items:center;gap:6px;position:relative;margin-bottom:9px;}
 .card-section-label-row .card-section-label{margin-bottom:0;}
@@ -256,7 +281,7 @@ body{display:flex;flex-direction:column;}
    фиксированные hex, не завязаны на тему. Бирюзовый акцент почти сливался
    с зелёной и особенно со своей же бирюзовой заливкой (контраст ~1:1-1.1:1),
    тёмное кольцо даёт 7.6-12:1 против всех трёх цветов одинаково надёжно. */
-.season-cell.sc-current{outline:2.5px solid rgba(6,10,14,.85);outline-offset:-2.5px;}
+.season-cell.sc-current{outline:2.5px solid var(--rf-season-ring);outline-offset:-2.5px;}
 .season-cell .sc-t{font-size:10px;color:#fff;opacity:.95;}
 .season-cell .sc-s{font-size:7.5px;color:#fff;opacity:.75;}
 .sc-none{background:#f87171;}
@@ -400,6 +425,7 @@ body{display:flex;flex-direction:column;}
 <div id="body-wrap">
 <div id="map-wrap">
   <div id="map"></div>
+  <a id="ymaps-logo" href="https://yandex.ru/maps/" target="_blank" rel="noopener" aria-label="Яндекс Карты"></a>
   <svg id="arc-svg"></svg>
   <div id="map-ctrl">
     <button class="map-ctrl-btn" onclick="toggleMapMenu()">
@@ -451,7 +477,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="privacy.html">Конфиденциальность</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.9</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v4.0</span>
         </div>
       </div>
     </div>
@@ -2463,12 +2489,13 @@ function initApp(data) {
     const flightChips = ri.airlines.length
       ? ri.airlines.map(code => esc(airlineName(code)))
       : (ri.carriers ? [esc(ri.carriers + ' ' + pluralCarriers(ri.carriers))] : []);
+    let flightsHtml = '';
     if (flightChips.length) {
       const fromApts = ri.apts.length ? ri.apts : cityAirportCodes(city);
       const noteBits = [];
       if (fromApts.length) noteBits.push('Вылет из: ' + fromApts.join(', '));
       if (ri.days) noteBits.push(fmtFreq(ri.days));
-      html += `<div class="card-section">
+      flightsHtml = `<div class="card-section">
         <div class="card-section-label">РЕЙСЫ</div>
         <div class="card-chips">${flightChips.map(c => `<span class="card-chip">${c}</span>`).join('')}</div>
         ${noteBits.length ? `<div class="card-note">${esc(noteBits.join(' · '))}</div>` : ''}
@@ -2478,9 +2505,10 @@ function initApp(data) {
     // Блок «ЦЕНЫ» — диапазон из кэша Travelpayouts (см. scripts/gen_price_data.py).
     // Нет данных по этой паре город→направление — секция не рисуется.
     const pd = PRICE_DATA[city + '→' + dest];
+    let pricesHtml = '';
     if (pd) {
       const range = pd.min === pd.max ? `~${fmtRub(pd.min)}` : `от ${fmtRub(pd.min)} до ${fmtRub(pd.max)}`;
-      html += `<div class="card-section">
+      pricesHtml = `<div class="card-section">
         <div class="card-section-label-row">
           <div class="card-section-label">ЦЕНЫ</div>
           <button class="info-btn" type="button" onclick="event.stopPropagation(); toggleInfoPop(this)" aria-label="Откуда цены">?</button>
@@ -2497,6 +2525,13 @@ function initApp(data) {
         <div class="card-price-range">${range}</div>
       </div>`;
     }
+
+    // Рейсы и цены — в одну строку, когда есть оба: у цены короткое значение,
+    // и отдельной строкой она оставляла широкую пустую полосу. Если блок один,
+    // рисуем как раньше, на всю ширину.
+    html += (flightsHtml && pricesHtml)
+      ? `<div class="card-section-row">${flightsHtml}${pricesHtml}</div>`
+      : flightsHtml + pricesHtml;
 
     const months = SEASON_DATA[dest];
     if (months) {
@@ -2619,8 +2654,9 @@ function initApp(data) {
     const btn = makeTpButton(city, dest);
     // Пометка «Реклама» с рекламодателем показывается только когда реально
     // есть рекламный креатив — то есть когда кнопка отрендерилась.
-    footer.innerHTML = `<div class="disclosure">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>`
-      + (btn ? `<div class="ad-label">${esc(TP_AD_LABEL)}</div>` : '');
+    // Отдельная строка про партнёрские ссылки убрана 15.08.2026: обязательная
+    // маркировка ниже уже говорит, что это реклама и кто рекламодатель.
+    footer.innerHTML = btn ? `<div class="ad-label">${esc(TP_AD_LABEL)}</div>` : '';
     if (btn) { btn.className = 'card-tp-btn'; btn.textContent = 'Найти билеты →'; footer.appendChild(btn); }
   }
 
@@ -2727,7 +2763,7 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
         <div class="card-info-cell"><div class="ci-label">ЦЕНЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Travelpayouts/Aviasales, диапазон недавно найденных цен по маршруту</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.9 · 15.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v4.0 · 15.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Кнопки «Билеты» — реклама Aviasales: при бронировании через них сайт получает комиссию, без наценки для вас. ${esc(TP_AD_LABEL)} Данные о рейсах справочные и могут устаревать: наличие маршрута, расписание и цены проверяйте у авиакомпании или в сервисе покупки билета. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
     `;
@@ -3001,7 +3037,7 @@ function initApp(data) {
   map.attributionControl.setPrefix(false);
   // Зум-контрол уже занимает правый нижний угол — атрибуцию уводим в левый,
   // иначе они встают друг над другом в одном контейнере Leaflet.
-  map.attributionControl.setPosition('bottomleft');
+  map.attributionControl.setPosition('bottomright');
 
   /* ── ВЕРТИКАЛЬНОЕ ЗАПОЛНЕНИЕ ────────────────────────────────────────
      Мировые тайлы на зуме z занимают ровно 256·2^z пикселей по высоте.
@@ -3038,7 +3074,10 @@ function initApp(data) {
   function isLightTheme() { return document.documentElement.getAttribute('data-theme') === 'light'; }
   // Схематичные тайлы в тёмной теме затемняем CSS-фильтром (.rf-dark-map,
   // см. <style>) — иначе поверх тёмного интерфейса светится белая карта.
-  const SCHEME_TILES = new Set(['yndx', 'osm', 'topo']);
+  // Рельеф из затемнения исключён: инверсия ломает его цветовую шкалу высот
+  // (зелень низин и коричневый гор превращаются в неразличимую кашу).
+  // Показываем как есть — светлым пятном на тёмном интерфейсе, зато читаемым.
+  const SCHEME_TILES = new Set(['yndx', 'osm']);
   function tileClass(key) { return SCHEME_TILES.has(key) && !isLightTheme() ? 'rf-dark-map' : ''; }
   // Опции слоя: собственные opts источника + класс тёмной темы + обязательный
   // копирайт. Leaflet сам показывает/убирает его при добавлении и снятии слоя.
@@ -3046,8 +3085,14 @@ function initApp(data) {
     const t = TILES[key];
     return Object.assign({}, t.opts, { className: tileClass(key), attribution: t.attribution || '' });
   }
+  // Логотип Яндекса обязателен только пока показывается его подложка.
+  function syncYandexLogo(key) {
+    const el = document.getElementById('ymaps-logo');
+    if (el) el.style.display = key === 'yndx' ? 'block' : 'none';
+  }
   let currentTileKey = 'yndx';
   let tileLayer = L.tileLayer(TILES.yndx.url, tileOpts('yndx')).addTo(map);
+  syncYandexLogo('yndx');
   let labelsLayer = null;
 
   const TILE_LABELS = { yndx:'Яндекс', osm:'OSM', topo:'Рельеф' };
@@ -3058,6 +3103,7 @@ function initApp(data) {
     const t = TILES[key];
     tileLayer = L.tileLayer(t.url, tileOpts(key)).addTo(map);
     if (t.labelsUrl) labelsLayer = L.tileLayer(t.labelsUrl, t.labelsOpts).addTo(map);
+    syncYandexLogo(key);
     document.getElementById('map-ctrl-label').textContent = TILE_LABELS[key];
     document.querySelectorAll('.map-menu-item').forEach(b => b.classList.toggle('on', b.dataset.tile === key));
     document.getElementById('map-menu').style.display = 'none';
