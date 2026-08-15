@@ -277,6 +277,9 @@ body{display:flex;flex-direction:column;}
 .dr-cc{font-family:var(--rf-mono);font-size:10px;letter-spacing:.08em;color:var(--rf-t4);margin-left:6px;}
 .card-footer{flex:none;padding:14px 16px;border-top:1px solid var(--rf-line2);background:var(--rf-panel);}
 .card-footer .disclosure{font-size:9.5px;line-height:1.4;color:var(--rf-t5);margin-bottom:9px;}
+/* Обязательная маркировка рекламы (ФЗ-38, ст. 18.1) — рядом с кнопкой,
+   заметнее обычного disclosure, но без крика. Скрывать нельзя. */
+.ad-label{font-family:var(--rf-mono);font-size:9.5px;letter-spacing:.04em;line-height:1.4;color:var(--rf-t4);margin-bottom:7px;}
 .card-tp-btn{display:block;text-align:center;padding:10px 14px;border:1px solid var(--rf-accent-border);border-radius:8px;background:var(--rf-accent-soft);color:var(--rf-accent);font-size:13px;font-weight:500;text-decoration:none;}
 
 .panel-empty{padding:34px 20px;text-align:center;font-size:13px;color:var(--rf-t4);}
@@ -441,7 +444,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="privacy.html">Конфиденциальность</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.5</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.6</span>
         </div>
       </div>
     </div>
@@ -1747,7 +1750,17 @@ const TP_CONFIG = {
   p: "4114",             // Product ID программы Aviasales
   campaign_id: "100",   // Campaign ID
   metrikaId: "111249573", // ID счётчика Яндекс.Метрики
+  // Идентификатор интернет-рекламы (ФЗ-38 «О рекламе», ст. 18.1). Выдан ОРД
+  // через Travelpayouts, взят из ссылки, сгенерированной в кабинете. Едет
+  // query-параметром и доживает до aviasales.ru через редирект tp.media
+  // (проверено 15.08.2026 — итоговый URL совпадает со ссылкой из кабинета).
+  // При смене юрлица рекламодателя TP выдаёт новый erid — обновлять здесь.
+  erid: "2VtzquZviLB",
 };
+
+// Вторая обязательная часть маркировки: пометка «Реклама» и рекламодатель.
+// Строка — как её отдаёт кабинет Travelpayouts, менять только вслед за ним.
+const TP_AD_LABEL = 'Реклама. Go Travel Un Limited. ИНН 9909520797';
 
 function tpSearchDate() {
   const d = new Date();
@@ -1774,6 +1787,7 @@ function tpLink(fromCity, toDest) {
   if (TP_CONFIG.p) link += `&p=${encodeURIComponent(TP_CONFIG.p)}`;
   link += `&u=${encodeURIComponent(u)}`;
   if (TP_CONFIG.campaign_id) link += `&campaign_id=${encodeURIComponent(TP_CONFIG.campaign_id)}`;
+  if (TP_CONFIG.erid) link += `&erid=${encodeURIComponent(TP_CONFIG.erid)}`;
   return link;
 }
 
@@ -2595,8 +2609,11 @@ function initApp(data) {
 
     let footer = viewCard.querySelector('.card-footer');
     if (!footer) { footer = document.createElement('div'); footer.className = 'card-footer'; viewCard.appendChild(footer); }
-    footer.innerHTML = `<div class="disclosure">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>`;
     const btn = makeTpButton(city, dest);
+    // Пометка «Реклама» с рекламодателем показывается только когда реально
+    // есть рекламный креатив — то есть когда кнопка отрендерилась.
+    footer.innerHTML = `<div class="disclosure">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас.</div>`
+      + (btn ? `<div class="ad-label">${esc(TP_AD_LABEL)}</div>` : '');
     if (btn) { btn.className = 'card-tp-btn'; btn.textContent = 'Найти билеты →'; footer.appendChild(btn); }
   }
 
@@ -2703,9 +2720,9 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
         <div class="card-info-cell"><div class="ci-label">ЦЕНЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Travelpayouts/Aviasales, диапазон недавно найденных цен по маршруту</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.5 · 15.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.6 · 15.08.2026</div></div>
       </div>
-      <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Содержит партнёрские ссылки Aviasales — при бронировании через них сайт получает комиссию, без наценки для вас. Данные о рейсах справочные и могут устаревать: наличие маршрута, расписание и цены проверяйте у авиакомпании или в сервисе покупки билета. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
+      <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Кнопки «Билеты» — реклама Aviasales: при бронировании через них сайт получает комиссию, без наценки для вас. ${esc(TP_AD_LABEL)} Данные о рейсах справочные и могут устаревать: наличие маршрута, расписание и цены проверяйте у авиакомпании или в сервисе покупки билета. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
     `;
   }
 
