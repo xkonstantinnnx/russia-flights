@@ -1,6 +1,6 @@
 {
-  "updated": "2026-08-07T20:29:03Z",
-  "source": "AirLabs + OpenSky Network + Яндекс.Расписания + Jonty/airline-route-data",
+  "updated": "2026-08-15T00:29:49Z",
+  "source": "AirLabs + AeroDataBox + Яндекс.Расписания",
   "routes": {
     "Москва": [
       "Абу-Даби",
@@ -9,6 +9,7 @@
       "Алжир",
       "Алматы",
       "Амман",
+      "Андижан",
       "Анталья",
       "Астана",
       "Ашхабад",
@@ -25,12 +26,15 @@
       "Гуанчжоу",
       "Гянджа",
       "Даламан",
+      "Дананг",
+      "Дар-эс-Салам",
       "Дели",
       "Денпасар",
       "Доха",
       "Дубай",
       "Душанбе",
       "Ереван",
+      "Занзибар",
       "Измир",
       "Кабул",
       "Каир",
@@ -38,6 +42,7 @@
       "Касабланка",
       "Коломбо",
       "Куляб",
+      "Кутаиси",
       "Мале",
       "Манама",
       "Маскат",
@@ -57,6 +62,7 @@
       "Санья",
       "Стамбул",
       "Сухум",
+      "Тайюань",
       "Ташкент",
       "Тбилиси",
       "Тегеран",
@@ -73,14 +79,9 @@
       "Шарджа",
       "Шарм-эль-Шейх",
       "Шымкент",
-      "Эр-Рияд",
-      "Занзибар",
-      "Андижан",
-      "Дар-эс-Салам",
-      "Кутаиси",
-      "Тайюань",
       "Эль-Аламейн",
-      "Эль-Кувейт"
+      "Эль-Кувейт",
+      "Эр-Рияд"
     ],
     "Санкт-Петербург": [
       "Абу-Даби",
@@ -89,9 +90,12 @@
       "Астана",
       "Баку",
       "Бангкок",
+      "Батуми",
       "Белград",
       "Бишкек",
       "Бухара",
+      "Гянджа",
+      "Даламан",
       "Дубай",
       "Душанбе",
       "Ереван",
@@ -100,28 +104,25 @@
       "Минск",
       "Монастир",
       "Наманган",
+      "Нячанг",
       "Ош",
       "Пекин",
       "Пхукет",
       "Самарканд",
       "Санья",
       "Стамбул",
+      "Сухум",
       "Ташкент",
       "Тбилиси",
       "Тегеран",
       "Ургенч",
+      "Фергана",
       "Худжанд",
       "Хургада",
       "Чэнду",
       "Шанхай",
       "Шарм-эль-Шейх",
-      "Шымкент",
-      "Батуми",
-      "Гянджа",
-      "Даламан",
-      "Нячанг",
-      "Сухум",
-      "Фергана"
+      "Шымкент"
     ],
     "Екатеринбург": [
       "Алматы",
@@ -133,6 +134,8 @@
       "Бишкек",
       "Бухара",
       "Гоа",
+      "Дели",
+      "Доха",
       "Дубай",
       "Душанбе",
       "Ереван",
@@ -146,6 +149,7 @@
       "Самарканд",
       "Санья",
       "Стамбул",
+      "Сухум",
       "Ташкент",
       "Тбилиси",
       "Ургенч",
@@ -153,10 +157,7 @@
       "Худжанд",
       "Хургада",
       "Шарджа",
-      "Шарм-эль-Шейх",
-      "Дели",
-      "Доха",
-      "Сухум"
+      "Шарм-эль-Шейх"
     ],
     "Новосибирск": [
       "Алматы",
@@ -172,6 +173,7 @@
       "Дубай",
       "Душанбе",
       "Ереван",
+      "Мале",
       "Нячанг",
       "Ош",
       "Пекин",
@@ -182,12 +184,11 @@
       "Ташкент",
       "Тбилиси",
       "Усть-Каменогорск",
+      "Фергана",
       "Худжанд",
       "Шанхай",
       "Шарм-эль-Шейх",
-      "Шымкент",
-      "Мале",
-      "Фергана"
+      "Шымкент"
     ],
     "Сочи": [
       "Абу-Даби",
@@ -196,6 +197,7 @@
       "Батуми",
       "Белград",
       "Бишкек",
+      "Даламан",
       "Дубай",
       "Душанбе",
       "Ереван",
@@ -211,8 +213,7 @@
       "Хургада",
       "Шарджа",
       "Шарм-эль-Шейх",
-      "Эр-Рияд",
-      "Даламан"
+      "Эр-Рияд"
     ],
     "Казань": [
       "Абу-Даби",
@@ -223,29 +224,32 @@
       "Батуми",
       "Белград",
       "Бишкек",
+      "Даламан",
       "Дубай",
       "Душанбе",
       "Ереван",
+      "Куляб",
       "Минск",
+      "Наманган",
+      "Нячанг",
       "Ош",
       "Рас-эль-Хайма",
       "Самарканд",
       "Санья",
       "Стамбул",
+      "Сухум",
       "Ташкент",
       "Тбилиси",
+      "Фергана",
       "Худжанд",
       "Хургада",
       "Шанхай",
       "Шарджа",
-      "Шарм-эль-Шейх",
-      "Даламан",
-      "Нячанг",
-      "Сухум",
-      "Фергана"
+      "Шарм-эль-Шейх"
     ],
     "Красноярск": [
       "Алматы",
+      "Анталья",
       "Баку",
       "Бангкок",
       "Бишкек",
@@ -253,6 +257,7 @@
       "Душанбе",
       "Ереван",
       "Наманган",
+      "Нячанг",
       "Ош",
       "Пекин",
       "Пхукет",
@@ -262,23 +267,23 @@
       "Харбин",
       "Худжанд",
       "Шанхай",
-      "Шымкент",
-      "Анталья",
-      "Нячанг"
+      "Шымкент"
     ],
     "Хабаровск": [
       "Бангкок",
       "Далянь",
+      "Макао",
+      "Нячанг",
       "Пекин",
       "Пхукет",
       "Санья",
       "Ташкент",
       "Харбин",
-      "Шанхай",
-      "Нячанг"
+      "Шанхай"
     ],
     "Владивосток": [
       "Бангкок",
+      "Гуанчжоу",
       "Далянь",
       "Нячанг",
       "Пекин",
@@ -287,8 +292,7 @@
       "Санья",
       "Ташкент",
       "Харбин",
-      "Шанхай",
-      "Гуанчжоу"
+      "Шанхай"
     ],
     "Иркутск": [
       "Бангкок",
@@ -323,23 +327,24 @@
     ],
     "Уфа": [
       "Анталья",
+      "Астана",
       "Батуми",
       "Дубай",
       "Душанбе",
       "Ереван",
+      "Минск",
       "Наманган",
+      "Нячанг",
       "Самарканд",
       "Санья",
       "Стамбул",
+      "Сухум",
       "Ташкент",
+      "Тбилиси",
       "Худжанд",
       "Хургада",
       "Шарджа",
-      "Шарм-эль-Шейх",
-      "Минск",
-      "Нячанг",
-      "Сухум",
-      "Тбилиси"
+      "Шарм-эль-Шейх"
     ],
     "Самара": [
       "Анталья",
@@ -349,17 +354,17 @@
       "Ереван",
       "Минск",
       "Наманган",
+      "Нячанг",
       "Ош",
       "Стамбул",
+      "Сухум",
       "Ташкент",
       "Тбилиси",
       "Ургенч",
       "Худжанд",
       "Хургада",
       "Шарджа",
-      "Шарм-эль-Шейх",
-      "Нячанг",
-      "Сухум"
+      "Шарм-эль-Шейх"
     ],
     "Челябинск": [
       "Анталья",
@@ -369,9 +374,9 @@
       "Ереван",
       "Минск",
       "Ош",
+      "Сухум",
       "Хургада",
-      "Шарм-эль-Шейх",
-      "Сухум"
+      "Шарм-эль-Шейх"
     ],
     "Мин. Воды": [
       "Алматы",
@@ -383,16 +388,16 @@
       "Душанбе",
       "Ереван",
       "Минск",
+      "Нячанг",
       "Самарканд",
       "Стамбул",
+      "Сухум",
       "Ташкент",
       "Тбилиси",
       "Тель-Авив",
       "Худжанд",
       "Хургада",
-      "Шарм-эль-Шейх",
-      "Нячанг",
-      "Сухум"
+      "Шарм-эль-Шейх"
     ],
     "Тюмень": [
       "Анталья",
@@ -401,14 +406,14 @@
       "Дубай",
       "Душанбе",
       "Ереван",
+      "Нячанг",
       "Ош",
       "Стамбул",
       "Ташкент",
       "Тбилиси",
       "Худжанд",
-      "Шымкент",
-      "Нячанг",
-      "Шарм-эль-Шейх"
+      "Шарм-эль-Шейх",
+      "Шымкент"
     ],
     "Нижний Новгород": [
       "Анталья",
@@ -429,27 +434,27 @@
       "Ереван",
       "Минск",
       "Наманган",
-      "Хургада",
-      "Шарм-эль-Шейх",
       "Нячанг",
-      "Ташкент"
+      "Ташкент",
+      "Хургада",
+      "Шарм-эль-Шейх"
     ],
     "Омск": [
       "Анталья",
       "Астана",
-      "Наманган",
-      "Ташкент",
       "Ереван",
+      "Наманган",
       "Нячанг",
-      "Сухум"
+      "Сухум",
+      "Ташкент"
     ],
     "Волгоград": [
+      "Анталья",
+      "Батуми",
       "Дубай",
       "Ереван",
       "Минск",
-      "Шарм-эль-Шейх",
-      "Анталья",
-      "Батуми"
+      "Шарм-эль-Шейх"
     ],
     "Сургут": [
       "Анталья",
@@ -463,12 +468,13 @@
       "Худжанд"
     ],
     "Оренбург": [
+      "Алматы",
       "Анталья",
       "Баку",
+      "Батуми",
+      "Дубай",
       "Ереван",
       "Сухум",
-      "Алматы",
-      "Батуми",
       "Шарм-эль-Шейх"
     ],
     "Нижневартовск": [
@@ -478,12 +484,16 @@
       "Ташкент"
     ],
     "Благовещенск": [
-      "Пекин"
+      "Пекин",
+      "Ташкент",
+      "Ханой",
+      "Харбин"
     ],
     "Чита": [
-      "Хайлар",
       "Нячанг",
-      "Пекин"
+      "Пекин",
+      "Пхукет",
+      "Хайлар"
     ],
     "Южно-Сахалинск": [
       "Пекин",
@@ -494,6 +504,7 @@
       "Минск"
     ],
     "Махачкала": [
+      "Анталья",
       "Бишкек",
       "Бухара",
       "Дубай",
@@ -501,8 +512,7 @@
       "Наманган",
       "Стамбул",
       "Ташкент",
-      "Ургенч",
-      "Анталья"
+      "Ургенч"
     ],
     "Грозный": [
       "Анталья",
@@ -514,11 +524,12 @@
     "Владикавказ": [
       "Анталья",
       "Стамбул",
-      "Хургада"
+      "Хургада",
+      "Шарм-эль-Шейх"
     ],
     "Астрахань": [
-      "Хургада",
-      "Анталья"
+      "Анталья",
+      "Хургада"
     ],
     "Калининград": [
       "Анталья",
@@ -530,8 +541,8 @@
       "Бишкек"
     ],
     "Ульяновск": [
-      "Хургада",
-      "Анталья"
+      "Анталья",
+      "Хургада"
     ],
     "Чебоксары": [
       "Минск"
@@ -555,9 +566,9 @@
       "Улан-Батор"
     ],
     "Якутск": [
+      "Далянь",
       "Пекин",
-      "Харбин",
-      "Далянь"
+      "Харбин"
     ],
     "Улан-Удэ": [
       "Ташкент"
@@ -573,6 +584,10 @@
     ],
     "Ханты-Мансийск": [
       "Сухум"
+    ],
+    "Новокузнецк": [
+      "Дананг",
+      "Нячанг"
     ]
   },
   "destinations": {
@@ -624,11 +639,29 @@
       "r": "Африка",
       "c": "Египет"
     },
+    "Эль-Аламейн": {
+      "la": 30.9,
+      "lo": 28.5,
+      "r": "Африка",
+      "c": "Египет"
+    },
     "Шарм-эль-Шейх": {
       "la": 27.9,
       "lo": 34.3,
       "r": "Африка",
       "c": "Египет"
+    },
+    "Дар-эс-Салам": {
+      "la": -6.9,
+      "lo": 39.2,
+      "r": "Африка",
+      "c": "Танзания"
+    },
+    "Занзибар": {
+      "la": -6.2,
+      "lo": 39.2,
+      "r": "Африка",
+      "c": "Танзания"
     },
     "Тель-Авив": {
       "la": 32.1,
@@ -701,6 +734,12 @@
       "lo": 36.0,
       "r": "БВ",
       "c": "Иордания"
+    },
+    "Эль-Кувейт": {
+      "la": 29.4,
+      "lo": 48.0,
+      "r": "БВ",
+      "c": "Кувейт"
     },
     "Абу-Даби": {
       "la": 24.5,
@@ -803,6 +842,12 @@
       "lo": 44.5,
       "r": "СНГ",
       "c": "Армения"
+    },
+    "Кутаиси": {
+      "la": 42.2,
+      "lo": 42.5,
+      "r": "СНГ",
+      "c": "Грузия"
     },
     "Батуми": {
       "la": 41.6,
@@ -930,6 +975,12 @@
       "r": "Азия",
       "c": "Индия"
     },
+    "Макао": {
+      "la": 22.2,
+      "lo": 113.6,
+      "r": "Азия",
+      "c": "Макао (КНР)"
+    },
     "Мале": {
       "la": 4.2,
       "lo": 73.5,
@@ -951,6 +1002,12 @@
     "Нячанг": {
       "la": 12.2,
       "lo": 109.2,
+      "r": "Азия",
+      "c": "Вьетнам"
+    },
+    "Дананг": {
+      "la": 16.1,
+      "lo": 108.2,
       "r": "Азия",
       "c": "Вьетнам"
     },
@@ -1037,1003 +1094,1953 @@
       "lo": 121.6,
       "r": "Азия",
       "c": "Китай"
-    },
-    "Занзибар": {
-      "la": -6.2,
-      "lo": 39.2,
-      "r": "Африка",
-      "c": "Танзания"
-    },
-    "Дар-эс-Салам": {
-      "la": -6.9,
-      "lo": 39.2,
-      "r": "Африка",
-      "c": "Танзания"
-    },
-    "Кутаиси": {
-      "la": 42.2,
-      "lo": 42.5,
-      "r": "СНГ",
-      "c": "Грузия"
-    },
-    "Эль-Аламейн": {
-      "la": 30.9,
-      "lo": 28.5,
-      "r": "Африка",
-      "c": "Египет"
-    },
-    "Эль-Кувейт": {
-      "la": 29.4,
-      "lo": 48.0,
-      "r": "БВ",
-      "c": "Кувейт"
     }
   },
   "weights": {
     "Москва→Алматы": {
-      "carriers": 1,
+      "carriers": 2,
+      "airlines": [
+        "DV",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 280
+      "duration_min": 265,
+      "apts": [
+        "SVO",
+        "VKO"
+      ]
     },
     "Москва→Аддис-Абеба": {
       "carriers": 1,
+      "airlines": [
+        "ET"
+      ],
       "days_per_week": 6,
-      "duration_min": 495
+      "duration_min": 495,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Амман": {
       "carriers": 1,
+      "airlines": [
+        "RJ"
+      ],
       "days_per_week": 3,
-      "duration_min": 320
+      "duration_min": 320,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Ашхабад": {
       "carriers": 1,
+      "airlines": [
+        "S7"
+      ],
       "days_per_week": 7,
-      "duration_min": 240
+      "duration_min": 240,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Анталья": {
-      "carriers": 1,
-      "days_per_week": 3,
-      "duration_min": 255
+      "carriers": 5,
+      "airlines": [
+        "2S",
+        "DP",
+        "PC",
+        "S7",
+        "TK"
+      ],
+      "days_per_week": 7,
+      "duration_min": 255,
+      "apts": [
+        "DME",
+        "VKO",
+        "ZIA"
+      ]
     },
     "Москва→Бухара": {
       "carriers": 1,
+      "airlines": [
+        "HH"
+      ],
       "days_per_week": 1,
-      "duration_min": 230
+      "duration_min": 230,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Каир": {
       "carriers": 1,
+      "airlines": [
+        "MS"
+      ],
       "days_per_week": 7,
-      "duration_min": 325
+      "duration_min": 325,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Александрия": {
       "carriers": 1,
-      "days_per_week": 2,
-      "duration_min": 350
+      "airlines": [
+        "B2"
+      ],
+      "days_per_week": 3,
+      "duration_min": 350,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Дубай": {
       "carriers": 1,
+      "airlines": [
+        "EK"
+      ],
       "days_per_week": 7,
-      "duration_min": 420
+      "duration_min": 420,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Душанбе": {
       "carriers": 2,
+      "airlines": [
+        "SZ",
+        "U6"
+      ],
       "days_per_week": 7,
-      "duration_min": 240
+      "duration_min": 240,
+      "apts": [
+        "DME",
+        "ZIA"
+      ]
     },
     "Москва→Ереван": {
       "carriers": 2,
+      "airlines": [
+        "3F",
+        "U6"
+      ],
       "days_per_week": 7,
-      "duration_min": 180
+      "duration_min": 180,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Фергана": {
-      "carriers": 1,
+      "carriers": 2,
+      "airlines": [
+        "HH",
+        "U6"
+      ],
       "days_per_week": 4,
-      "duration_min": 240
+      "duration_min": 240,
+      "apts": [
+        "DME",
+        "ZIA"
+      ]
     },
     "Москва→Бишкек": {
-      "carriers": 1,
+      "carriers": 3,
+      "airlines": [
+        "K2Z",
+        "U6",
+        "YK"
+      ],
       "days_per_week": 7,
-      "duration_min": 235
+      "duration_min": 235,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Измир": {
       "carriers": 1,
+      "airlines": [
+        "PC"
+      ],
       "days_per_week": 7,
-      "duration_min": 250
+      "duration_min": 250,
+      "apts": [
+        "VKO"
+      ]
     },
     "Москва→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 7,
-      "duration_min": 220
+      "duration_min": 220,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Баку": {
       "carriers": 2,
+      "airlines": [
+        "U6",
+        "WZ"
+      ],
       "days_per_week": 5,
-      "duration_min": 185
+      "duration_min": 185,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Стамбул": {
       "carriers": 1,
+      "airlines": [
+        "2S"
+      ],
       "days_per_week": 3,
-      "duration_min": 225
+      "duration_min": 225,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Худжанд": {
       "carriers": 2,
+      "airlines": [
+        "SZ",
+        "U6"
+      ],
       "days_per_week": 7,
-      "duration_min": 240
+      "duration_min": 240,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Минск": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 4,
-      "duration_min": 95
+      "duration_min": 95,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Наманган": {
       "carriers": 1,
+      "airlines": [
+        "U6"
+      ],
       "days_per_week": 2,
-      "duration_min": 245
+      "duration_min": 245,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Ош": {
       "carriers": 1,
+      "airlines": [
+        "U6"
+      ],
       "days_per_week": 7,
-      "duration_min": 250
+      "duration_min": 250,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Самарканд": {
       "carriers": 1,
+      "airlines": [
+        "U6"
+      ],
       "days_per_week": 7,
-      "duration_min": 225
+      "duration_min": 225,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Ташкент": {
       "carriers": 1,
+      "airlines": [
+        "U6"
+      ],
       "days_per_week": 7,
-      "duration_min": 230
+      "duration_min": 230,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Тбилиси": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 7,
-      "duration_min": 195
+      "duration_min": 195,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Куляб": {
       "carriers": 1,
+      "airlines": [
+        "U6"
+      ],
       "days_per_week": 5,
-      "duration_min": 265
+      "duration_min": 265,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Москва→Тель-Авив": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 7,
-      "duration_min": 355
+      "duration_min": 355,
+      "apts": [
+        "ZIA"
+      ]
     },
     "Санкт-Петербург→Алматы": {
       "carriers": 2,
+      "airlines": [
+        "FV",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 290
+      "duration_min": 290,
+      "apts": [
+        "LED"
+      ]
     },
     "Екатеринбург→Алматы": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 6,
-      "duration_min": 170
+      "duration_min": 170,
+      "apts": [
+        "SVX"
+      ]
     },
     "Екатеринбург→Анталья": {
       "carriers": 4,
+      "airlines": [
+        "2S",
+        "DP",
+        "SU",
+        "ZF"
+      ],
       "days_per_week": 7,
-      "duration_min": 305
+      "duration_min": 305,
+      "apts": [
+        "SVX"
+      ]
     },
     "Екатеринбург→Бухара": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 1,
-      "duration_min": 180
+      "duration_min": 180,
+      "apts": [
+        "SVX"
+      ]
     },
     "Екатеринбург→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 225
-    },
-    "Екатеринбург→Нячанг": {
-      "carriers": 1,
-      "days_per_week": 2,
-      "duration_min": 540
+      "duration_min": 225,
+      "apts": [
+        "SVX"
+      ]
     },
     "Новосибирск→Алматы": {
       "carriers": 1,
+      "airlines": [
+        "S7"
+      ],
       "days_per_week": 7,
-      "duration_min": 150
+      "duration_min": 150,
+      "apts": [
+        "OVB"
+      ]
     },
     "Новосибирск→Анталья": {
       "carriers": 3,
+      "airlines": [
+        "S7",
+        "SU",
+        "ZF"
+      ],
       "days_per_week": 7,
-      "duration_min": 395
+      "duration_min": 405,
+      "apts": [
+        "OVB"
+      ]
     },
     "Новосибирск→Андижан": {
       "carriers": 2,
+      "airlines": [
+        "HY",
+        "S7"
+      ],
       "days_per_week": 1,
-      "duration_min": 180
+      "duration_min": 180,
+      "apts": [
+        "OVB"
+      ]
     },
     "Новосибирск→Бангкок": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 460
+      "duration_min": 460,
+      "apts": [
+        "OVB"
+      ]
     },
     "Новосибирск→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 310
+      "duration_min": 310,
+      "apts": [
+        "OVB"
+      ]
     },
     "Новосибирск→Шымкент": {
-      "carriers": 2,
-      "days_per_week": 4,
-      "duration_min": 170
+      "carriers": 1,
+      "airlines": [
+        "DV"
+      ],
+      "days_per_week": 2,
+      "duration_min": 160,
+      "apts": [
+        "OVB"
+      ]
     },
     "Новосибирск→Нячанг": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 455
-    },
-    "Новосибирск→Дубай": {
-      "carriers": 2,
-      "days_per_week": 5,
-      "duration_min": 410
+      "duration_min": 455,
+      "apts": [
+        "OVB"
+      ]
     },
     "Сочи→Абу-Даби": {
       "carriers": 1,
+      "airlines": [
+        "EY"
+      ],
       "days_per_week": 5,
-      "duration_min": 290
+      "duration_min": 290,
+      "apts": [
+        "AER"
+      ]
     },
     "Сочи→Анталья": {
       "carriers": 1,
+      "airlines": [
+        "2S"
+      ],
       "days_per_week": 3,
-      "duration_min": 120
+      "duration_min": 120,
+      "apts": [
+        "AER"
+      ]
     },
     "Сочи→Белград": {
       "carriers": 1,
+      "airlines": [
+        "JU"
+      ],
       "days_per_week": 2,
-      "duration_min": 170
+      "duration_min": 170,
+      "apts": [
+        "AER"
+      ]
     },
     "Сочи→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 6,
-      "duration_min": 60
+      "duration_min": 60,
+      "apts": [
+        "AER"
+      ]
     },
     "Казань→Алматы": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 210
+      "duration_min": 210,
+      "apts": [
+        "KZN"
+      ]
     },
     "Казань→Ашхабад": {
       "carriers": 1,
+      "airlines": [
+        "T5"
+      ],
       "days_per_week": 4,
-      "duration_min": 200
+      "duration_min": 200,
+      "apts": [
+        "KZN"
+      ]
     },
     "Казань→Анталья": {
       "carriers": 4,
+      "airlines": [
+        "2S",
+        "DP",
+        "SU",
+        "TK"
+      ],
       "days_per_week": 7,
-      "duration_min": 300
+      "duration_min": 300,
+      "apts": [
+        "KZN"
+      ]
+    },
+    "Казань→Белград": {
+      "carriers": 1,
+      "airlines": [
+        "JU"
+      ],
+      "days_per_week": 2,
+      "duration_min": 240,
+      "apts": [
+        "KZN"
+      ]
+    },
+    "Казань→Батуми": {
+      "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
+      "days_per_week": 2,
+      "duration_min": 200,
+      "apts": [
+        "KZN"
+      ]
     },
     "Красноярск→Алматы": {
       "carriers": 2,
+      "airlines": [
+        "FV",
+        "SU"
+      ],
       "days_per_week": 6,
-      "duration_min": 170
+      "duration_min": 170,
+      "apts": [
+        "KJA"
+      ]
     },
     "Красноярск→Бангкок": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 4,
-      "duration_min": 415
+      "duration_min": 415,
+      "apts": [
+        "KJA"
+      ]
     },
     "Красноярск→Гуанчжоу": {
       "carriers": 2,
+      "airlines": [
+        "FV",
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 340
+      "duration_min": 340,
+      "apts": [
+        "KJA"
+      ]
     },
     "Красноярск→Шымкент": {
       "carriers": 1,
+      "airlines": [
+        "DV"
+      ],
       "days_per_week": 2,
-      "duration_min": 180
+      "duration_min": 180,
+      "apts": [
+        "KJA"
+      ]
     },
     "Красноярск→Душанбе": {
       "carriers": 2,
+      "airlines": [
+        "SZ",
+        "U6"
+      ],
       "days_per_week": 4,
-      "duration_min": 250
+      "duration_min": 250,
+      "apts": [
+        "KJA"
+      ]
+    },
+    "Красноярск→Ереван": {
+      "carriers": 1,
+      "airlines": [
+        "5G"
+      ],
+      "days_per_week": 1,
+      "duration_min": 360,
+      "apts": [
+        "KJA"
+      ]
+    },
+    "Красноярск→Бишкек": {
+      "carriers": 3,
+      "airlines": [
+        "FV",
+        "SU",
+        "YK"
+      ],
+      "days_per_week": 4,
+      "duration_min": 180,
+      "apts": [
+        "KJA"
+      ]
     },
     "Хабаровск→Бангкок": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 480
+      "duration_min": 480,
+      "apts": [
+        "KHV"
+      ]
     },
     "Хабаровск→Далянь": {
       "carriers": 1,
+      "airlines": [
+        "R3"
+      ],
       "days_per_week": 1,
-      "duration_min": 170
+      "duration_min": 170,
+      "apts": [
+        "KHV"
+      ]
     },
     "Хабаровск→Пхукет": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 485
+      "duration_min": 485,
+      "apts": [
+        "KHV"
+      ]
     },
     "Хабаровск→Харбин": {
       "carriers": 2,
+      "airlines": [
+        "EU",
+        "HZ"
+      ],
       "days_per_week": 5,
-      "duration_min": 100
+      "duration_min": 100,
+      "apts": [
+        "KHV"
+      ]
     },
     "Владивосток→Бангкок": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 3,
-      "duration_min": 415
+      "duration_min": 415,
+      "apts": [
+        "VVO"
+      ]
     },
     "Владивосток→Нячанг": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 425
+      "duration_min": 425,
+      "apts": [
+        "VVO"
+      ]
     },
     "Владивосток→Далянь": {
       "carriers": 1,
+      "airlines": [
+        "HU"
+      ],
       "days_per_week": 4,
-      "duration_min": 150
+      "duration_min": 150,
+      "apts": [
+        "VVO"
+      ]
     },
     "Владивосток→Пхеньян": {
       "carriers": 1,
+      "airlines": [
+        "JS"
+      ],
       "days_per_week": 3,
-      "duration_min": 110
+      "duration_min": 110,
+      "apts": [
+        "VVO"
+      ]
     },
     "Владивосток→Пхукет": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 440
+      "duration_min": 440,
+      "apts": [
+        "VVO"
+      ]
     },
     "Владивосток→Харбин": {
       "carriers": 5,
+      "airlines": [
+        "CZ",
+        "EU",
+        "FV",
+        "HZ",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 90
+      "duration_min": 90,
+      "apts": [
+        "VVO"
+      ]
     },
     "Иркутск→Бангкок": {
       "carriers": 2,
+      "airlines": [
+        "S7",
+        "SU"
+      ],
       "days_per_week": 6,
-      "duration_min": 365
+      "duration_min": 365,
+      "apts": [
+        "IKT"
+      ]
     },
     "Иркутск→Гуанчжоу": {
       "carriers": 1,
+      "airlines": [
+        "S7"
+      ],
       "days_per_week": 4,
-      "duration_min": 300
+      "duration_min": 300,
+      "apts": [
+        "IKT"
+      ]
     },
     "Иркутск→Нячанг": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 4,
-      "duration_min": 415
+      "duration_min": 415,
+      "apts": [
+        "IKT"
+      ]
     },
     "Иркутск→Фергана": {
       "carriers": 1,
+      "airlines": [
+        "S7"
+      ],
       "days_per_week": 1,
-      "duration_min": 275
+      "duration_min": 275,
+      "apts": [
+        "IKT"
+      ]
     },
     "Иркутск→Бишкек": {
       "carriers": 1,
+      "airlines": [
+        "YK"
+      ],
       "days_per_week": 1,
-      "duration_min": 240
+      "duration_min": 240,
+      "apts": [
+        "IKT"
+      ]
     },
     "Иркутск→Пхукет": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 415
+      "duration_min": 415,
+      "apts": [
+        "IKT"
+      ]
     },
     "Краснодар→Анталья": {
       "carriers": 2,
+      "airlines": [
+        "2S",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 150
+      "duration_min": 150,
+      "apts": [
+        "KRR"
+      ]
     },
     "Краснодар→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 3,
-      "duration_min": 70
+      "duration_min": 70,
+      "apts": [
+        "KRR"
+      ]
     },
     "Краснодар→Дубай": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 4,
-      "duration_min": 285
+      "duration_min": 285,
+      "apts": [
+        "KRR"
+      ]
     },
     "Краснодар→Душанбе": {
       "carriers": 1,
+      "airlines": [
+        "U6"
+      ],
       "days_per_week": 1,
-      "duration_min": 210
+      "duration_min": 210,
+      "apts": [
+        "KRR"
+      ]
     },
     "Краснодар→Ереван": {
       "carriers": 3,
+      "airlines": [
+        "3F",
+        "A4",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 100
+      "duration_min": 100,
+      "apts": [
+        "KRR"
+      ]
     },
     "Краснодар→Бишкек": {
       "carriers": 1,
+      "airlines": [
+        "YK"
+      ],
       "days_per_week": 2,
-      "duration_min": 220
+      "duration_min": 220,
+      "apts": [
+        "KRR"
+      ]
     },
     "Краснодар→Хургада": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 235
+      "duration_min": 235,
+      "apts": [
+        "KRR"
+      ]
     },
     "Краснодар→Стамбул": {
       "carriers": 2,
+      "airlines": [
+        "DP",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 125
+      "duration_min": 140,
+      "apts": [
+        "KRR"
+      ]
     },
     "Уфа→Анталья": {
       "carriers": 2,
+      "airlines": [
+        "2S",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 300
+      "duration_min": 300,
+      "apts": [
+        "UFA"
+      ]
     },
     "Уфа→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 205
+      "duration_min": 205,
+      "apts": [
+        "UFA"
+      ]
     },
     "Уфа→Дубай": {
       "carriers": 2,
+      "airlines": [
+        "EK",
+        "FZ"
+      ],
       "days_per_week": 3,
-      "duration_min": 305
+      "duration_min": 395,
+      "apts": [
+        "UFA"
+      ]
     },
     "Уфа→Душанбе": {
       "carriers": 3,
+      "airlines": [
+        "N4",
+        "SZ",
+        "U6"
+      ],
       "days_per_week": 5,
-      "duration_min": 190
+      "duration_min": 190,
+      "apts": [
+        "UFA"
+      ]
     },
     "Уфа→Ереван": {
       "carriers": 2,
+      "airlines": [
+        "5G",
+        "A4"
+      ],
       "days_per_week": 4,
-      "duration_min": 180
+      "duration_min": 180,
+      "apts": [
+        "UFA"
+      ]
     },
     "Уфа→Хургада": {
-      "carriers": 2,
-      "days_per_week": 3,
-      "duration_min": 350
+      "carriers": 3,
+      "airlines": [
+        "FV",
+        "NE",
+        "SU"
+      ],
+      "days_per_week": 4,
+      "duration_min": 375,
+      "apts": [
+        "UFA"
+      ]
     },
     "Самара→Анталья": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 290
+      "duration_min": 290,
+      "apts": [
+        "KUF"
+      ]
     },
     "Самара→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 3,
-      "duration_min": 185
+      "duration_min": 185,
+      "apts": [
+        "KUF"
+      ]
     },
     "Самара→Дубай": {
       "carriers": 2,
+      "airlines": [
+        "EK",
+        "FZ"
+      ],
       "days_per_week": 4,
-      "duration_min": 400
+      "duration_min": 400,
+      "apts": [
+        "KUF"
+      ]
     },
     "Самара→Душанбе": {
       "carriers": 2,
+      "airlines": [
+        "SZ",
+        "U6"
+      ],
       "days_per_week": 5,
-      "duration_min": 210
+      "duration_min": 210,
+      "apts": [
+        "KUF"
+      ]
     },
     "Самара→Ереван": {
       "carriers": 4,
+      "airlines": [
+        "3F",
+        "FV",
+        "SU",
+        "WZ"
+      ],
       "days_per_week": 7,
-      "duration_min": 175
+      "duration_min": 175,
+      "apts": [
+        "KUF"
+      ]
     },
     "Самара→Хургада": {
       "carriers": 3,
+      "airlines": [
+        "FV",
+        "NE",
+        "SU"
+      ],
       "days_per_week": 6,
-      "duration_min": 355
+      "duration_min": 355,
+      "apts": [
+        "KUF"
+      ]
     },
     "Самара→Стамбул": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 275
+      "duration_min": 275,
+      "apts": [
+        "KUF"
+      ]
     },
     "Челябинск→Анталья": {
       "carriers": 3,
+      "airlines": [
+        "2S",
+        "DP",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 305
+      "duration_min": 305,
+      "apts": [
+        "CEK"
+      ]
     },
     "Челябинск→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 215
+      "duration_min": 215,
+      "apts": [
+        "CEK"
+      ]
     },
     "Челябинск→Душанбе": {
       "carriers": 1,
+      "airlines": [
+        "U6"
+      ],
       "days_per_week": 3,
-      "duration_min": 180
+      "duration_min": 180,
+      "apts": [
+        "CEK"
+      ]
     },
     "Челябинск→Баку": {
       "carriers": 1,
+      "airlines": [
+        "IO"
+      ],
       "days_per_week": 1,
-      "duration_min": 170
+      "duration_min": 170,
+      "apts": [
+        "CEK"
+      ]
     },
     "Челябинск→Хургада": {
       "carriers": 2,
+      "airlines": [
+        "FV",
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 385
+      "duration_min": 385,
+      "apts": [
+        "CEK"
+      ]
     },
     "Мин. Воды→Алматы": {
       "carriers": 1,
+      "airlines": [
+        "A4"
+      ],
       "days_per_week": 2,
-      "duration_min": 235
+      "duration_min": 235,
+      "apts": [
+        "MRV"
+      ]
     },
     "Мин. Воды→Анталья": {
       "carriers": 3,
+      "airlines": [
+        "2S",
+        "A4",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 150
-    },
-    "Мин. Воды→Бухара": {
-      "carriers": 1,
-      "days_per_week": 1,
-      "duration_min": 170
+      "duration_min": 150,
+      "apts": [
+        "MRV"
+      ]
     },
     "Мин. Воды→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "A4"
+      ],
       "days_per_week": 2,
-      "duration_min": 80
+      "duration_min": 80,
+      "apts": [
+        "MRV"
+      ]
     },
     "Тюмень→Анталья": {
       "carriers": 1,
+      "airlines": [
+        "UT"
+      ],
       "days_per_week": 2,
-      "duration_min": 330
+      "duration_min": 330,
+      "apts": [
+        "TJM"
+      ]
     },
     "Тюмень→Шымкент": {
       "carriers": 1,
+      "airlines": [
+        "DV"
+      ],
       "days_per_week": 2,
-      "duration_min": 180
+      "duration_min": 180,
+      "apts": [
+        "TJM"
+      ]
     },
     "Тюмень→Душанбе": {
       "carriers": 1,
+      "airlines": [
+        "N4"
+      ],
       "days_per_week": 1,
-      "duration_min": 185
+      "duration_min": 185,
+      "apts": [
+        "TJM"
+      ]
     },
     "Тюмень→Ереван": {
       "carriers": 1,
+      "airlines": [
+        "UT"
+      ],
       "days_per_week": 2,
-      "duration_min": 230
+      "duration_min": 230,
+      "apts": [
+        "TJM"
+      ]
     },
     "Тюмень→Баку": {
       "carriers": 1,
+      "airlines": [
+        "UT"
+      ],
       "days_per_week": 2,
-      "duration_min": 220
+      "duration_min": 220,
+      "apts": [
+        "TJM"
+      ]
     },
     "Тюмень→Стамбул": {
       "carriers": 1,
+      "airlines": [
+        "UT"
+      ],
       "days_per_week": 1,
-      "duration_min": 330
+      "duration_min": 330,
+      "apts": [
+        "TJM"
+      ]
     },
     "Тюмень→Худжанд": {
       "carriers": 1,
+      "airlines": [
+        "UT"
+      ],
       "days_per_week": 2,
-      "duration_min": 170
+      "duration_min": 170,
+      "apts": [
+        "TJM"
+      ]
     },
     "Нижний Новгород→Анталья": {
       "carriers": 2,
+      "airlines": [
+        "SU",
+        "ZF"
+      ],
       "days_per_week": 7,
-      "duration_min": 295
+      "duration_min": 295,
+      "apts": [
+        "GOJ"
+      ]
     },
     "Нижний Новгород→Белград": {
       "carriers": 1,
+      "airlines": [
+        "JU"
+      ],
       "days_per_week": 2,
-      "duration_min": 220
+      "duration_min": 220,
+      "apts": [
+        "GOJ"
+      ]
     },
     "Нижний Новгород→Ереван": {
       "carriers": 2,
+      "airlines": [
+        "5G",
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 205
+      "duration_min": 205,
+      "apts": [
+        "GOJ"
+      ]
     },
     "Нижний Новгород→Хургада": {
       "carriers": 3,
+      "airlines": [
+        "FV",
+        "NE",
+        "SU"
+      ],
       "days_per_week": 4,
-      "duration_min": 375
+      "duration_min": 375,
+      "apts": [
+        "GOJ"
+      ]
     },
     "Нижний Новгород→Минск": {
-      "carriers": 1,
-      "days_per_week": 3,
-      "duration_min": 130
+      "carriers": 2,
+      "airlines": [
+        "B2",
+        "SU"
+      ],
+      "days_per_week": 4,
+      "duration_min": 130,
+      "apts": [
+        "GOJ"
+      ]
     },
     "Пермь→Анталья": {
       "carriers": 3,
+      "airlines": [
+        "2S",
+        "DP",
+        "SU"
+      ],
       "days_per_week": 7,
-      "duration_min": 315
+      "duration_min": 315,
+      "apts": [
+        "PEE"
+      ]
     },
     "Пермь→Батуми": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 225
+      "duration_min": 225,
+      "apts": [
+        "PEE"
+      ]
     },
     "Пермь→Ереван": {
       "carriers": 1,
+      "airlines": [
+        "5G"
+      ],
       "days_per_week": 2,
-      "duration_min": 210
+      "duration_min": 210,
+      "apts": [
+        "PEE"
+      ]
     },
     "Пермь→Баку": {
       "carriers": 1,
+      "airlines": [
+        "IO"
+      ],
       "days_per_week": 2,
-      "duration_min": 185
+      "duration_min": 185,
+      "apts": [
+        "PEE"
+      ]
     },
     "Пермь→Хургада": {
       "carriers": 3,
-      "days_per_week": 5,
-      "duration_min": 365
+      "airlines": [
+        "FV",
+        "NE",
+        "SU"
+      ],
+      "days_per_week": 4,
+      "duration_min": 370,
+      "apts": [
+        "PEE"
+      ]
     },
     "Пермь→Минск": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 185
+      "duration_min": 185,
+      "apts": [
+        "PEE"
+      ]
+    },
+    "Пермь→Наманган": {
+      "carriers": 1,
+      "airlines": [
+        "HY"
+      ],
+      "days_per_week": 1,
+      "duration_min": 190,
+      "apts": [
+        "PEE"
+      ]
     },
     "Омск→Анталья": {
       "carriers": 1,
+      "airlines": [
+        "2S"
+      ],
       "days_per_week": 3,
-      "duration_min": 340
+      "duration_min": 340,
+      "apts": [
+        "OMS"
+      ]
     },
     "Омск→Наманган": {
       "carriers": 2,
+      "airlines": [
+        "HY",
+        "S7"
+      ],
       "days_per_week": 1,
-      "duration_min": 160
+      "duration_min": 160,
+      "apts": [
+        "OMS"
+      ]
     },
     "Волгоград→Ереван": {
       "carriers": 2,
+      "airlines": [
+        "FV",
+        "SU"
+      ],
       "days_per_week": 3,
-      "duration_min": 155
+      "duration_min": 155,
+      "apts": [
+        "VOG"
+      ]
     },
     "Волгоград→Минск": {
       "carriers": 1,
+      "airlines": [
+        "B2"
+      ],
       "days_per_week": 4,
-      "duration_min": 140
+      "duration_min": 140,
+      "apts": [
+        "VOG"
+      ]
     },
     "Волгоград→Шарм-эль-Шейх": {
       "carriers": 1,
+      "airlines": [
+        "SM"
+      ],
       "days_per_week": 2,
-      "duration_min": 300
+      "duration_min": 300,
+      "apts": [
+        "VOG"
+      ]
     },
     "Сургут→Анталья": {
       "carriers": 2,
+      "airlines": [
+        "UT",
+        "ZF"
+      ],
       "days_per_week": 2,
-      "duration_min": 365
+      "duration_min": 365,
+      "apts": [
+        "SGC"
+      ]
     },
     "Сургут→Ереван": {
       "carriers": 1,
+      "airlines": [
+        "UT"
+      ],
       "days_per_week": 1,
-      "duration_min": 275
+      "duration_min": 275,
+      "apts": [
+        "SGC"
+      ]
     },
     "Сургут→Фергана": {
       "carriers": 1,
+      "airlines": [
+        "UT"
+      ],
       "days_per_week": 1,
-      "duration_min": 210
+      "duration_min": 210,
+      "apts": [
+        "SGC"
+      ]
     },
     "Сургут→Бишкек": {
-      "carriers": 1,
-      "days_per_week": 1,
-      "duration_min": 190
+      "carriers": 3,
+      "airlines": [
+        "KA",
+        "UT",
+        "YK"
+      ],
+      "days_per_week": 2,
+      "duration_min": 190,
+      "apts": [
+        "SGC"
+      ]
     },
     "Сургут→Баку": {
       "carriers": 1,
+      "airlines": [
+        "UT"
+      ],
       "days_per_week": 2,
-      "duration_min": 265
+      "duration_min": 265,
+      "apts": [
+        "SGC"
+      ]
     },
     "Сургут→Худжанд": {
       "carriers": 1,
-      "days_per_week": 2,
-      "duration_min": 210
+      "airlines": [
+        "SZ"
+      ],
+      "days_per_week": 1,
+      "duration_min": 210,
+      "apts": [
+        "SGC"
+      ]
     },
     "Оренбург→Анталья": {
       "carriers": 1,
+      "airlines": [
+        "2S"
+      ],
       "days_per_week": 4,
-      "duration_min": 265
+      "duration_min": 265,
+      "apts": [
+        "REN"
+      ]
     },
     "Оренбург→Ереван": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 1,
-      "duration_min": 175
+      "duration_min": 175,
+      "apts": [
+        "REN"
+      ]
     },
     "Оренбург→Баку": {
       "carriers": 1,
+      "airlines": [
+        "IO"
+      ],
       "days_per_week": 2,
-      "duration_min": 150
+      "duration_min": 150,
+      "apts": [
+        "REN"
+      ]
+    },
+    "Оренбург→Шарм-эль-Шейх": {
+      "carriers": 1,
+      "airlines": [
+        "SM"
+      ],
+      "days_per_week": 1,
+      "duration_min": 325,
+      "apts": [
+        "REN"
+      ]
     },
     "Оренбург→Сухум": {
       "carriers": 1,
+      "airlines": [
+        "7R"
+      ],
       "days_per_week": 1,
-      "duration_min": 105
+      "duration_min": 105,
+      "apts": [
+        "REN"
+      ]
     },
     "Нижневартовск→Баку": {
       "carriers": 1,
+      "airlines": [
+        "IO"
+      ],
       "days_per_week": 1,
-      "duration_min": 250
+      "duration_min": 250,
+      "apts": [
+        "NJC"
+      ]
     },
     "Нижневартовск→Наманган": {
       "carriers": 2,
+      "airlines": [
+        "HY",
+        "S7"
+      ],
       "days_per_week": 2,
-      "duration_min": 230
+      "duration_min": 230,
+      "apts": [
+        "NJC"
+      ]
     },
     "Нижневартовск→Ош": {
       "carriers": 1,
-      "days_per_week": 1,
-      "duration_min": 200
+      "airlines": [
+        "U6"
+      ],
+      "days_per_week": 2,
+      "duration_min": 200,
+      "apts": [
+        "NJC"
+      ]
     },
     "Нижневартовск→Ташкент": {
       "carriers": 3,
+      "airlines": [
+        "HY",
+        "S7",
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 205
+      "duration_min": 205,
+      "apts": [
+        "NJC"
+      ]
     },
     "Благовещенск→Пекин": {
       "carriers": 1,
+      "airlines": [
+        "IO"
+      ],
       "days_per_week": 1,
-      "duration_min": 150
+      "duration_min": 150,
+      "apts": [
+        "BQS"
+      ]
     },
     "Чита→Хайлар": {
       "carriers": 1,
+      "airlines": [
+        "CA"
+      ],
       "days_per_week": 2,
-      "duration_min": 85
+      "duration_min": 75,
+      "apts": [
+        "HTA"
+      ]
     },
     "Южно-Сахалинск→Харбин": {
       "carriers": 2,
+      "airlines": [
+        "HZ",
+        "SU"
+      ],
       "days_per_week": 1,
-      "duration_min": 145
+      "duration_min": 145,
+      "apts": [
+        "UUS"
+      ]
     },
     "Мурманск→Минск": {
       "carriers": 1,
+      "airlines": [
+        "B2"
+      ],
       "days_per_week": 1,
-      "duration_min": 160
+      "duration_min": 160,
+      "apts": [
+        "MMK"
+      ]
     },
     "Махачкала→Бухара": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 1,
-      "duration_min": 140
+      "duration_min": 140,
+      "apts": [
+        "MCX"
+      ]
     },
     "Махачкала→Дубай": {
       "carriers": 2,
+      "airlines": [
+        "EK",
+        "FZ"
+      ],
       "days_per_week": 4,
-      "duration_min": 255
+      "duration_min": 255,
+      "apts": [
+        "MCX"
+      ]
     },
     "Махачкала→Бишкек": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 195
+      "duration_min": 195,
+      "apts": [
+        "MCX"
+      ]
     },
     "Махачкала→Стамбул": {
       "carriers": 1,
+      "airlines": [
+        "DP"
+      ],
       "days_per_week": 7,
-      "duration_min": 185
+      "duration_min": 185,
+      "apts": [
+        "MCX"
+      ]
     },
     "Грозный→Анталья": {
       "carriers": 2,
+      "airlines": [
+        "SU",
+        "UT"
+      ],
       "days_per_week": 3,
-      "duration_min": 180
+      "duration_min": 180,
+      "apts": [
+        "GRV"
+      ]
     },
     "Грозный→Бишкек": {
       "carriers": 1,
+      "airlines": [
+        "YK"
+      ],
       "days_per_week": 1,
-      "duration_min": 200
+      "duration_min": 200,
+      "apts": [
+        "GRV"
+      ]
     },
     "Грозный→Стамбул": {
       "carriers": 1,
+      "airlines": [
+        "UT"
+      ],
       "days_per_week": 7,
-      "duration_min": 165
+      "duration_min": 165,
+      "apts": [
+        "GRV"
+      ]
     },
     "Грозный→Ташкент": {
       "carriers": 4,
+      "airlines": [
+        "7A",
+        "C6",
+        "HY",
+        "S7"
+      ],
       "days_per_week": 5,
-      "duration_min": 160
+      "duration_min": 160,
+      "apts": [
+        "GRV"
+      ]
     },
     "Владикавказ→Анталья": {
       "carriers": 1,
+      "airlines": [
+        "DP"
+      ],
       "days_per_week": 3,
-      "duration_min": 165
+      "duration_min": 165,
+      "apts": [
+        "OGZ"
+      ]
     },
     "Владикавказ→Хургада": {
       "carriers": 1,
+      "airlines": [
+        "NE"
+      ],
       "days_per_week": 1,
-      "duration_min": 240
+      "duration_min": 240,
+      "apts": [
+        "OGZ"
+      ]
     },
     "Владикавказ→Стамбул": {
       "carriers": 1,
+      "airlines": [
+        "DP"
+      ],
       "days_per_week": 6,
-      "duration_min": 165
+      "duration_min": 165,
+      "apts": [
+        "OGZ"
+      ]
     },
     "Астрахань→Хургада": {
       "carriers": 1,
+      "airlines": [
+        "NE"
+      ],
       "days_per_week": 1,
-      "duration_min": 265
+      "duration_min": 265,
+      "apts": [
+        "ASF"
+      ]
     },
     "Калининград→Анталья": {
       "carriers": 1,
+      "airlines": [
+        "2S"
+      ],
       "days_per_week": 6,
-      "duration_min": 210
+      "duration_min": 210,
+      "apts": [
+        "KGD"
+      ]
     },
     "Калининград→Ереван": {
       "carriers": 1,
+      "airlines": [
+        "5G"
+      ],
       "days_per_week": 1,
-      "duration_min": 320
+      "duration_min": 320,
+      "apts": [
+        "KGD"
+      ]
     },
     "Воронеж→Бишкек": {
       "carriers": 1,
+      "airlines": [
+        "YK"
+      ],
       "days_per_week": 1,
-      "duration_min": 220
+      "duration_min": 220,
+      "apts": [
+        "VOZ"
+      ]
     },
     "Ульяновск→Хургада": {
       "carriers": 1,
+      "airlines": [
+        "NE"
+      ],
       "days_per_week": 2,
-      "duration_min": 410
+      "duration_min": 410,
+      "apts": [
+        "ULV"
+      ]
     },
     "Чебоксары→Минск": {
       "carriers": 1,
+      "airlines": [
+        "SU"
+      ],
       "days_per_week": 2,
-      "duration_min": 150
+      "duration_min": 150,
+      "apts": [
+        "CSY"
+      ]
     },
     "Саранск→Анталья": {
       "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
       "days_per_week": 2,
-      "duration_min": 275
+      "duration_min": 275,
+      "apts": [
+        "SKX"
+      ]
     },
     "Магнитогорск→Минск": {
       "carriers": 1,
+      "airlines": [
+        "B2"
+      ],
       "days_per_week": 1,
-      "duration_min": 190
+      "duration_min": 190,
+      "apts": [
+        "MQF"
+      ]
     },
     "Архангельск→Анталья": {
       "carriers": 1,
+      "airlines": [
+        "2S"
+      ],
       "days_per_week": 3,
-      "duration_min": 305
+      "duration_min": 305,
+      "apts": [
+        "ARH"
+      ]
     },
     "Петрозаводск→Минск": {
       "carriers": 1,
+      "airlines": [
+        "D2"
+      ],
       "days_per_week": 1,
-      "duration_min": 100
+      "duration_min": 100,
+      "apts": [
+        "PES"
+      ]
     },
     "Ноябрьск→Минск": {
       "carriers": 1,
-      "days_per_week": 7,
-      "duration_min": 245
+      "airlines": [
+        "B2"
+      ],
+      "days_per_week": 6,
+      "duration_min": 245,
+      "apts": [
+        "NOJ"
+      ]
     },
     "Кызыл→Улан-Батор": {
       "carriers": 1,
+      "airlines": [
+        "KV"
+      ],
       "days_per_week": 1,
-      "duration_min": 165
+      "duration_min": 165,
+      "apts": [
+        "KYZ"
+      ]
     },
     "Якутск→Харбин": {
       "carriers": 1,
+      "airlines": [
+        "R3"
+      ],
       "days_per_week": 4,
-      "duration_min": 175
-    },
-    "Москва→Монастир": {
-      "carriers": null,
-      "days_per_week": 2,
-      "duration_min": null
-    },
-    "Москва→Доха": {
-      "carriers": null,
-      "days_per_week": 2,
-      "duration_min": null
-    },
-    "Москва→Белград": {
-      "carriers": null,
-      "days_per_week": 2,
-      "duration_min": null
-    },
-    "Санкт-Петербург→Минск": {
-      "carriers": null,
-      "days_per_week": 2,
-      "duration_min": null
-    },
-    "Москва→Хургада": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 385
-    },
-    "Москва→Шанхай": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 545
-    },
-    "Москва→Шарм-эль-Шейх": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 385
+      "duration_min": 175,
+      "apts": [
+        "YKS"
+      ]
     },
     "Москва→Абу-Даби": {
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 345
     },
-    "Москва→Пекин": {
-      "carriers": 2,
+    "Москва→Алжир": {
+      "carriers": 1,
       "days_per_week": null,
-      "duration_min": 450
+      "duration_min": 325
     },
     "Москва→Астана": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 210
     },
-    "Москва→Гуанчжоу": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 575
-    },
-    "Москва→Пхукет": {
+    "Москва→Багдад": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 570
+      "duration_min": 295
     },
     "Москва→Бангкок": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 560
     },
-    "Москва→Мале": {
+    "Москва→Белград": {
+      "carriers": null,
+      "days_per_week": 2,
+      "duration_min": null
+    },
+    "Москва→Варадеро": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 545
-    },
-    "Москва→Чэнду": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 465
-    },
-    "Москва→Касабланка": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 375
-    },
-    "Москва→Маскат": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 380
-    },
-    "Москва→Манама": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 385
-    },
-    "Москва→Нячанг": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 615
-    },
-    "Москва→Дели": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 365
-    },
-    "Москва→Тегеран": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 245
-    },
-    "Москва→Санья": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 580
-    },
-    "Москва→Даламан": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 320
-    },
-    "Москва→Эр-Рияд": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 385
-    },
-    "Москва→Алжир": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 325
-    },
-    "Москва→Денпасар": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 745
-    },
-    "Москва→Ханой": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 520
-    },
-    "Москва→Маэ": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 540
-    },
-    "Москва→Коломбо": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 523
-    },
-    "Москва→Гянджа": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 205
+      "duration_min": 865
     },
     "Москва→Гоа": {
       "carriers": 1,
@@ -2045,108 +3052,263 @@
       "days_per_week": null,
       "duration_min": 585
     },
-    "Москва→Хошимин": {
-      "carriers": 1,
+    "Москва→Гуанчжоу": {
+      "carriers": 2,
       "days_per_week": null,
-      "duration_min": 595
+      "duration_min": 575
     },
-    "Москва→Варадеро": {
+    "Москва→Гянджа": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 865
+      "duration_min": 205
     },
-    "Москва→Шымкент": {
+    "Москва→Даламан": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 240
+      "duration_min": 320
     },
-    "Москва→Пхеньян": {
+    "Москва→Дели": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 455
+      "duration_min": 365
+    },
+    "Москва→Денпасар": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 745
+    },
+    "Москва→Доха": {
+      "carriers": null,
+      "days_per_week": 2,
+      "duration_min": null
     },
     "Москва→Кабул": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 273
     },
-    "Москва→Шарджа": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 330
-    },
-    "Москва→Ургенч": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 225
-    },
-    "Москва→Рас-эль-Хайма": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 330
-    },
     "Москва→Карши": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 235
     },
-    "Москва→Усть-Каменогорск": {
+    "Москва→Касабланка": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 260
+      "duration_min": 375
     },
-    "Москва→Сухум": {
+    "Москва→Коломбо": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 100
+      "duration_min": 523
     },
-    "Москва→Нахичевань": {
+    "Москва→Мале": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 220
+      "duration_min": 545
     },
-    "Москва→Багдад": {
+    "Москва→Манама": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 295
+      "duration_min": 385
+    },
+    "Москва→Маскат": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 380
+    },
+    "Москва→Маэ": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 540
+    },
+    "Москва→Монастир": {
+      "carriers": null,
+      "days_per_week": 2,
+      "duration_min": null
     },
     "Москва→Навои": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 235
     },
-    "Санкт-Петербург→Стамбул": {
+    "Москва→Нахичевань": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 220
+    },
+    "Москва→Нячанг": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 615
+    },
+    "Москва→Пекин": {
       "carriers": 2,
       "days_per_week": null,
+      "duration_min": 450
+    },
+    "Москва→Пхеньян": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 455
+    },
+    "Москва→Пхукет": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 570
+    },
+    "Москва→Рас-эль-Хайма": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 330
+    },
+    "Москва→Санья": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 580
+    },
+    "Москва→Сухум": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 100
+    },
+    "Москва→Тегеран": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 245
+    },
+    "Москва→Ургенч": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 225
+    },
+    "Москва→Усть-Каменогорск": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 260
+    },
+    "Москва→Ханой": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 520
+    },
+    "Москва→Хошимин": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 595
+    },
+    "Москва→Хургада": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 385
+    },
+    "Москва→Чэнду": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 465
+    },
+    "Москва→Шанхай": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 545
+    },
+    "Москва→Шарджа": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 330
+    },
+    "Москва→Шарм-эль-Шейх": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 385
+    },
+    "Москва→Шымкент": {
+      "carriers": 1,
+      "days_per_week": null,
       "duration_min": 240
+    },
+    "Москва→Эр-Рияд": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 385
+    },
+    "Санкт-Петербург→Абу-Даби": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 375
     },
     "Санкт-Петербург→Анталья": {
       "carriers": 4,
       "days_per_week": null,
       "duration_min": 345
     },
-    "Санкт-Петербург→Ереван": {
-      "carriers": 2,
+    "Санкт-Петербург→Астана": {
+      "carriers": 1,
       "days_per_week": null,
-      "duration_min": 250
-    },
-    "Санкт-Петербург→Ташкент": {
-      "carriers": 4,
-      "days_per_week": null,
-      "duration_min": 290
-    },
-    "Санкт-Петербург→Дубай": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 385
+      "duration_min": 255
     },
     "Санкт-Петербург→Баку": {
       "carriers": 3,
       "days_per_week": null,
       "duration_min": 245
     },
+    "Санкт-Петербург→Бангкок": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 598
+    },
+    "Санкт-Петербург→Белград": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 180
+    },
+    "Санкт-Петербург→Бишкек": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 290
+    },
+    "Санкт-Петербург→Бухара": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 295
+    },
+    "Санкт-Петербург→Дубай": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 385
+    },
     "Санкт-Петербург→Душанбе": {
       "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 295
+    },
+    "Санкт-Петербург→Ереван": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 250
+    },
+    "Санкт-Петербург→Карши": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 285
+    },
+    "Санкт-Петербург→Касабланка": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 340
+    },
+    "Санкт-Петербург→Минск": {
+      "carriers": null,
+      "days_per_week": 2,
+      "duration_min": null
+    },
+    "Санкт-Петербург→Монастир": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 265
+    },
+    "Санкт-Петербург→Наманган": {
+      "carriers": 1,
       "days_per_week": null,
       "duration_min": 295
     },
@@ -2155,135 +3317,110 @@
       "days_per_week": null,
       "duration_min": 300
     },
-    "Санкт-Петербург→Шарм-эль-Шейх": {
-      "carriers": 4,
-      "days_per_week": null,
-      "duration_min": 350
-    },
-    "Санкт-Петербург→Белград": {
+    "Санкт-Петербург→Пекин": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 180
-    },
-    "Санкт-Петербург→Хургада": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 360
-    },
-    "Санкт-Петербург→Худжанд": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 290
-    },
-    "Санкт-Петербург→Шанхай": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 560
-    },
-    "Санкт-Петербург→Самарканд": {
-      "carriers": 4,
-      "days_per_week": null,
-      "duration_min": 288
-    },
-    "Санкт-Петербург→Тбилиси": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 245
-    },
-    "Санкт-Петербург→Касабланка": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 340
-    },
-    "Санкт-Петербург→Астана": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 255
-    },
-    "Санкт-Петербург→Чэнду": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 460
-    },
-    "Санкт-Петербург→Ургенч": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 260
-    },
-    "Санкт-Петербург→Бишкек": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 290
-    },
-    "Санкт-Петербург→Абу-Даби": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 375
+      "duration_min": 465
     },
     "Санкт-Петербург→Пхукет": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 645
     },
-    "Санкт-Петербург→Пекин": {
-      "carriers": 1,
+    "Санкт-Петербург→Самарканд": {
+      "carriers": 4,
       "days_per_week": null,
-      "duration_min": 465
-    },
-    "Санкт-Петербург→Бухара": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 295
-    },
-    "Санкт-Петербург→Бангкок": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 598
-    },
-    "Санкт-Петербург→Тегеран": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 555
-    },
-    "Санкт-Петербург→Монастир": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 265
+      "duration_min": 288
     },
     "Санкт-Петербург→Санья": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 575
     },
-    "Санкт-Петербург→Карши": {
+    "Санкт-Петербург→Стамбул": {
       "carriers": 2,
       "days_per_week": null,
-      "duration_min": 285
+      "duration_min": 240
     },
-    "Санкт-Петербург→Наманган": {
+    "Санкт-Петербург→Ташкент": {
+      "carriers": 4,
+      "days_per_week": null,
+      "duration_min": 290
+    },
+    "Санкт-Петербург→Тбилиси": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 245
+    },
+    "Санкт-Петербург→Тегеран": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 295
+      "duration_min": 555
+    },
+    "Санкт-Петербург→Ургенч": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 260
+    },
+    "Санкт-Петербург→Худжанд": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 290
+    },
+    "Санкт-Петербург→Хургада": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 360
+    },
+    "Санкт-Петербург→Чэнду": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 460
+    },
+    "Санкт-Петербург→Шанхай": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 560
+    },
+    "Санкт-Петербург→Шарм-эль-Шейх": {
+      "carriers": 4,
+      "days_per_week": null,
+      "duration_min": 350
     },
     "Санкт-Петербург→Шымкент": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 270
     },
+    "Екатеринбург→Астана": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 108
+    },
+    "Екатеринбург→Баку": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 190
+    },
+    "Екатеринбург→Бангкок": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 515
+    },
+    "Екатеринбург→Бишкек": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 163
+    },
+    "Екатеринбург→Гоа": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 405
+    },
     "Екатеринбург→Дубай": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 330
-    },
-    "Екатеринбург→Стамбул": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 330
-    },
-    "Екатеринбург→Ташкент": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 170
     },
     "Екатеринбург→Душанбе": {
       "carriers": 3,
@@ -2295,175 +3432,145 @@
       "days_per_week": null,
       "duration_min": 220
     },
-    "Екатеринбург→Бишкек": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 163
-    },
-    "Екатеринбург→Худжанд": {
+    "Екатеринбург→Минск": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 180
-    },
-    "Екатеринбург→Астана": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 108
-    },
-    "Екатеринбург→Шарджа": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 310
-    },
-    "Екатеринбург→Баку": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 190
-    },
-    "Екатеринбург→Пекин": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 370
-    },
-    "Екатеринбург→Шарм-эль-Шейх": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 378
+      "duration_min": 195
     },
     "Екатеринбург→Наманган": {
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 175
     },
-    "Екатеринбург→Хургада": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 385
-    },
-    "Екатеринбург→Самарканд": {
+    "Екатеринбург→Нячанг": {
       "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 175
+      "days_per_week": 2,
+      "duration_min": 540
     },
     "Екатеринбург→Ош": {
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 180
     },
-    "Екатеринбург→Гоа": {
+    "Екатеринбург→Пекин": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 405
-    },
-    "Екатеринбург→Тбилиси": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 210
-    },
-    "Екатеринбург→Санья": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 485
-    },
-    "Екатеринбург→Бангкок": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 515
+      "duration_min": 370
     },
     "Екатеринбург→Пхукет": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 528
     },
-    "Екатеринбург→Харбин": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 355
-    },
-    "Екатеринбург→Минск": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 195
-    },
     "Екатеринбург→Рас-эль-Хайма": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 305
+    },
+    "Екатеринбург→Самарканд": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 175
+    },
+    "Екатеринбург→Санья": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 485
+    },
+    "Екатеринбург→Стамбул": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 330
+    },
+    "Екатеринбург→Ташкент": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 170
+    },
+    "Екатеринбург→Тбилиси": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 210
     },
     "Екатеринбург→Ургенч": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 170
     },
+    "Екатеринбург→Харбин": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 355
+    },
+    "Екатеринбург→Худжанд": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 180
+    },
+    "Екатеринбург→Хургада": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 385
+    },
+    "Екатеринбург→Шарджа": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 310
+    },
+    "Екатеринбург→Шарм-эль-Шейх": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 378
+    },
     "Новосибирск→Астана": {
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 130
-    },
-    "Новосибирск→Ташкент": {
-      "carriers": 4,
-      "days_per_week": null,
-      "duration_min": 190
-    },
-    "Новосибирск→Бишкек": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 150
-    },
-    "Новосибирск→Пекин": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 265
-    },
-    "Новосибирск→Ош": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 175
-    },
-    "Новосибирск→Душанбе": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 193
-    },
-    "Новосибирск→Худжанд": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 190
-    },
-    "Новосибирск→Ереван": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 300
-    },
-    "Новосибирск→Усть-Каменогорск": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 85
-    },
-    "Новосибирск→Стамбул": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 400
-    },
-    "Новосибирск→Санья": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 395
-    },
-    "Новосибирск→Гоа": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 425
     },
     "Новосибирск→Баку": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 270
     },
-    "Новосибирск→Тбилиси": {
+    "Новосибирск→Бишкек": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 150
+    },
+    "Новосибирск→Бухара": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 215
+    },
+    "Новосибирск→Гоа": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 425
+    },
+    "Новосибирск→Дубай": {
+      "carriers": 2,
+      "days_per_week": 5,
+      "duration_min": 410
+    },
+    "Новосибирск→Душанбе": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 193
+    },
+    "Новосибирск→Ереван": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 300
+    },
+    "Новосибирск→Ош": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 175
+    },
+    "Новосибирск→Пекин": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 265
     },
     "Новосибирск→Пхукет": {
       "carriers": 1,
@@ -2475,6 +3582,36 @@
       "days_per_week": null,
       "duration_min": 200
     },
+    "Новосибирск→Санья": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 395
+    },
+    "Новосибирск→Стамбул": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 400
+    },
+    "Новосибирск→Ташкент": {
+      "carriers": 4,
+      "days_per_week": null,
+      "duration_min": 190
+    },
+    "Новосибирск→Тбилиси": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 300
+    },
+    "Новосибирск→Усть-Каменогорск": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 85
+    },
+    "Новосибирск→Худжанд": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 190
+    },
     "Новосибирск→Шанхай": {
       "carriers": 1,
       "days_per_week": null,
@@ -2485,60 +3622,35 @@
       "days_per_week": null,
       "duration_min": 430
     },
-    "Новосибирск→Бухара": {
+    "Сочи→Алматы": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 215
+      "duration_min": 238
     },
-    "Сочи→Стамбул": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 135
-    },
-    "Сочи→Ереван": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 70
-    },
-    "Сочи→Тбилиси": {
+    "Сочи→Бишкек": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 83
-    },
-    "Сочи→Ташкент": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 205
+      "duration_min": 240
     },
     "Сочи→Дубай": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 230
     },
-    "Сочи→Тель-Авив": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 175
-    },
-    "Сочи→Самарканд": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 200
-    },
-    "Сочи→Шарджа": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 215
-    },
-    "Сочи→Алматы": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 238
-    },
     "Сочи→Душанбе": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 215
+    },
+    "Сочи→Ереван": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 70
+    },
+    "Сочи→Маскат": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 260
     },
     "Сочи→Минск": {
       "carriers": 1,
@@ -2550,150 +3662,160 @@
       "days_per_week": null,
       "duration_min": 223
     },
-    "Сочи→Хургада": {
-      "carriers": 1,
+    "Сочи→Самарканд": {
+      "carriers": 2,
       "days_per_week": null,
       "duration_min": 200
+    },
+    "Сочи→Стамбул": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 135
+    },
+    "Сочи→Ташкент": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 205
+    },
+    "Сочи→Тбилиси": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 83
+    },
+    "Сочи→Тель-Авив": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 175
     },
     "Сочи→Ургенч": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 150
     },
+    "Сочи→Хургада": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 200
+    },
+    "Сочи→Шарджа": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 215
+    },
     "Сочи→Шарм-эль-Шейх": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 195
-    },
-    "Сочи→Бишкек": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 240
-    },
-    "Сочи→Маскат": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 260
     },
     "Сочи→Эр-Рияд": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 255
     },
-    "Казань→Дубай": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 305
-    },
-    "Казань→Стамбул": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 325
-    },
-    "Казань→Шарм-эль-Шейх": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 340
-    },
-    "Казань→Ташкент": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 180
-    },
-    "Казань→Душанбе": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 208
-    },
-    "Казань→Шарджа": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 290
-    },
-    "Казань→Хургада": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 350
-    },
-    "Казань→Минск": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 140
-    },
     "Казань→Абу-Даби": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 320
-    },
-    "Казань→Шанхай": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 480
-    },
-    "Казань→Бишкек": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 195
-    },
-    "Казань→Тбилиси": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 185
-    },
-    "Казань→Санья": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 515
-    },
-    "Казань→Самарканд": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 205
-    },
-    "Казань→Ереван": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 190
-    },
-    "Казань→Белград": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 245
-    },
-    "Казань→Худжанд": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 195
-    },
-    "Казань→Батуми": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 200
-    },
-    "Казань→Рас-эль-Хайма": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 288
-    },
-    "Казань→Ош": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 205
     },
     "Казань→Астана": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 150
     },
-    "Красноярск→Ташкент": {
-      "carriers": 4,
-      "days_per_week": null,
-      "duration_min": 225
-    },
-    "Красноярск→Бишкек": {
+    "Казань→Бишкек": {
       "carriers": 2,
       "days_per_week": null,
+      "duration_min": 195
+    },
+    "Казань→Дубай": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 305
+    },
+    "Казань→Душанбе": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 208
+    },
+    "Казань→Ереван": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 190
+    },
+    "Казань→Минск": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 140
+    },
+    "Казань→Ош": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 205
+    },
+    "Казань→Рас-эль-Хайма": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 288
+    },
+    "Казань→Самарканд": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 205
+    },
+    "Казань→Санья": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 515
+    },
+    "Казань→Стамбул": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 325
+    },
+    "Казань→Ташкент": {
+      "carriers": 3,
+      "days_per_week": null,
       "duration_min": 180
+    },
+    "Казань→Тбилиси": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 185
+    },
+    "Казань→Худжанд": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 195
+    },
+    "Казань→Хургада": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 350
+    },
+    "Казань→Шанхай": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 480
+    },
+    "Казань→Шарджа": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 290
+    },
+    "Казань→Шарм-эль-Шейх": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 340
+    },
+    "Красноярск→Баку": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 300
+    },
+    "Красноярск→Наманган": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 215
     },
     "Красноярск→Ош": {
       "carriers": 3,
@@ -2705,6 +3827,11 @@
       "days_per_week": null,
       "duration_min": 230
     },
+    "Красноярск→Пхукет": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 455
+    },
     "Красноярск→Санья": {
       "carriers": 1,
       "days_per_week": null,
@@ -2715,35 +3842,20 @@
       "days_per_week": null,
       "duration_min": 210
     },
+    "Красноярск→Ташкент": {
+      "carriers": 4,
+      "days_per_week": null,
+      "duration_min": 225
+    },
     "Красноярск→Харбин": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 220
     },
-    "Красноярск→Пхукет": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 455
-    },
     "Красноярск→Худжанд": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 225
-    },
-    "Красноярск→Баку": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 300
-    },
-    "Красноярск→Ереван": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 330
-    },
-    "Красноярск→Наманган": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 215
     },
     "Красноярск→Шанхай": {
       "carriers": 1,
@@ -2760,25 +3872,20 @@
       "days_per_week": null,
       "duration_min": 400
     },
-    "Хабаровск→Шанхай": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 240
-    },
     "Хабаровск→Ташкент": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 470
     },
+    "Хабаровск→Шанхай": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 240
+    },
     "Владивосток→Пекин": {
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 170
-    },
-    "Владивосток→Шанхай": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 218
     },
     "Владивосток→Санья": {
       "carriers": 1,
@@ -2790,15 +3897,30 @@
       "days_per_week": null,
       "duration_min": 468
     },
-    "Иркутск→Пекин": {
-      "carriers": 1,
+    "Владивосток→Шанхай": {
+      "carriers": 2,
       "days_per_week": null,
-      "duration_min": 180
+      "duration_min": 218
+    },
+    "Иркутск→Наманган": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 265
     },
     "Иркутск→Ош": {
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 265
+    },
+    "Иркутск→Пекин": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 180
+    },
+    "Иркутск→Санья": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 335
     },
     "Иркутск→Ташкент": {
       "carriers": 2,
@@ -2810,25 +3932,20 @@
       "days_per_week": null,
       "duration_min": 55
     },
-    "Иркутск→Санья": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 335
-    },
     "Иркутск→Шанхай": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 260
     },
-    "Иркутск→Наманган": {
-      "carriers": 2,
+    "Краснодар→Наманган": {
+      "carriers": 1,
       "days_per_week": null,
-      "duration_min": 265
+      "duration_min": 228
     },
-    "Краснодар→Шарм-эль-Шейх": {
-      "carriers": 3,
+    "Краснодар→Самарканд": {
+      "carriers": 1,
       "days_per_week": null,
-      "duration_min": 203
+      "duration_min": 205
     },
     "Краснодар→Ташкент": {
       "carriers": 1,
@@ -2845,85 +3962,75 @@
       "days_per_week": null,
       "duration_min": 230
     },
-    "Краснодар→Наманган": {
-      "carriers": 1,
+    "Краснодар→Шарм-эль-Шейх": {
+      "carriers": 3,
       "days_per_week": null,
-      "duration_min": 228
-    },
-    "Краснодар→Самарканд": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 205
-    },
-    "Уфа→Шарджа": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 285
-    },
-    "Уфа→Ташкент": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 170
-    },
-    "Уфа→Самарканд": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 170
-    },
-    "Уфа→Шарм-эль-Шейх": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 345
-    },
-    "Уфа→Санья": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 510
+      "duration_min": 203
     },
     "Уфа→Наманган": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 185
     },
-    "Уфа→Худжанд": {
+    "Уфа→Самарканд": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 178
+      "duration_min": 170
+    },
+    "Уфа→Санья": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 510
     },
     "Уфа→Стамбул": {
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 305
     },
-    "Самара→Ташкент": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 185
-    },
-    "Самара→Шарджа": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 278
-    },
-    "Самара→Тбилиси": {
-      "carriers": 1,
+    "Уфа→Ташкент": {
+      "carriers": 2,
       "days_per_week": null,
       "duration_min": 170
     },
-    "Самара→Шарм-эль-Шейх": {
-      "carriers": 3,
+    "Уфа→Худжанд": {
+      "carriers": 1,
       "days_per_week": null,
-      "duration_min": 320
+      "duration_min": 178
+    },
+    "Уфа→Шарджа": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 285
+    },
+    "Уфа→Шарм-эль-Шейх": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 345
+    },
+    "Самара→Минск": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 160
     },
     "Самара→Наманган": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 195
     },
-    "Самара→Минск": {
+    "Самара→Ош": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 160
+      "duration_min": 190
+    },
+    "Самара→Ташкент": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 185
+    },
+    "Самара→Тбилиси": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 170
     },
     "Самара→Ургенч": {
       "carriers": 1,
@@ -2935,15 +4042,15 @@
       "days_per_week": null,
       "duration_min": 170
     },
-    "Самара→Ош": {
+    "Самара→Шарджа": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 190
+      "duration_min": 278
     },
-    "Челябинск→Шарм-эль-Шейх": {
-      "carriers": 2,
+    "Самара→Шарм-эль-Шейх": {
+      "carriers": 3,
       "days_per_week": null,
-      "duration_min": 370
+      "duration_min": 320
     },
     "Челябинск→Ереван": {
       "carriers": 1,
@@ -2960,20 +4067,50 @@
       "days_per_week": null,
       "duration_min": 160
     },
-    "Мин. Воды→Ереван": {
-      "carriers": 3,
-      "days_per_week": null,
-      "duration_min": 80
-    },
-    "Мин. Воды→Стамбул": {
+    "Челябинск→Шарм-эль-Шейх": {
       "carriers": 2,
       "days_per_week": null,
-      "duration_min": 165
+      "duration_min": 370
+    },
+    "Мин. Воды→Астана": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 213
+    },
+    "Мин. Воды→Бухара": {
+      "carriers": 1,
+      "days_per_week": 1,
+      "duration_min": 170
     },
     "Мин. Воды→Дубай": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 225
+    },
+    "Мин. Воды→Душанбе": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 185
+    },
+    "Мин. Воды→Ереван": {
+      "carriers": 3,
+      "days_per_week": null,
+      "duration_min": 80
+    },
+    "Мин. Воды→Минск": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 225
+    },
+    "Мин. Воды→Самарканд": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 175
+    },
+    "Мин. Воды→Стамбул": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 165
     },
     "Мин. Воды→Ташкент": {
       "carriers": 4,
@@ -2985,15 +4122,15 @@
       "days_per_week": null,
       "duration_min": 75
     },
-    "Мин. Воды→Душанбе": {
-      "carriers": 1,
+    "Мин. Воды→Тель-Авив": {
+      "carriers": 2,
       "days_per_week": null,
-      "duration_min": 185
+      "duration_min": 200
     },
-    "Мин. Воды→Самарканд": {
+    "Мин. Воды→Худжанд": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 175
+      "duration_min": 180
     },
     "Мин. Воды→Хургада": {
       "carriers": 1,
@@ -3005,67 +4142,42 @@
       "days_per_week": null,
       "duration_min": 220
     },
-    "Мин. Воды→Тель-Авив": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 200
-    },
-    "Мин. Воды→Минск": {
+    "Тюмень→Батуми": {
       "carriers": 1,
       "days_per_week": null,
-      "duration_min": 225
-    },
-    "Мин. Воды→Астана": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 213
-    },
-    "Мин. Воды→Худжанд": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 180
+      "duration_min": 240
     },
     "Тюмень→Дубай": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 330
     },
-    "Тюмень→Ташкент": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 180
-    },
     "Тюмень→Ош": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 170
+    },
+    "Тюмень→Ташкент": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 180
     },
     "Тюмень→Тбилиси": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 220
     },
-    "Тюмень→Батуми": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 240
-    },
-    "Нижний Новгород→Ташкент": {
+    "Нижний Новгород→Батуми": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 210
-    },
-    "Нижний Новгород→Шарм-эль-Шейх": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 375
     },
     "Нижний Новгород→Сухум": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 145
     },
-    "Нижний Новгород→Батуми": {
+    "Нижний Новгород→Ташкент": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 210
@@ -3075,15 +4187,15 @@
       "days_per_week": null,
       "duration_min": 193
     },
+    "Нижний Новгород→Шарм-эль-Шейх": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 375
+    },
     "Пермь→Шарм-эль-Шейх": {
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 385
-    },
-    "Пермь→Наманган": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 190
     },
     "Омск→Астана": {
       "carriers": 1,
@@ -3100,6 +4212,11 @@
       "days_per_week": null,
       "duration_min": 278
     },
+    "Сургут→Дубай": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 370
+    },
     "Сургут→Ош": {
       "carriers": 2,
       "days_per_week": null,
@@ -3110,30 +4227,10 @@
       "days_per_week": null,
       "duration_min": 215
     },
-    "Сургут→Дубай": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 370
-    },
-    "Улан-Удэ→Ташкент": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 310
-    },
     "Южно-Сахалинск→Пекин": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 238
-    },
-    "Махачкала→Ургенч": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 118
-    },
-    "Махачкала→Ташкент": {
-      "carriers": 2,
-      "days_per_week": null,
-      "duration_min": 165
     },
     "Махачкала→Минск": {
       "carriers": 1,
@@ -3144,6 +4241,16 @@
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 190
+    },
+    "Махачкала→Ташкент": {
+      "carriers": 2,
+      "days_per_week": null,
+      "duration_min": 165
+    },
+    "Махачкала→Ургенч": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 118
     },
     "Грозный→Дубай": {
       "carriers": 1,
@@ -3160,15 +4267,20 @@
       "days_per_week": null,
       "duration_min": 290
     },
-    "Череповец→Минск": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 90
-    },
     "Якутск→Пекин": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 270
+    },
+    "Улан-Удэ→Ташкент": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 310
+    },
+    "Череповец→Минск": {
+      "carriers": 1,
+      "days_per_week": null,
+      "duration_min": 90
     }
   }
 }
