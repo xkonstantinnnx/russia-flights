@@ -88,12 +88,18 @@ body{display:flex;flex-direction:column;}
 #body-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
 #map-wrap{position:absolute;inset:0;}
 #map{width:100%;height:100%;}
-/* Логотип Яндекса — обязательное условие Tiles API: официальное изображение
-   в углу карты, гиперссылка на Яндекс Карты. Показывается только когда
-   активен слой Яндекса (см. setTiles). Отступы уже заложены внутрь файла,
-   поэтому свои минимальные. Лежит поверх тайлов, но вне слоя — CSS-фильтр
-   тёмной темы его не трогает. */
-#ymaps-logo{position:absolute;left:6px;bottom:4px;z-index:500;display:none;width:92px;height:50px;background:var(--rf-ylogo) left bottom/contain no-repeat;}
+/* Копирайт источника карты — в самом правом нижнем углу. У Яндекса это
+   обязательный графический логотип со ссылкой на Яндекс Карты (текстовый
+   копирайт им не нужен), у OSM и Рельефа — наоборот, текст. Поэтому вместе
+   они не появляются никогда. Отступы логотипа заложены внутрь файла.
+   Блок лежит поверх тайлов, но вне слоя — фильтр тёмной темы его не трогает.
+   Кнопки зума приподняты, чтобы встать НАД блоком, а не наоборот. */
+#map-credits{position:absolute;right:6px;bottom:4px;z-index:500;display:flex;align-items:flex-end;}
+#ymaps-logo{display:none;width:78px;height:43px;background:var(--rf-ylogo) right bottom/contain no-repeat;}
+#map-credit-text{display:none;background:var(--rf-chip-solid);color:var(--rf-t3);font-size:9.5px;line-height:1.5;padding:2px 7px;border-radius:5px;}
+#map-credit-text a{color:var(--rf-t2);text-decoration:none;}
+#map-credit-text a:hover{color:var(--rf-accent);}
+.leaflet-bottom.leaflet-right .leaflet-control-zoom{margin-bottom:50px;}
 #arc-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;}
 .leaflet-container{background:var(--rf-bg);}
 .leaflet-control-zoom{z-index:700;}
@@ -117,12 +123,10 @@ body{display:flex;flex-direction:column;}
 @keyframes rfdash{to{stroke-dashoffset:-24;}}
 .leaflet-control-zoom a{background:var(--rf-chip-solid)!important;color:var(--rf-accent)!important;border-color:var(--rf-line)!important;}
 .leaflet-control-zoom a:hover{background:var(--rf-hover-bg)!important;}
-/* Атрибуция обязательна по условиям всех источников тайлов. Раньше была
-   скрыта (display:none) — с 15.08.2026 показываем, оформив под интерфейс.
-   Отдельный контрол, поэтому CSS-фильтр .rf-dark-map её не затрагивает. */
-.leaflet-control-attribution{background:var(--rf-chip-solid)!important;color:var(--rf-t3)!important;font-size:9.5px!important;line-height:1.5!important;padding:2px 7px!important;border-radius:5px 0 0 0!important;box-shadow:none!important;}
-.leaflet-control-attribution a{color:var(--rf-t2)!important;text-decoration:none!important;}
-.leaflet-control-attribution a:hover{color:var(--rf-accent)!important;}
+/* Штатный контрол атрибуции Leaflet не используем: он встаёт НАД кнопками
+   зума в том же углу, а копирайт нужен в самом углу. Рисуем свой блок
+   #map-credits (см. выше). */
+.leaflet-control-attribution{display:none!important;}
 .leaflet-tooltip{background:var(--rf-chip-solid)!important;border:1px solid var(--rf-line)!important;color:var(--rf-text)!important;font-size:11px!important;border-radius:6px!important;padding:4px 9px!important;box-shadow:var(--rf-shadow)!important;}
 .leaflet-tooltip::before{display:none!important;}
 
@@ -425,7 +429,10 @@ body{display:flex;flex-direction:column;}
 <div id="body-wrap">
 <div id="map-wrap">
   <div id="map"></div>
-  <a id="ymaps-logo" href="https://yandex.ru/maps/" target="_blank" rel="noopener" aria-label="Яндекс Карты"></a>
+  <div id="map-credits">
+    <a id="ymaps-logo" href="https://yandex.ru/maps/" target="_blank" rel="noopener" aria-label="Яндекс Карты"></a>
+    <div id="map-credit-text"></div>
+  </div>
   <svg id="arc-svg"></svg>
   <div id="map-ctrl">
     <button class="map-ctrl-btn" onclick="toggleMapMenu()">
@@ -477,7 +484,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="privacy.html">Конфиденциальность</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v4.0</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v4.1</span>
         </div>
       </div>
     </div>
@@ -2763,7 +2770,7 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
         <div class="card-info-cell"><div class="ci-label">ЦЕНЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Travelpayouts/Aviasales, диапазон недавно найденных цен по маршруту</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v4.0 · 15.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v4.1 · 15.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Кнопки «Билеты» — реклама Aviasales: при бронировании через них сайт получает комиссию, без наценки для вас. ${esc(TP_AD_LABEL)} Данные о рейсах справочные и могут устаревать: наличие маршрута, расписание и цены проверяйте у авиакомпании или в сервисе покупки билета. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
     `;
@@ -3000,12 +3007,12 @@ function initApp(data) {
     url: 'https://tiles.api-maps.yandex.ru/v1/tiles/?apikey=' + encodeURIComponent(YANDEX_TILES_KEY) +
          '&lang=ru_RU&l=map&projection=web_mercator&scale=1&x={x}&y={y}&z={z}',
     opts: { maxZoom: 19 },
-    attribution: '© <a href="https://yandex.ru/maps/" target="_blank" rel="noopener">Яндекс</a>',
+    attribution: '',
   };
   const YANDEX_LEGACY = {
     url: 'https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}&scale=1&lang=ru_RU&projection=web_mercator',
     opts: { maxZoom: 19 },
-    attribution: '© <a href="https://yandex.ru/maps/" target="_blank" rel="noopener">Яндекс</a>',
+    attribution: '',
   };
 
   /* Все источники — легальные: официальный API с ключом либо свободная
@@ -3017,6 +3024,8 @@ function initApp(data) {
      Google Map Tiles API платный). Если спутник понадобится — это платный
      тариф и отдельное решение. */
   const TILES = {
+    // У Яндекса attribution пустой намеренно: их условия требуют графический
+    // логотип (#ymaps-logo), текстовый копирайт не нужен.
     yndx: YANDEX_TILES_KEY ? YANDEX_OFFICIAL : YANDEX_LEGACY,
     osm:  { url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             opts:{ maxZoom:19 },
@@ -3030,14 +3039,11 @@ function initApp(data) {
   // zoomControl выключен: кнопки +/− раньше сидели в верхнем левом углу
   // как в макете: зум-контрол в правом нижнем углу (не top-left — там
   // теперь плавающая панель).
-  const map = L.map('map', {center:[55,70], zoom:3, zoomControl:true, attributionControl:true, minZoom:2, maxZoom:12, worldCopyJump:true});
+  // attributionControl:false — копирайт рисуем сами в #map-credits, чтобы он
+  // оказался в самом углу, а не над кнопками зума. Leaflet под BSD-2
+  // собственной атрибуции не требует.
+  const map = L.map('map', {center:[55,70], zoom:3, zoomControl:true, attributionControl:false, minZoom:2, maxZoom:12, worldCopyJump:true});
   map.zoomControl.setPosition('bottomright');
-  // Без префикса «Leaflet» — оставляем только копирайт источника тайлов,
-  // который обязателен. Сам Leaflet под BSD-2 атрибуции не требует.
-  map.attributionControl.setPrefix(false);
-  // Зум-контрол уже занимает правый нижний угол — атрибуцию уводим в левый,
-  // иначе они встают друг над другом в одном контейнере Leaflet.
-  map.attributionControl.setPosition('bottomright');
 
   /* ── ВЕРТИКАЛЬНОЕ ЗАПОЛНЕНИЕ ────────────────────────────────────────
      Мировые тайлы на зуме z занимают ровно 256·2^z пикселей по высоте.
@@ -3079,20 +3085,25 @@ function initApp(data) {
   // Показываем как есть — светлым пятном на тёмном интерфейсе, зато читаемым.
   const SCHEME_TILES = new Set(['yndx', 'osm']);
   function tileClass(key) { return SCHEME_TILES.has(key) && !isLightTheme() ? 'rf-dark-map' : ''; }
-  // Опции слоя: собственные opts источника + класс тёмной темы + обязательный
-  // копирайт. Leaflet сам показывает/убирает его при добавлении и снятии слоя.
   function tileOpts(key) {
-    const t = TILES[key];
-    return Object.assign({}, t.opts, { className: tileClass(key), attribution: t.attribution || '' });
+    return Object.assign({}, TILES[key].opts, { className: tileClass(key) });
   }
-  // Логотип Яндекса обязателен только пока показывается его подложка.
-  function syncYandexLogo(key) {
-    const el = document.getElementById('ymaps-logo');
-    if (el) el.style.display = key === 'yndx' ? 'block' : 'none';
+  // Яндексу нужен только логотип, OSM и Рельефу — только текст, поэтому
+  // показываем ровно одно из двух. Разметка копирайта своя (см. TILES),
+  // из данных туда ничего не подставляется.
+  function syncCredits(key) {
+    const logo = document.getElementById('ymaps-logo');
+    const text = document.getElementById('map-credit-text');
+    const isYandex = key === 'yndx';
+    if (logo) logo.style.display = isYandex ? 'block' : 'none';
+    if (text) {
+      text.style.display = isYandex ? 'none' : 'block';
+      if (!isYandex) text.innerHTML = TILES[key].attribution || '';
+    }
   }
   let currentTileKey = 'yndx';
   let tileLayer = L.tileLayer(TILES.yndx.url, tileOpts('yndx')).addTo(map);
-  syncYandexLogo('yndx');
+  syncCredits('yndx');
   let labelsLayer = null;
 
   const TILE_LABELS = { yndx:'Яндекс', osm:'OSM', topo:'Рельеф' };
@@ -3103,7 +3114,7 @@ function initApp(data) {
     const t = TILES[key];
     tileLayer = L.tileLayer(t.url, tileOpts(key)).addTo(map);
     if (t.labelsUrl) labelsLayer = L.tileLayer(t.labelsUrl, t.labelsOpts).addTo(map);
-    syncYandexLogo(key);
+    syncCredits(key);
     document.getElementById('map-ctrl-label').textContent = TILE_LABELS[key];
     document.querySelectorAll('.map-menu-item').forEach(b => b.classList.toggle('on', b.dataset.tile === key));
     document.getElementById('map-menu').style.display = 'none';
