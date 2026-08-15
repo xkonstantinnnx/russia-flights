@@ -128,7 +128,10 @@ body{display:flex;flex-direction:column;}
 .map-ctrl-caret{color:var(--rf-t5);font-size:10px;}
 .map-menu{position:absolute;top:44px;right:0;width:214px;padding:10px;background:var(--rf-panel);backdrop-filter:blur(16px);border:1px solid var(--rf-line);border-radius:10px;box-shadow:var(--rf-shadow);}
 .map-menu-label{font-family:var(--rf-mono);font-size:9px;letter-spacing:.14em;color:var(--rf-t5);margin-bottom:7px;}
-.map-menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+/* Три слоя в ряд: ширина меню 214px, поэтому у кнопок боковые отступы
+   поменьше и текст по центру — иначе «Яндекс»/«Рельеф» переносятся. */
+.map-menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.map-menu-grid .map-menu-item{padding-left:4px;padding-right:4px;text-align:center;}
 .map-menu-item{padding:6px 9px;border-radius:6px;cursor:pointer;font-size:11.5px;font-family:var(--rf-font);border:1px solid var(--rf-line);background:var(--rf-input);color:var(--rf-t3);}
 .map-menu-item.on{border-color:var(--rf-accent-border);background:var(--rf-accent-soft);color:var(--rf-accent);}
 .map-menu-note{margin-top:11px;padding-top:9px;border-top:1px solid var(--rf-line2);font-size:10.5px;line-height:1.45;color:var(--rf-t4);}
@@ -407,12 +410,11 @@ body{display:flex;flex-direction:column;}
     <div id="map-menu" class="map-menu" style="display:none;">
       <div class="map-menu-label">ТИП КАРТЫ</div>
       <div class="map-menu-grid">
-        <button class="map-menu-item"    data-tile="gmap"   onclick="setTiles('gmap')">Google</button>
         <button class="map-menu-item on" data-tile="yndx"   onclick="setTiles('yndx')">Яндекс</button>
-        <button class="map-menu-item"    data-tile="sat"    onclick="setTiles('sat')">Спутник</button>
-        <button class="map-menu-item"    data-tile="hybrid" onclick="setTiles('hybrid')">Гибрид</button>
+        <button class="map-menu-item"    data-tile="osm"    onclick="setTiles('osm')">OSM</button>
+        <button class="map-menu-item"    data-tile="topo"   onclick="setTiles('topo')">Рельеф</button>
       </div>
-      <div class="map-menu-note">Полного набора «Яндекс × тип» нет: у Яндекса в проекте только схема.</div>
+      <div class="map-menu-note">Спутниковой съёмки нет — только схематичные карты.</div>
     </div>
   </div>
   <div id="season-switch">
@@ -449,7 +451,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="privacy.html">Конфиденциальность</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.8</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.9</span>
         </div>
       </div>
     </div>
@@ -2725,7 +2727,7 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
         <div class="card-info-cell"><div class="ci-label">ЦЕНЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Travelpayouts/Aviasales, диапазон недавно найденных цен по маршруту</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.8 · 15.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.9 · 15.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Кнопки «Билеты» — реклама Aviasales: при бронировании через них сайт получает комиссию, без наценки для вас. ${esc(TP_AD_LABEL)} Данные о рейсах справочные и могут устаревать: наличие маршрута, расписание и цены проверяйте у авиакомпании или в сервисе покупки билета. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
     `;
@@ -2970,19 +2972,24 @@ function initApp(data) {
     attribution: '© <a href="https://yandex.ru/maps/" target="_blank" rel="noopener">Яндекс</a>',
   };
 
+  /* Все источники — легальные: официальный API с ключом либо свободная
+     лицензия с указанием авторства. Слои Google (схема, спутник, гибрид)
+     убраны 15.08.2026: они брались с внутренних адресов mt{s}.google.com
+     в обход условий использования. Спутника в наборе нет — бесплатного
+     источника спутниковой съёмки с разрешённым коммерческим использованием
+     не существует (Esri и MapTiler дают её только некоммерческим проектам,
+     Google Map Tiles API платный). Если спутник понадобится — это платный
+     тариф и отдельное решение. */
   const TILES = {
-    gmap:   { url:'https://mt{s}.google.com/vt/lyrs=m&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19},
-              attribution:'© Google' },
-    yndx:   YANDEX_TILES_KEY ? YANDEX_OFFICIAL : YANDEX_LEGACY,
-    sat:    { url:'https://mt{s}.google.com/vt/lyrs=y&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19},
-              attribution:'© Google' },
-    // Гибрид = спутник + подписи отдельным слоем поверх (два L.tileLayer).
-    hybrid: { url:'https://mt{s}.google.com/vt/lyrs=y&hl=ru&x={x}&y={y}&z={z}',           opts:{subdomains:'0123',maxZoom:19},
-              labelsUrl:'https://mt{s}.google.com/vt/lyrs=h&hl=ru&x={x}&y={y}&z={z}',     labelsOpts:{subdomains:'0123',maxZoom:19},
-              attribution:'© Google' },
-    // «Рельеф» (OpenTopoMap) убран 08.08.2026: лицензия CC-BY-SA обязывала
-    // показывать копирайт, а атрибуция тогда была скрыта. С 15.08.2026
-    // атрибуция показывается — слой при желании можно вернуть.
+    yndx: YANDEX_TILES_KEY ? YANDEX_OFFICIAL : YANDEX_LEGACY,
+    osm:  { url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            opts:{ maxZoom:19 },
+            attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' },
+    // Вернулся 15.08.2026: выкидывали 08.08.2026 только потому, что лицензия
+    // CC-BY-SA требует копирайт, а атрибуция тогда была скрыта. Теперь есть.
+    topo: { url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+            opts:{ subdomains:'abc', maxZoom:17 },
+            attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, SRTM · © <a href="https://opentopomap.org/" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)' },
   };
   // zoomControl выключен: кнопки +/− раньше сидели в верхнем левом углу
   // как в макете: зум-контрол в правом нижнем углу (не top-left — там
@@ -3031,7 +3038,7 @@ function initApp(data) {
   function isLightTheme() { return document.documentElement.getAttribute('data-theme') === 'light'; }
   // Схематичные тайлы в тёмной теме затемняем CSS-фильтром (.rf-dark-map,
   // см. <style>) — иначе поверх тёмного интерфейса светится белая карта.
-  const SCHEME_TILES = new Set(['gmap', 'yndx']);
+  const SCHEME_TILES = new Set(['yndx', 'osm', 'topo']);
   function tileClass(key) { return SCHEME_TILES.has(key) && !isLightTheme() ? 'rf-dark-map' : ''; }
   // Опции слоя: собственные opts источника + класс тёмной темы + обязательный
   // копирайт. Leaflet сам показывает/убирает его при добавлении и снятии слоя.
@@ -3043,7 +3050,7 @@ function initApp(data) {
   let tileLayer = L.tileLayer(TILES.yndx.url, tileOpts('yndx')).addTo(map);
   let labelsLayer = null;
 
-  const TILE_LABELS = { gmap:'Google', yndx:'Яндекс', sat:'Спутник', hybrid:'Гибрид' };
+  const TILE_LABELS = { yndx:'Яндекс', osm:'OSM', topo:'Рельеф' };
   window.setTiles = function(key) {
     currentTileKey = key;
     map.removeLayer(tileLayer);

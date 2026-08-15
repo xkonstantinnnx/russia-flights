@@ -49,11 +49,12 @@
     # в консоли браузера (F12 -> Console). Погонять 1-2 недели на всех
     # слоях карты и с Вебвизором, добить недостающие источники, затем
     # переименовать в Content-Security-Policy.
-    # Источники: jsdelivr (Leaflet, с SRI), mc.yandex.ru (Метрика),
-    # тайлы mt0-3.google.com (перечислены поимённо — тайлы ходят только
-    # на эти четыре хоста, весь *.google.com не нужен) и Яндекса.
-    # Шрифты с 15.08.2026 self-host (fonts.css + fonts/) — font-src 'self'.
-    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://mc.yandex.ru; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self'; img-src 'self' data: https://mt0.google.com https://mt1.google.com https://mt2.google.com https://mt3.google.com https://core-renderer-tiles.maps.yandex.net https://mc.yandex.ru; connect-src 'self' https://mc.yandex.ru wss://mc.yandex.ru; frame-src https://mc.yandex.ru; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+    # Источники: jsdelivr (Leaflet, с SRI), mc.yandex.ru (Метрика) и тайлы.
+    # С 15.08.2026 тайлы только легальные: официальный Tiles API Яндекса,
+    # OpenStreetMap и OpenTopoMap (a/b/c — его субдомены). Хосты Google
+    # (mt0-3) и неофициальный core-renderer-tiles.maps.yandex.net убраны
+    # вместе со слоями. Шрифты self-host — font-src 'self'.
+    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://mc.yandex.ru; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self'; img-src 'self' data: https://tiles.api-maps.yandex.ru https://tile.openstreetmap.org https://a.tile.opentopomap.org https://b.tile.opentopomap.org https://c.tile.opentopomap.org https://mc.yandex.ru; connect-src 'self' https://mc.yandex.ru wss://mc.yandex.ru; frame-src https://mc.yandex.ru; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
 
     # HTML и routes.json: кэшировать можно, но перепроверять по ETag —
     # свежесть после ежечасного cron-pull гарантирована, 304 дешёвые.
