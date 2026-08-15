@@ -1,4 +1,4 @@
-Contact: mailto:xkonstantinnnxkz@gmail.com
+Contact: https://github.com/xkonstantinnnx/russia-flights/issues
 Expires: 2027-08-14T00:00:00.000Z
 Preferred-Languages: ru, en
 Canonical: https://russia-flights.ru/.well-known/security.txt

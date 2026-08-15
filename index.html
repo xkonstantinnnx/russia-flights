@@ -139,19 +139,8 @@ body{display:flex;flex-direction:column;}
    сама кнопка внутри — прозрачная, только квадратная точка + текст + ▾. */
 /* z-index выше, чем у #season-switch (700), — иначе открытое выпадающее
    меню типа карты частично уходит под соседнюю кнопку «Сезон». */
-#map-ctrl{position:absolute;top:14px;right:14px;z-index:710;background:var(--rf-panel);backdrop-filter:blur(14px);border:1px solid var(--rf-line);border-radius:9px;box-shadow:var(--rf-shadow);}
-.map-ctrl-btn{display:flex;align-items:center;gap:8px;padding:7px 11px;border:none;background:transparent;color:var(--rf-t2);font-family:var(--rf-font);font-size:12px;cursor:pointer;}
-.map-ctrl-dot{width:7px;height:7px;border-radius:2px;background:var(--rf-accent);flex:none;}
-.map-ctrl-caret{color:var(--rf-t5);font-size:10px;}
-.map-menu{position:absolute;top:44px;right:0;width:214px;padding:10px;background:var(--rf-panel);backdrop-filter:blur(16px);border:1px solid var(--rf-line);border-radius:10px;box-shadow:var(--rf-shadow);}
-.map-menu-label{font-family:var(--rf-mono);font-size:9px;letter-spacing:.14em;color:var(--rf-t5);margin-bottom:7px;}
-/* Три слоя в ряд: ширина меню 214px, поэтому у кнопок боковые отступы
-   поменьше и текст по центру — иначе «Яндекс»/«Рельеф» переносятся. */
-.map-menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
-.map-menu-grid .map-menu-item{padding-left:4px;padding-right:4px;text-align:center;}
-.map-menu-item{padding:6px 9px;border-radius:6px;cursor:pointer;font-size:11.5px;font-family:var(--rf-font);border:1px solid var(--rf-line);background:var(--rf-input);color:var(--rf-t3);}
-.map-menu-item.on{border-color:var(--rf-accent-border);background:var(--rf-accent-soft);color:var(--rf-accent);}
-.map-menu-note{margin-top:11px;padding-top:9px;border-top:1px solid var(--rf-line2);font-size:10.5px;line-height:1.45;color:var(--rf-t4);}
+/* Стили переключателя типа карты убраны вместе с ним 15.08.2026 — остался
+   единственный легальный источник тайлов. */
 
 #season-switch{position:absolute;top:52px;right:8px;z-index:700;display:flex;gap:4px;align-items:center;}
 .ts-btn{font-family:var(--rf-mono);font-size:10px;line-height:1;padding:6px 9px;border-radius:8px;border:1px solid var(--rf-line);background:var(--rf-chip-solid);color:var(--rf-t2);cursor:pointer;backdrop-filter:blur(4px);}
@@ -172,7 +161,9 @@ body{display:flex;flex-direction:column;}
 /* Легенда — визовый режим (как в макете), не регионы: цвета совпадают с
    маркерами/дугами на карте. Кликабельна — фильтрует направления так же,
    как чипы визы в списке (общий visaActive, см. toggleVisaFilter). */
-#legend{position:absolute;z-index:550;display:flex;align-items:center;gap:4px;padding:4px;background:var(--rf-panel);border:1px solid var(--rf-line);border-radius:9px;backdrop-filter:blur(12px);box-shadow:var(--rf-shadow);}
+/* Легенда по центру низа карты: у правого края она перекрывала обязательный
+   логотип Яндекса, у левого уходит под плавающую панель. */
+#legend{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:550;display:flex;align-items:center;gap:4px;padding:4px;background:var(--rf-panel);border:1px solid var(--rf-line);border-radius:9px;backdrop-filter:blur(12px);box-shadow:var(--rf-shadow);}
 .leg-btn{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;cursor:pointer;font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;border:1px solid transparent;background:transparent;color:var(--rf-t3);}
 .leg-btn.on{border-color:var(--rf-accent-border);background:var(--rf-accent-soft);color:var(--rf-text);}
 .leg-btn .leg-dot{width:8px;height:8px;border-radius:50%;flex:none;}
@@ -375,8 +366,7 @@ body{display:flex;flex-direction:column;}
 /* ── DESKTOP (≥ 900px): панель плавает поверх карты слева ─── */
 @media (min-width: 900px) {
   #panel { top: 14px; bottom: 14px; left: 14px; width: 396px; border-radius: 14px; }
-  /* right:56 (не 16) — оставляет место зум-контролу Leaflet в том же углу */
-  #legend { bottom: 16px; right: 56px; }
+  #legend { bottom: 16px; }
   #season-switch { top: 56px; }
   .ts-btn { font-size: 11px; padding: 4px 11px; }
 }
@@ -391,7 +381,7 @@ body{display:flex;flex-direction:column;}
   }
   #panel.sheet-full { height: 74vh; }
   .panel-grabber { display: block; flex: none; width: 40px; height: 4px; border-radius: 3px; background: var(--rf-line); margin: 9px auto 4px; cursor: pointer; }
-  #legend { bottom: 150px; left: 14px; right: auto; }
+  #legend { bottom: 150px; }
 }
 </style>
 </head>
@@ -434,22 +424,7 @@ body{display:flex;flex-direction:column;}
     <div id="map-credit-text"></div>
   </div>
   <svg id="arc-svg"></svg>
-  <div id="map-ctrl">
-    <button class="map-ctrl-btn" onclick="toggleMapMenu()">
-      <span class="map-ctrl-dot"></span>
-      <span id="map-ctrl-label">Яндекс</span>
-      <span class="map-ctrl-caret">▾</span>
-    </button>
-    <div id="map-menu" class="map-menu" style="display:none;">
-      <div class="map-menu-label">ТИП КАРТЫ</div>
-      <div class="map-menu-grid">
-        <button class="map-menu-item on" data-tile="yndx"   onclick="setTiles('yndx')">Яндекс</button>
-        <button class="map-menu-item"    data-tile="osm"    onclick="setTiles('osm')">OSM</button>
-        <button class="map-menu-item"    data-tile="topo"   onclick="setTiles('topo')">Рельеф</button>
-      </div>
-      <div class="map-menu-note">Спутниковой съёмки нет — только схематичные карты.</div>
-    </div>
-  </div>
+  <!-- Переключателя типа карты нет: легально доступен один источник (см. TILES). -->
   <div id="season-switch">
     <select id="season-month" style="visibility:hidden;" onchange="setSeasonMonth(this.value)"></select>
     <button class="ts-btn" id="season-toggle" onclick="toggleSeason()">🌦 Сезон</button>
@@ -476,15 +451,16 @@ body{display:flex;flex-direction:column;}
         <div class="panel-section-label" id="overview-list-label">ГОРОДА ВЫЛЕТА</div>
         <div id="overview-list"></div>
         <div class="panel-footer-links">
-          <a href="#" onclick="showFullView('text');return false;">Список маршрутов текстом</a>
+          <!-- Подписи короткие, чтобы строка не разъезжалась на две. -->
+          <a href="#" onclick="showFullView('text');return false;">Маршруты</a>
           <span style="color:var(--rf-line);">·</span>
           <a href="#" onclick="showFullView('stats');return false;">Статистика</a>
           <span style="color:var(--rf-line);">·</span>
           <a href="#" onclick="showFullView('about');return false;">О проекте</a>
           <span style="color:var(--rf-line);">·</span>
-          <a href="privacy.html">Конфиденциальность</a>
+          <a href="privacy.html">Приватность</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v4.1</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v4.2</span>
         </div>
       </div>
     </div>
@@ -2770,7 +2746,7 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
         <div class="card-info-cell"><div class="ci-label">ЦЕНЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Travelpayouts/Aviasales, диапазон недавно найденных цен по маршруту</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v4.1 · 15.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v4.2 · 15.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Кнопки «Билеты» — реклама Aviasales: при бронировании через них сайт получает комиссию, без наценки для вас. ${esc(TP_AD_LABEL)} Данные о рейсах справочные и могут устаревать: наличие маршрута, расписание и цены проверяйте у авиакомпании или в сервисе покупки билета. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
     `;
@@ -3027,14 +3003,11 @@ function initApp(data) {
     // У Яндекса attribution пустой намеренно: их условия требуют графический
     // логотип (#ymaps-logo), текстовый копирайт не нужен.
     yndx: YANDEX_TILES_KEY ? YANDEX_OFFICIAL : YANDEX_LEGACY,
-    osm:  { url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            opts:{ maxZoom:19 },
-            attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' },
-    // Вернулся 15.08.2026: выкидывали 08.08.2026 только потому, что лицензия
-    // CC-BY-SA требует копирайт, а атрибуция тогда была скрыта. Теперь есть.
-    topo: { url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-            opts:{ subdomains:'abc', maxZoom:17 },
-            attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, SRTM · © <a href="https://opentopomap.org/" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)' },
+    // OSM и OpenTopoMap убраны 15.08.2026 и возвращать их нельзя: они рисуют
+    // границы России не так, как требует законодательство РФ, а карты,
+    // оспаривающие территориальную целостность, отнесены к экстремистским
+    // материалам (штраф либо арест для физлица). Скрыть слой границ в
+    // растровых тайлах невозможно — они уже нарисованы в картинке.
   };
   // zoomControl выключен: кнопки +/− раньше сидели в верхнем левом углу
   // как в макете: зум-контрол в правом нижнем углу (не top-left — там
@@ -3106,28 +3079,16 @@ function initApp(data) {
   syncCredits('yndx');
   let labelsLayer = null;
 
-  const TILE_LABELS = { yndx:'Яндекс', osm:'OSM', topo:'Рельеф' };
-  window.setTiles = function(key) {
-    currentTileKey = key;
+  // Слой сейчас один, переключателя типа карты нет. Пересборка нужна только
+  // при смене темы: класс затемнения задаётся при создании слоя.
+  function refreshTiles() {
+    const t = TILES[currentTileKey];
     map.removeLayer(tileLayer);
     if (labelsLayer) { map.removeLayer(labelsLayer); labelsLayer = null; }
-    const t = TILES[key];
-    tileLayer = L.tileLayer(t.url, tileOpts(key)).addTo(map);
+    tileLayer = L.tileLayer(t.url, tileOpts(currentTileKey)).addTo(map);
     if (t.labelsUrl) labelsLayer = L.tileLayer(t.labelsUrl, t.labelsOpts).addTo(map);
-    syncCredits(key);
-    document.getElementById('map-ctrl-label').textContent = TILE_LABELS[key];
-    document.querySelectorAll('.map-menu-item').forEach(b => b.classList.toggle('on', b.dataset.tile === key));
-    document.getElementById('map-menu').style.display = 'none';
-  };
-
-  window.toggleMapMenu = function() {
-    const menu = document.getElementById('map-menu');
-    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-  };
-  document.addEventListener('click', e => {
-    const ctrl = document.getElementById('map-ctrl');
-    if (ctrl && !ctrl.contains(e.target)) document.getElementById('map-menu').style.display = 'none';
-  });
+    syncCredits(currentTileKey);
+  }
 
   // Всплывающая методическая подсказка по клику на «?» (сейчас — только у
   // «СЕЗОННОСТЬ» в карточке направления, разметка общая для будущих подсказок).
@@ -3428,7 +3389,7 @@ function initApp(data) {
   window.__onThemeChange = () => {
     for (const [name, m] of Object.entries(dstMarkers)) m.setStyle({ color: dstColor(name), fillColor: haloColor() });
     for (const [name, obj] of Object.entries(ruMarkers)) obj.m.setStyle({ color: originColor(name===curFrom), fillColor: haloColor() });
-    setTiles(currentTileKey);
+    refreshTiles();
     renderLegend();
     drawArcs();
   };
