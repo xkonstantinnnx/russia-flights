@@ -449,7 +449,7 @@ body{display:flex;flex-direction:column;}
           <span style="color:var(--rf-line);">·</span>
           <a href="privacy.html">Конфиденциальность</a>
           <span style="flex:1;"></span>
-          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.7</span>
+          <span style="font-family:var(--rf-mono);font-size:10px;letter-spacing:.06em;color:var(--rf-t5);">v3.8</span>
         </div>
       </div>
     </div>
@@ -2725,7 +2725,7 @@ function initApp(data) {
         <div class="card-info-cell"><div class="ci-label">ВИЗОВЫЕ РЕЖИМЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">ru.wikipedia.org, статья «Визовые требования для граждан России»</div></div>
         <div class="card-info-cell"><div class="ci-label">СЕЗОННОСТЬ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Open-Meteo Historical Weather + Marine API, климатический комфорт и температура воды по месяцам</div></div>
         <div class="card-info-cell"><div class="ci-label">ЦЕНЫ</div><div class="ci-val" style="font-size:13px;font-weight:400;">Travelpayouts/Aviasales, диапазон недавно найденных цен по маршруту</div></div>
-        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.7 · 15.08.2026</div></div>
+        <div class="card-info-cell"><div class="ci-label">ВЕРСИЯ</div><div class="ci-val" style="font-size:13px;font-weight:400;">v3.8 · 15.08.2026</div></div>
       </div>
       <div style="margin-top:18px;font-size:9.5px;line-height:1.4;color:var(--rf-t5);">Кнопки «Билеты» — реклама Aviasales: при бронировании через них сайт получает комиссию, без наценки для вас. ${esc(TP_AD_LABEL)} Данные о рейсах справочные и могут устаревать: наличие маршрута, расписание и цены проверяйте у авиакомпании или в сервисе покупки билета. Сайт использует Яндекс.Метрику — подробности на странице <a href="privacy.html" style="color:var(--rf-accent);">конфиденциальности</a>.</div>
     `;
@@ -2956,7 +2956,7 @@ function initApp(data) {
      core-renderer-tiles, который работает без ключа, но в обход условий
      использования. Вписать ключ сюда — единственное, что нужно для перехода.
      Важно: projection=web_mercator обязателен, иначе едут маркеры. */
-  const YANDEX_TILES_KEY = "";
+  const YANDEX_TILES_KEY = "5e4025d5-1721-4b77-8562-b8dde8220a8a";
 
   const YANDEX_OFFICIAL = {
     url: 'https://tiles.api-maps.yandex.ru/v1/tiles/?apikey=' + encodeURIComponent(YANDEX_TILES_KEY) +
