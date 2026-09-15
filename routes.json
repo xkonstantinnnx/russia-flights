@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T02:14:58Z",
+  "updated": "2026-09-15T02:04:31Z",
   "source": "AirLabs + AeroDataBox + Яндекс.Расписания",
   "routes": {
     "Москва": [
@@ -286,6 +286,7 @@
       "Пхукет",
       "Санья",
       "Ташкент",
+      "Ханой",
       "Харбин",
       "Шанхай"
     ],
@@ -293,6 +294,7 @@
       "Бангкок",
       "Гуанчжоу",
       "Далянь",
+      "Дананг",
       "Нячанг",
       "Пекин",
       "Пхеньян",
@@ -414,6 +416,7 @@
       "Анталья",
       "Баку",
       "Батуми",
+      "Бишкек",
       "Дубай",
       "Душанбе",
       "Ереван",
@@ -448,6 +451,7 @@
       "Нячанг",
       "Пхукет",
       "Ташкент",
+      "Тбилиси",
       "Хургада",
       "Шарм-эль-Шейх"
     ],
@@ -536,12 +540,15 @@
     ],
     "Владикавказ": [
       "Анталья",
+      "Дубай",
       "Стамбул",
       "Хургада",
       "Шарм-эль-Шейх"
     ],
     "Астрахань": [
       "Анталья",
+      "Баку",
+      "Тбилиси",
       "Хургада"
     ],
     "Калининград": [
@@ -549,9 +556,6 @@
       "Ереван",
       "Минск",
       "Шарм-эль-Шейх"
-    ],
-    "Воронеж": [
-      "Бишкек"
     ],
     "Ульяновск": [
       "Анталья",
@@ -582,6 +586,12 @@
       "Далянь",
       "Пекин",
       "Харбин"
+    ],
+    "Барнаул": [
+      "Сухум"
+    ],
+    "Воронеж": [
+      "Бишкек"
     ],
     "Улан-Удэ": [
       "Ташкент"
@@ -1214,17 +1224,6 @@
         "DME"
       ]
     },
-    "Москва→Александрия": {
-      "carriers": 1,
-      "airlines": [
-        "B2"
-      ],
-      "days_per_week": 1,
-      "duration_min": 350,
-      "apts": [
-        "DME"
-      ]
-    },
     "Москва→Дубай": {
       "carriers": 1,
       "airlines": [
@@ -1472,7 +1471,7 @@
       "airlines": [
         "U6"
       ],
-      "days_per_week": 5,
+      "days_per_week": 7,
       "duration_min": 170,
       "apts": [
         "SVX"
@@ -1508,7 +1507,7 @@
         "HY",
         "S7"
       ],
-      "days_per_week": 1,
+      "days_per_week": 2,
       "duration_min": 180,
       "apts": [
         "OVB"
@@ -1531,7 +1530,7 @@
         "S7",
         "YK"
       ],
-      "days_per_week": 6,
+      "days_per_week": 7,
       "duration_min": 150,
       "apts": [
         "OVB"
@@ -1576,7 +1575,7 @@
         "EY"
       ],
       "days_per_week": 5,
-      "duration_min": 290,
+      "duration_min": 275,
       "apts": [
         "AER"
       ]
@@ -1608,7 +1607,7 @@
       "airlines": [
         "WZ"
       ],
-      "days_per_week": 5,
+      "days_per_week": 6,
       "duration_min": 60,
       "apts": [
         "AER"
@@ -1690,7 +1689,7 @@
       "airlines": [
         "WZ"
       ],
-      "days_per_week": 1,
+      "days_per_week": 2,
       "duration_min": 200,
       "apts": [
         "KZN"
@@ -1726,7 +1725,7 @@
         "SU",
         "YK"
       ],
-      "days_per_week": 4,
+      "days_per_week": 5,
       "duration_min": 180,
       "apts": [
         "KJA"
@@ -1755,17 +1754,6 @@
         "KJA"
       ]
     },
-    "Красноярск→Душанбе": {
-      "carriers": 1,
-      "airlines": [
-        "SZ"
-      ],
-      "days_per_week": 1,
-      "duration_min": 270,
-      "apts": [
-        "KJA"
-      ]
-    },
     "Хабаровск→Бангкок": {
       "carriers": 1,
       "airlines": [
@@ -1783,7 +1771,7 @@
         "R3"
       ],
       "days_per_week": 1,
-      "duration_min": 170,
+      "duration_min": 160,
       "apts": [
         "KHV"
       ]
@@ -1800,12 +1788,13 @@
       ]
     },
     "Хабаровск→Харбин": {
-      "carriers": 2,
+      "carriers": 3,
       "airlines": [
         "EU",
-        "HZ"
+        "HZ",
+        "SU"
       ],
-      "days_per_week": 5,
+      "days_per_week": 6,
       "duration_min": 100,
       "apts": [
         "KHV"
@@ -1926,17 +1915,6 @@
         "IKT"
       ]
     },
-    "Иркутск→Бишкек": {
-      "carriers": 1,
-      "airlines": [
-        "YK"
-      ],
-      "days_per_week": 1,
-      "duration_min": 240,
-      "apts": [
-        "IKT"
-      ]
-    },
     "Иркутск→Пхукет": {
       "carriers": 1,
       "airlines": [
@@ -2001,7 +1979,7 @@
         "SU"
       ],
       "days_per_week": 7,
-      "duration_min": 100,
+      "duration_min": 90,
       "apts": [
         "KRR"
       ]
@@ -2035,19 +2013,20 @@
         "SU"
       ],
       "days_per_week": 7,
-      "duration_min": 130,
+      "duration_min": 140,
       "apts": [
         "KRR"
       ]
     },
     "Уфа→Анталья": {
-      "carriers": 2,
+      "carriers": 3,
       "airlines": [
         "2S",
+        "PC",
         "SU"
       ],
       "days_per_week": 7,
-      "duration_min": 295,
+      "duration_min": 300,
       "apts": [
         "UFA"
       ]
@@ -2070,7 +2049,7 @@
         "FZ"
       ],
       "days_per_week": 4,
-      "duration_min": 375,
+      "duration_min": 345,
       "apts": [
         "UFA"
       ]
@@ -2100,26 +2079,14 @@
         "UFA"
       ]
     },
-    "Уфа→Хургада": {
-      "carriers": 3,
-      "airlines": [
-        "FV",
-        "NE",
-        "SU"
-      ],
-      "days_per_week": 4,
-      "duration_min": 350,
-      "apts": [
-        "UFA"
-      ]
-    },
     "Самара→Анталья": {
-      "carriers": 1,
+      "carriers": 2,
       "airlines": [
+        "PC",
         "SU"
       ],
       "days_per_week": 7,
-      "duration_min": 290,
+      "duration_min": 285,
       "apts": [
         "KUF"
       ]
@@ -2141,7 +2108,7 @@
         "EK",
         "FZ"
       ],
-      "days_per_week": 4,
+      "days_per_week": 5,
       "duration_min": 365,
       "apts": [
         "KUF"
@@ -2179,7 +2146,7 @@
         "NE",
         "SU"
       ],
-      "days_per_week": 6,
+      "days_per_week": 5,
       "duration_min": 355,
       "apts": [
         "KUF"
@@ -2254,17 +2221,6 @@
         "CEK"
       ]
     },
-    "Челябинск→Минск": {
-      "carriers": 1,
-      "airlines": [
-        "WZ"
-      ],
-      "days_per_week": 1,
-      "duration_min": 215,
-      "apts": [
-        "CEK"
-      ]
-    },
     "Мин. Воды→Алматы": {
       "carriers": 1,
       "airlines": [
@@ -2294,7 +2250,7 @@
       "airlines": [
         "A4"
       ],
-      "days_per_week": 1,
+      "days_per_week": 3,
       "duration_min": 80,
       "apts": [
         "MRV"
@@ -2384,7 +2340,7 @@
         "ZF"
       ],
       "days_per_week": 7,
-      "duration_min": 295,
+      "duration_min": 305,
       "apts": [
         "GOJ"
       ]
@@ -2421,18 +2377,6 @@
       ],
       "days_per_week": 4,
       "duration_min": 375,
-      "apts": [
-        "GOJ"
-      ]
-    },
-    "Нижний Новгород→Минск": {
-      "carriers": 2,
-      "airlines": [
-        "B2",
-        "SU"
-      ],
-      "days_per_week": 4,
-      "duration_min": 130,
       "apts": [
         "GOJ"
       ]
@@ -2491,7 +2435,7 @@
         "NE",
         "SU"
       ],
-      "days_per_week": 4,
+      "days_per_week": 3,
       "duration_min": 390,
       "apts": [
         "PEE"
@@ -2527,6 +2471,17 @@
       ],
       "days_per_week": 1,
       "duration_min": 160,
+      "apts": [
+        "OMS"
+      ]
+    },
+    "Омск→Астана": {
+      "carriers": 1,
+      "airlines": [
+        "IQ"
+      ],
+      "days_per_week": 7,
+      "duration_min": 80,
       "apts": [
         "OMS"
       ]
@@ -2578,11 +2533,10 @@
       ]
     },
     "Сургут→Бишкек": {
-      "carriers": 3,
+      "carriers": 2,
       "airlines": [
         "KA",
-        "UT",
-        "YK"
+        "UT"
       ],
       "days_per_week": 2,
       "duration_min": 190,
@@ -2628,7 +2582,7 @@
       "airlines": [
         "SZ"
       ],
-      "days_per_week": 1,
+      "days_per_week": 2,
       "duration_min": 210,
       "apts": [
         "SGC"
@@ -2706,7 +2660,7 @@
       "airlines": [
         "U6"
       ],
-      "days_per_week": 2,
+      "days_per_week": 3,
       "duration_min": 200,
       "apts": [
         "NJC"
@@ -2781,18 +2735,6 @@
         "MCX"
       ]
     },
-    "Махачкала→Дубай": {
-      "carriers": 2,
-      "airlines": [
-        "EK",
-        "FZ"
-      ],
-      "days_per_week": 4,
-      "duration_min": 255,
-      "apts": [
-        "MCX"
-      ]
-    },
     "Махачкала→Бишкек": {
       "carriers": 1,
       "airlines": [
@@ -2800,6 +2742,19 @@
       ],
       "days_per_week": 1,
       "duration_min": 185,
+      "apts": [
+        "MCX"
+      ]
+    },
+    "Махачкала→Дубай": {
+      "carriers": 3,
+      "airlines": [
+        "DP",
+        "EK",
+        "FZ"
+      ],
+      "days_per_week": 4,
+      "duration_min": 235,
       "apts": [
         "MCX"
       ]
@@ -2821,19 +2776,19 @@
         "SU",
         "UT"
       ],
-      "days_per_week": 3,
+      "days_per_week": 4,
       "duration_min": 180,
       "apts": [
         "GRV"
       ]
     },
-    "Грозный→Бишкек": {
+    "Грозный→Дубай": {
       "carriers": 1,
       "airlines": [
-        "YK"
+        "UT"
       ],
       "days_per_week": 1,
-      "duration_min": 200,
+      "duration_min": 265,
       "apts": [
         "GRV"
       ]
@@ -2850,14 +2805,15 @@
       ]
     },
     "Грозный→Ташкент": {
-      "carriers": 3,
+      "carriers": 4,
       "airlines": [
+        "7Q",
         "C6",
         "HY",
         "S7"
       ],
       "days_per_week": 5,
-      "duration_min": 190,
+      "duration_min": 180,
       "apts": [
         "GRV"
       ]
@@ -2928,17 +2884,6 @@
         "KGD"
       ]
     },
-    "Воронеж→Бишкек": {
-      "carriers": 1,
-      "airlines": [
-        "YK"
-      ],
-      "days_per_week": 1,
-      "duration_min": 220,
-      "apts": [
-        "VOZ"
-      ]
-    },
     "Ульяновск→Хургада": {
       "carriers": 1,
       "airlines": [
@@ -2977,7 +2922,7 @@
       "airlines": [
         "B2"
       ],
-      "days_per_week": 2,
+      "days_per_week": 1,
       "duration_min": 190,
       "apts": [
         "MQF"
@@ -3038,10 +2983,43 @@
         "YKS"
       ]
     },
+    "Якутск→Харбин": {
+      "carriers": 1,
+      "airlines": [
+        "R3"
+      ],
+      "days_per_week": 3,
+      "duration_min": 175,
+      "apts": [
+        "YKS"
+      ]
+    },
+    "Барнаул→Сухум": {
+      "carriers": 1,
+      "airlines": [
+        "U6"
+      ],
+      "days_per_week": 1,
+      "duration_min": 255,
+      "apts": [
+        "BAX"
+      ]
+    },
     "Москва→Абу-Даби": {
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 345
+    },
+    "Москва→Александрия": {
+      "carriers": 1,
+      "airlines": [
+        "B2"
+      ],
+      "days_per_week": 1,
+      "duration_min": 350,
+      "apts": [
+        "DME"
+      ]
     },
     "Москва→Алжир": {
       "carriers": 1,
@@ -3845,6 +3823,17 @@
       "days_per_week": null,
       "duration_min": 300
     },
+    "Красноярск→Душанбе": {
+      "carriers": 1,
+      "airlines": [
+        "SZ"
+      ],
+      "days_per_week": 1,
+      "duration_min": 270,
+      "apts": [
+        "KJA"
+      ]
+    },
     "Красноярск→Ереван": {
       "carriers": 1,
       "airlines": [
@@ -3946,6 +3935,17 @@
       "days_per_week": null,
       "duration_min": 218
     },
+    "Иркутск→Бишкек": {
+      "carriers": 1,
+      "airlines": [
+        "YK"
+      ],
+      "days_per_week": 1,
+      "duration_min": 240,
+      "apts": [
+        "IKT"
+      ]
+    },
     "Иркутск→Наманган": {
       "carriers": 2,
       "days_per_week": null,
@@ -4041,6 +4041,19 @@
       "days_per_week": null,
       "duration_min": 178
     },
+    "Уфа→Хургада": {
+      "carriers": 3,
+      "airlines": [
+        "FV",
+        "NE",
+        "SU"
+      ],
+      "days_per_week": 4,
+      "duration_min": 350,
+      "apts": [
+        "UFA"
+      ]
+    },
     "Уфа→Шарджа": {
       "carriers": 1,
       "days_per_week": null,
@@ -4100,6 +4113,17 @@
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 210
+    },
+    "Челябинск→Минск": {
+      "carriers": 1,
+      "airlines": [
+        "WZ"
+      ],
+      "days_per_week": 1,
+      "duration_min": 215,
+      "apts": [
+        "CEK"
+      ]
     },
     "Челябинск→Ош": {
       "carriers": 1,
@@ -4211,6 +4235,18 @@
       "days_per_week": null,
       "duration_min": 210
     },
+    "Нижний Новгород→Минск": {
+      "carriers": 2,
+      "airlines": [
+        "B2",
+        "SU"
+      ],
+      "days_per_week": 4,
+      "duration_min": 130,
+      "apts": [
+        "GOJ"
+      ]
+    },
     "Нижний Новгород→Сухум": {
       "carriers": 1,
       "days_per_week": null,
@@ -4246,11 +4282,6 @@
       "carriers": 2,
       "days_per_week": null,
       "duration_min": 385
-    },
-    "Омск→Астана": {
-      "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 80
     },
     "Омск→Ташкент": {
       "carriers": 1,
@@ -4313,10 +4344,16 @@
       "days_per_week": null,
       "duration_min": 118
     },
-    "Грозный→Дубай": {
+    "Грозный→Бишкек": {
       "carriers": 1,
-      "days_per_week": null,
-      "duration_min": 210
+      "airlines": [
+        "YK"
+      ],
+      "days_per_week": 1,
+      "duration_min": 200,
+      "apts": [
+        "GRV"
+      ]
     },
     "Калининград→Минск": {
       "carriers": 1,
@@ -4328,21 +4365,21 @@
       "days_per_week": null,
       "duration_min": 290
     },
+    "Воронеж→Бишкек": {
+      "carriers": 1,
+      "airlines": [
+        "YK"
+      ],
+      "days_per_week": 1,
+      "duration_min": 220,
+      "apts": [
+        "VOZ"
+      ]
+    },
     "Якутск→Пекин": {
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 270
-    },
-    "Якутск→Харбин": {
-      "carriers": 1,
-      "airlines": [
-        "R3"
-      ],
-      "days_per_week": 4,
-      "duration_min": 175,
-      "apts": [
-        "YKS"
-      ]
     },
     "Улан-Удэ→Ташкент": {
       "carriers": 1,
@@ -4353,6 +4390,11 @@
       "carriers": 1,
       "days_per_week": null,
       "duration_min": 90
+    },
+    "Санкт-Петербург→Сухум": {
+      "carriers": null,
+      "days_per_week": 1,
+      "duration_min": null
     }
   }
 }
